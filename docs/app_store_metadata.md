@@ -117,7 +117,7 @@ https://the360ghar.com/support
 
 | Field | Value |
 |-------|-------|
-| Bundle ID | `com.the360ghar.flatmates` |
+| Bundle ID | `com.the360ghar.flatmates360` |
 | App Store ID | Set `APP_STORE_ID` with `--dart-define` after App Store Connect assigns it |
 | SKU | `360flatmates` |
 | Primary language | English |
@@ -127,7 +127,7 @@ https://the360ghar.com/support
 
 | Field | Value |
 |-------|-------|
-| Package name | `com.the360ghar.flatmates` |
+| Package name | `com.the360ghar.flatmates360` |
 | App signing | Google-managed |
 | Default language | English (US) |
 

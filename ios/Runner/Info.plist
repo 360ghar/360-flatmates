@@ -90,10 +90,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>CFBundleURLName</key>
-			<string>com.the360ghar.flatmates</string>
+			<string>com.the360ghar.flatmates360</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.the360ghar.flatmates</string>
+				<string>com.the360ghar.flatmates360</string>
 			</array>
 		</dict>
 	</array>

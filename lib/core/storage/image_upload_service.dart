@@ -142,7 +142,9 @@ class ImageUploadService {
 
     try {
       await supabase.storage.from(_bucket).upload(name, file);
-      final url = await supabase.storage.from(_bucket).createSignedUrl(name, 315360000);
+      // 7-day signed URL. TODO: migrate to path-based storage and generate
+      // fresh signed URLs on read so URLs are short-lived and revocable.
+      final url = await supabase.storage.from(_bucket).createSignedUrl(name, 604800);
       return UploadSuccess(url);
     } on StorageException catch (e) {
       return UploadFailure(
