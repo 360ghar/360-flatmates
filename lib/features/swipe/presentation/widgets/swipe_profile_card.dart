@@ -734,7 +734,10 @@ class ExpandedCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                CompatibilityRing(percentage: compatibility.percentage),
+                CompatibilityRing(
+                  percentage: compatibility.percentage,
+                  newLabel: locale.badgeNew,
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.xl),

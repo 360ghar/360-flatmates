@@ -66,7 +66,10 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
       if (locality != null && locality.isNotEmpty) locality,
       if (city != null && city.isNotEmpty) city,
     ].join(', ');
-    final currentLocation = selectedLocation?.displayText ?? profileLocation;
+    final selectedDisplayText = selectedLocation?.displayText ?? '';
+    final currentLocation = selectedDisplayText.isNotEmpty
+        ? selectedDisplayText
+        : profileLocation;
     final currentRadiusKm =
         feedState.filters.radiusKm ??
         DiscoverFeedController.defaultLocationRadiusKm;
@@ -121,6 +124,7 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
     final searchRadiusKm =
         feedState.filters.radiusKm ??
         DiscoverFeedController.defaultLocationRadiusKm;
+    final selectedDisplayText = selectedLocation?.displayText ?? '';
 
     return Scaffold(
       body: SafeArea(
@@ -136,7 +140,9 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
               child: Row(
                 children: [
                   _MapLocationChip(
-                    locationName: selectedLocation?.displayText,
+                    locationName: selectedDisplayText.isNotEmpty
+                        ? selectedDisplayText
+                        : null,
                     onTap: () => _showLocationPicker(context),
                   ),
                   const SizedBox(width: AppSpacing.sm),

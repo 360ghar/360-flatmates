@@ -42,6 +42,9 @@ val releaseStoreFilePath = keystoreProperties.getProperty("storeFile")
     ?: System.getenv("KEYSTORE_FILE")
 val releaseSigningRequested = keystorePropertiesFile.exists()
     || System.getenv("KEYSTORE_FILE") != null
+    || System.getenv("KEY_ALIAS") != null
+    || System.getenv("KEY_PASSWORD") != null
+    || System.getenv("KEYSTORE_PASSWORD") != null
 val releaseSigningComplete = releaseKeyAlias.isNotBlank()
     && releaseKeyPassword.isNotBlank()
     && releaseStorePassword.isNotBlank()
@@ -52,6 +55,13 @@ if (releaseTaskRequested && releaseSigningRequested && !releaseSigningComplete) 
         "Release signing credentials are incomplete. " +
             "Ensure key.properties contains keyAlias, keyPassword, storePassword, and storeFile, " +
             "or set KEY_ALIAS, KEY_PASSWORD, KEYSTORE_PASSWORD, and KEYSTORE_FILE environment variables."
+    )
+}
+
+if (releaseTaskRequested && !releaseSigningRequested && !releaseSigningComplete) {
+    throw GradleException(
+        "Release builds require signing. " +
+            "Provide key.properties or set KEYSTORE_FILE, KEY_ALIAS, KEY_PASSWORD, and KEYSTORE_PASSWORD environment variables."
     )
 }
 

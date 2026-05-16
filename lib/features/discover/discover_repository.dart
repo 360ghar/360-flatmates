@@ -370,7 +370,7 @@ final discoverListingsProvider = FutureProvider<List<PropertyListing>>((ref) {
   final effectiveFilters = filters?.hasGeoLocation == true
       ? filters
       : selectedLocation != null
-          ? DiscoverFilters(
+          ? (filters ?? const DiscoverFilters()).copyWith(
               latitude: selectedLocation.latitude,
               longitude: selectedLocation.longitude,
               radiusKm: DiscoverFeedController.defaultLocationRadiusKm,

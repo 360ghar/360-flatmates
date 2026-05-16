@@ -125,8 +125,13 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       if (locality != null && locality.isNotEmpty) locality,
       if (city != null && city.isNotEmpty) city,
     ].join(', ');
-    final currentLocation = selectedLocation?.displayText ?? profileLocation;
-    final counterLocation = selectedLocation?.displayText ?? city;
+    final selectedDisplayText = selectedLocation?.displayText ?? '';
+    final currentLocation = selectedDisplayText.isNotEmpty
+        ? selectedDisplayText
+        : profileLocation;
+    final counterLocation = selectedDisplayText.isNotEmpty
+        ? selectedDisplayText
+        : city;
     final subtitleCity = (city != null && city.isNotEmpty)
         ? city
         : currentLocation.isNotEmpty

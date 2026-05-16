@@ -11,12 +11,14 @@ class CompatibilityRing extends ConsumerStatefulWidget {
     required this.percentage,
     this.size = 72,
     this.strokeWidth = 5,
+    this.newLabel = 'New',
     super.key,
   });
 
   final double percentage;
   final double size;
   final double strokeWidth;
+  final String newLabel;
 
   @override
   ConsumerState<CompatibilityRing> createState() => _CompatibilityRingState();
@@ -88,7 +90,7 @@ class _CompatibilityRingState extends ConsumerState<CompatibilityRing>
             },
           ),
           Text(
-            _hasReliableScore ? '${widget.percentage.round()}%' : 'New',
+            _hasReliableScore ? '${widget.percentage.round()}%' : widget.newLabel,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w800,
               color: color,

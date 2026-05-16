@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import '../errors/error_presenter.dart';
 import 'auth_token_provider.dart';
@@ -44,7 +45,7 @@ final class ApiClient {
     try {
       return await _dio.get(path, queryParameters: queryParameters);
     } on DioException catch (e, st) {
-      throw ErrorPresenter.fromDio(e, st);
+      Error.throwWithStackTrace(ErrorPresenter.fromDio(e, st), Chain.current());
     }
   }
 
@@ -56,7 +57,7 @@ final class ApiClient {
     try {
       return await _dio.post(path, data: data, queryParameters: queryParameters);
     } on DioException catch (e, st) {
-      throw ErrorPresenter.fromDio(e, st);
+      Error.throwWithStackTrace(ErrorPresenter.fromDio(e, st), Chain.current());
     }
   }
 
@@ -68,7 +69,7 @@ final class ApiClient {
     try {
       return await _dio.put(path, data: data, queryParameters: queryParameters);
     } on DioException catch (e, st) {
-      throw ErrorPresenter.fromDio(e, st);
+      Error.throwWithStackTrace(ErrorPresenter.fromDio(e, st), Chain.current());
     }
   }
 
@@ -80,7 +81,7 @@ final class ApiClient {
     try {
       return await _dio.delete(path, data: data, queryParameters: queryParameters);
     } on DioException catch (e, st) {
-      throw ErrorPresenter.fromDio(e, st);
+      Error.throwWithStackTrace(ErrorPresenter.fromDio(e, st), Chain.current());
     }
   }
 }
