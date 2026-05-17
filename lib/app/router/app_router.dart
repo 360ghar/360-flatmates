@@ -80,6 +80,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isDeepLink =
           location.startsWith('/chats/') ||
           location.startsWith('/flat-details/') ||
+          location.startsWith('/flatmates/listing/') ||
+          location.startsWith('/flatmates/chat/') ||
           location.startsWith('/listing-review/') ||
           location.startsWith('/manage-listings') ||
           location == '/notifications' ||
@@ -181,6 +183,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           }
           return FlatDetailsPage(listingId: id);
         },
+      ),
+      GoRoute(
+        path: '/flatmates/listing/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        redirect: (context, state) =>
+            '/flat-details/${state.pathParameters['id']}',
+      ),
+      GoRoute(
+        path: '/flatmates/chat/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        redirect: (context, state) =>
+            '/chats/${state.pathParameters['id']}',
       ),
       GoRoute(
         path: '/notifications',

@@ -12,7 +12,6 @@ Flutter mobile client for the 360 FlatMates product.
 
 ## Release Configuration
 
-- Android map features read `GOOGLE_MAPS_API_KEY` from `android/local.properties`, a Gradle property (`-PGOOGLE_MAPS_API_KEY=...`), or the shell environment. Android release builds fail fast when this value is missing.
 - iOS App Store links read `APP_STORE_ID` from `--dart-define=APP_STORE_ID=...` after App Store Connect assigns the app ID.
 
 ## Running on iOS Simulator (Browser Preview)

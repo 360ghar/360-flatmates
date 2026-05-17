@@ -6,7 +6,7 @@ const kSupportEmail = 'support@the360ghar.com';
 const kAppStoreId = String.fromEnvironment('APP_STORE_ID');
 
 /// Google Play Store ID — update this when the app is published.
-const kPlayStoreId = 'com.the360ghar.flatmates';
+const kPlayStoreId = 'com.the360ghar.flatmates360';
 
 /// Constructs the App Store deep link URL using [kAppStoreId].
 /// Returns an empty string when the store ID has not been assigned yet.
