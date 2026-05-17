@@ -95,7 +95,9 @@ android {
     defaultConfig {
         applicationId = "com.the360ghar.flatmates360"
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Pin to 35 to match the previous Play Store release's device catalog.
+        // Flutter 3.41.x defaults to 36 which drops ~18k device profiles.
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
