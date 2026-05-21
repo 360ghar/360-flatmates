@@ -20,7 +20,7 @@ final class NominatimService {
   );
 
   static const _defaultBaseUrl = 'https://nominatim.openstreetmap.org';
-  static const _defaultUserAgent = '360Flatmates/1.0 (contact@360ghar.com)';
+  static const _defaultUserAgent = '360Flatmates/1.0 (info@360ghar.com)';
 
   String get _baseUrl {
     final envUrl = dotenv.env['NOMINATIM_BASE_URL'] ?? '';

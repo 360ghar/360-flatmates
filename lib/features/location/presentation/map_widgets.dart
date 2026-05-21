@@ -166,7 +166,9 @@ class _MapControlButton extends StatelessWidget {
             ? AppSemanticColors.darkSurfaceElevated
             : AppSemanticColors.card,
         borderRadius: AppRadius.smBorder,
-        boxShadow: [AppShadows.floatingFor(isDark ? Brightness.dark : Brightness.light)],
+        boxShadow: [
+          AppShadows.floatingFor(isDark ? Brightness.dark : Brightness.light),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -179,9 +181,7 @@ class _MapControlButton extends StatelessWidget {
             child: Icon(
               icon,
               size: 20,
-              color: isDark
-                  ? AppSemanticColors.paper3
-                  : AppSemanticColors.ink2,
+              color: isDark ? AppSemanticColors.paper3 : AppSemanticColors.ink2,
             ),
           ),
         ),
@@ -212,9 +212,7 @@ class GetDirectionsButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppSemanticColors.accent,
         side: const BorderSide(color: AppSemanticColors.accent),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.smBorder,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.smBorder),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,

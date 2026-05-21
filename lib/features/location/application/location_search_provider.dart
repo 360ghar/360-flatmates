@@ -59,15 +59,28 @@ class LocationSearchNotifier extends Notifier<LocationSearchState> {
     final googleService = ref.read(googlePlacesServiceProvider);
     final nominatimService = ref.read(nominatimServiceProvider);
 
-    var results = await googleService.getPlaceSuggestions(query);
-
-    if (results.isEmpty) {
-      results = await nominatimService.search(query);
-    }
+    final results = await Future.wait([
+      googleService
+          .getPlaceSuggestions(query)
+          .catchError((_) => <PlaceSuggestion>[]),
+      nominatimService.search(query).catchError((_) => <PlaceSuggestion>[]),
+    ]);
 
     if (version != _searchVersion) return;
 
-    state = LocationSearchState(suggestions: results, isLoading: false);
+    final merged = <PlaceSuggestion>[];
+    final seenDescriptions = <String>{};
+    for (final list in results) {
+      for (final s in list) {
+        final key =
+            '${s.mainText.toLowerCase()}|${s.secondaryText.toLowerCase()}';
+        if (seenDescriptions.add(key)) {
+          merged.add(s);
+        }
+      }
+    }
+
+    state = LocationSearchState(suggestions: merged, isLoading: false);
   }
 
   Future<PlaceDetails?> resolveSuggestion(PlaceSuggestion suggestion) {

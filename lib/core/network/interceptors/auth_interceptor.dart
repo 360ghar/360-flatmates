@@ -60,15 +60,16 @@ final class AuthInterceptor extends Interceptor {
           _processQueue(newToken);
           return;
         }
-        _refreshCompleter!.complete(false);
+        final capturedCompleter = _refreshCompleter!;
+        capturedCompleter.complete(false);
         _refreshCompleter = null;
+        await _tokenProvider.clearSession();
         _failQueue(err.stackTrace);
       } catch (e) {
-        _refreshCompleter!.complete(false);
+        _refreshCompleter?.complete(false);
         _refreshCompleter = null;
         _failQueue(e is DioException ? e.stackTrace : null);
       }
-      await _tokenProvider.clearSession();
       handler.next(
         DioException(
           requestOptions: err.requestOptions,
