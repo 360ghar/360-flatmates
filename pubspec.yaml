@@ -1,7 +1,7 @@
 name: flatmates_app
 description: "360 FlatMates"
 publish_to: 'none'
-version: 1.0.2+5
+version: 1.0.2+6
 
 environment:
   sdk: ^3.9.0
@@ -13,7 +13,9 @@ dependencies:
   connectivity_plus: ^6.1.4
   cupertino_icons: ^1.0.8
   dio: ^5.9.0
+  firebase_analytics: ^11.6.0
   firebase_core: ^3.14.0
+  firebase_crashlytics: ^4.3.10
   firebase_messaging: ^15.2.9
   flutter:
     sdk: flutter
@@ -34,6 +36,7 @@ dependencies:
   image_picker: ^1.1.2
   intl: ^0.20.2
   json_annotation: ^4.9.0
+  package_info_plus: ^8.3.0
   path_provider: ^2.1.5
   share_plus: ^10.1.4
   shared_preferences: ^2.5.3
@@ -41,6 +44,7 @@ dependencies:
   url_launcher: ^6.3.1
   supabase_flutter: ^2.10.4
   confetti: ^0.7.0
+  flutter_markdown: ^0.7.4+1
   qr_flutter: ^4.1.0
   video_player: ^2.11.1
   stack_trace: ^1.12.1
@@ -60,6 +64,7 @@ flutter:
 
   assets:
     - assets/illustrations/
+    - assets/legal/
     - .env
 
 flutter_launcher_icons:

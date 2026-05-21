@@ -17,6 +17,11 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(":app")
+    // Fix duplicate BuildConfig.class in plugin full JARs (e.g. url_launcher_android
+    // ships its own BuildConfig while AGP also generates one).
+    tasks.withType<Jar>().configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }
 
 tasks.register<Delete>("clean") {

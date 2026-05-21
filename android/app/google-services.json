@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "280778516706",
+    "project_id": "flatmates-a5291",
+    "storage_bucket": "flatmates-a5291.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:280778516706:android:208ecaab153abadd0716bb",
+        "android_client_info": {
+          "package_name": "com.the360ghar.flatmates360"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArALNoUD3PlMOvDyx6lKIItNI-hBnSaE8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -8,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../config/endpoints.dart';
 import '../providers.dart';
+import '../storage/app_preferences.dart';
 
 class NotificationService {
   NotificationService(this._ref, {bool messagingEnabled = false})
@@ -97,17 +98,33 @@ class NotificationService {
     if (!_messagingEnabled) return;
 
     try {
-      if (Platform.isIOS) {
-        await FirebaseMessaging.instance.requestPermission(
-          alert: true,
-          badge: true,
-          sound: true,
+      final prefs = _ref.read(appPreferencesProvider);
+
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+
+      await prefs.setBool(PrefKeys.notifPermissionRequested, true);
+
+      final authorizationStatus = settings.authorizationStatus;
+      if (authorizationStatus == AuthorizationStatus.denied) {
+        debugPrint(
+          '[NotificationService] Permission denied — notifications disabled.',
         );
-      } else if (Platform.isAndroid) {
-        await FirebaseMessaging.instance.requestPermission(
-          alert: true,
-          badge: true,
-          sound: true,
+      } else if (authorizationStatus == AuthorizationStatus.provisional) {
+        debugPrint(
+          '[NotificationService] Provisional permission granted — quiet notifications.',
+        );
+      } else if (authorizationStatus == AuthorizationStatus.authorized) {
+        debugPrint(
+          '[NotificationService] Notification permission authorized.',
+        );
+      } else if (authorizationStatus == AuthorizationStatus.notDetermined) {
+        debugPrint(
+          '[NotificationService] Permission not determined — may request again later.',
         );
       }
 

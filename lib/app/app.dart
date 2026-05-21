@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/analytics/analytics_service.dart';
+import '../core/app_config/app_config_service.dart';
+import '../core/app_config/force_update_page.dart';
+import '../core/app_config/maintenance_page.dart';
+import '../core/app_config/optional_update_dialog.dart';
 import '../core/deep_links/deep_link_service.dart';
 import '../core/errors/app_failure.dart';
 import '../core/network/connectivity_monitor.dart';
@@ -27,6 +32,7 @@ class App extends ConsumerStatefulWidget {
 class _AppState extends ConsumerState<App> {
   DeepLinkService? _deepLinkService;
   bool _hasNavigatedFromNotification = false;
+  bool _appConfigChecked = false;
 
   // Local notifications are initialized in bootstrap() before runApp().
   // NotificationService.initialize() is called after auth login (see ref.listen below).
@@ -39,6 +45,8 @@ class _AppState extends ConsumerState<App> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final router = ref.read(appRouterProvider);
       _deepLinkService = DeepLinkService(router: router)..init();
+      _checkAppConfig();
+      ref.read(analyticsServiceProvider).logAppOpen();
     });
   }
 
@@ -46,6 +54,82 @@ class _AppState extends ConsumerState<App> {
   void dispose() {
     _deepLinkService?.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkAppConfig() async {
+    if (_appConfigChecked) return;
+
+    final configService = ref.read(appConfigServiceProvider);
+    final analytics = ref.read(analyticsServiceProvider);
+    final remoteConfig = await configService.fetchConfig();
+
+    if (!mounted || remoteConfig == null) {
+      // Config fetch failed or not available — let the app continue normally.
+      if (remoteConfig == null) {
+        try {
+          analytics.recordError(
+            Exception('App config fetch returned null'),
+            StackTrace.current,
+          );
+        } catch (_) {}
+      }
+      _appConfigChecked = true;
+      return;
+    }
+
+    // Check maintenance mode first.
+    if (remoteConfig.maintenanceEnabled) {
+      analytics.logMaintenanceScreenShown();
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => MaintenancePage(
+            message: remoteConfig.maintenanceMessage,
+            onRetry: () {
+              Navigator.of(context).pop();
+              _appConfigChecked = false;
+              _checkAppConfig();
+            },
+          ),
+        ),
+        (_) => false,
+      );
+      _appConfigChecked = true;
+      return;
+    }
+
+    // Check update status.
+    final status = await configService.checkUpdateStatus(remoteConfig);
+
+    if (!mounted) {
+      _appConfigChecked = true;
+      return;
+    }
+
+    switch (status) {
+      case AppUpdateStatus.forceUpdate:
+        analytics.logForceUpdateShown();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => ForceUpdatePage(updateUrl: remoteConfig.updateUrl),
+          ),
+          (_) => false,
+        );
+      case AppUpdateStatus.optionalUpdate:
+        analytics.logOptionalUpdateShown();
+        OptionalUpdateDialog.show(
+          context,
+          updateUrl: remoteConfig.updateUrl,
+          message: remoteConfig.optionalUpdateMessage,
+          onDismiss: () {
+            configService.dismissOptionalUpdate(remoteConfig.latestVersion);
+          },
+        );
+      case AppUpdateStatus.upToDate:
+        break;
+    }
+
+    _appConfigChecked = true;
   }
 
   @override
@@ -64,7 +148,10 @@ class _AppState extends ConsumerState<App> {
       final error = next.asError?.error;
       if (error is AuthExpiredFailure) {
         unawaited(
-          ref.read(authControllerProvider.notifier).signOut().catchError((_) {}),
+          ref
+              .read(authControllerProvider.notifier)
+              .signOut()
+              .catchError((_) {}),
         );
       }
     });
@@ -80,7 +167,9 @@ class _AppState extends ConsumerState<App> {
 
     ref.listen<AuthState>(authControllerProvider, (_, next) {
       final bootstrap = ref.read(bootstrapControllerProvider.notifier);
+      final analytics = ref.read(analyticsServiceProvider);
       if (next.isLoggedIn) {
+        analytics.logLogin();
         bootstrap.load();
         ref.read(notificationServiceProvider).initialize();
         // Connect SSE stream with a token refresher callback so reconnects
@@ -125,6 +214,8 @@ class _AppState extends ConsumerState<App> {
     final route = NotificationService.consumePendingRoute();
     if (route != null && route.isNotEmpty) {
       _hasNavigatedFromNotification = true;
+      final analytics = ref.read(analyticsServiceProvider);
+      analytics.logNotificationOpened();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         router.go(route);
       });

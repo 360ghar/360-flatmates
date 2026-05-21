@@ -7,6 +7,12 @@ abstract final class PrefKeys {
   static const localeCountryCode = 'locale_country_code';
   static const hideLastName = 'privacy_hide_last_name';
   static const hideExactLocation = 'privacy_hide_exact_location';
+  static const notifNewMessages = 'notif_new_messages';
+  static const notifVisitReminders = 'notif_visit_reminders';
+  static const notifNewMatches = 'notif_new_matches';
+  static const notifListingUpdates = 'notif_listing_updates';
+  static const notifPromotions = 'notif_promotions';
+  static const notifPermissionRequested = 'notif_permission_requested';
 }
 
 final class AppPreferences {
@@ -27,6 +33,11 @@ final class AppPreferences {
   Future<bool> remove(String key) => _prefs.remove(key);
 
   bool getBool(String key) => _prefs.getBool(key) ?? false;
+
+  bool getBoolOrDefault(String key, bool defaultValue) =>
+      _prefs.getBool(key) ?? defaultValue;
+
+  bool containsKey(String key) => _prefs.containsKey(key);
 
   Future<bool> setBool(String key, bool value) => _prefs.setBool(key, value);
 }

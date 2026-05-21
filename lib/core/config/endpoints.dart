@@ -51,6 +51,9 @@ abstract final class FlatmatesEndpoints {
   static const notificationRegister = '/notifications/devices/register';
   static const notificationUnregister = '/notifications/devices/unregister';
 
+  // -- App Config --
+  static const appConfig = '/flatmates/app-config';
+
   // -- Flatmates --
   static const sse = '/flatmates/sse';
   static const flatmatesProfile = '/flatmates/profile';

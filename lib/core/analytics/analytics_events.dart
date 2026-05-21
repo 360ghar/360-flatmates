@@ -1,5 +1,8 @@
 /// Analytics event names aligned to the PRD metrics funnel.
 abstract final class AnalyticsEvents {
+  // App lifecycle
+  static const appOpen = 'app_open';
+
   // Auth
   static const authStarted = 'auth_started';
   static const authCompleted = 'auth_completed';
