@@ -73,9 +73,10 @@ class _OtpPageState extends ConsumerState<OtpPage> with CodeAutoFill {
       if (mounted) {
         setState(() => _isListening = true);
       }
-    } catch (_) {
+    } catch (e) {
       // SMS auto-fill not available on this platform (e.g. iOS simulator).
       // The user will enter the OTP manually.
+      debugPrint('OtpPage._startListeningForSms: SMS auto-fill unavailable: $e');
     }
   }
 

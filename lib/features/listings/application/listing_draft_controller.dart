@@ -37,7 +37,9 @@ class ListingDraftController extends Notifier<ListingDraftState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('$_prefsKey:step', state.step.name);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ListingDraftController._saveDraft failed: $e');
+    }
   }
 
   // ── Step navigation ──────────────────────────────────────────────

@@ -212,8 +212,9 @@ class NotificationService {
               'platform': Platform.isIOS ? 'ios' : 'android',
             },
           );
-    } catch (_) {
+    } catch (e) {
       // Token sync is best-effort; do not block UX.
+      debugPrint('NotificationService._sendTokenToServer failed: $e');
     }
   }
 
@@ -228,8 +229,9 @@ class NotificationService {
             FlatmatesEndpoints.notificationUnregister,
             queryParameters: {'token': token},
           );
-    } catch (_) {
+    } catch (e) {
       // Best-effort
+      debugPrint('NotificationService.clearToken failed: $e');
     }
   }
 }

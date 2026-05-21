@@ -85,6 +85,7 @@ class OnboardingController extends Notifier<OnboardingState> {
       await prefs.setString(_prefsKey, jsonEncode(data));
     } catch (e) {
       // Ignore save errors
+      debugPrint('[OnboardingController] _saveState error: $e');
     }
   }
 
@@ -94,6 +95,7 @@ class OnboardingController extends Notifier<OnboardingState> {
       await prefs.remove(_prefsKey);
     } catch (e) {
       // Ignore errors
+      debugPrint('[OnboardingController] _clearSavedState error: $e');
     }
   }
 

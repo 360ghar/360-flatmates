@@ -122,7 +122,9 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
       await ref
           .read(chatsRepositoryProvider)
           .markMessagesAsRead(widget.conversationId);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ChatThreadPage._markMessagesAsRead failed: $e');
+    }
   }
 
   Future<void> _scheduleVisit() async {
@@ -147,7 +149,8 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
           .sendMessage(conversationId: widget.conversationId, body: body);
       setState(() => _hasSentFirstMessage = true);
       ref.invalidate(conversationsProvider);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ChatThreadPage._sendMessage failed: $e');
       _messageController.text = previousText;
       _messageController.selection = previousSelection;
       if (mounted) {
@@ -184,7 +187,8 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
           );
       setState(() => _hasSentFirstMessage = true);
       ref.invalidate(conversationsProvider);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ChatThreadPage._sendPhoto failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -233,7 +237,9 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
       updatedConversation = await repository.fetchConversation(
         widget.conversationId,
       );
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('ChatThreadPage._submitQnA failed for conversation ${widget.conversationId}: $e');
+    }
     _markQnANudgeDismissed();
     if (mounted) {
       setState(() {

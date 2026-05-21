@@ -95,7 +95,9 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
         _rentController.text = listing.monthlyRent.toStringAsFixed(0);
         _availableFrom = listing.availableFrom;
       });
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('CreateListingPage._loadListingForEdit failed for listing $listingId: $e');
+    }
   }
 
   List<CatalogOption> _catalog(String key) {

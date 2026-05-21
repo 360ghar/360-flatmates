@@ -17,7 +17,8 @@ Future<void> confirmVisitFromChat({
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(locale.visitConfirmed)));
-  } catch (_) {
+  } catch (e) {
+    debugPrint('confirmVisitFromChat failed for visit ${visit.id}: $e');
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,
@@ -66,7 +67,8 @@ Future<void> rescheduleVisitFromChat({
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(locale.visitRescheduleCta)));
-  } catch (_) {
+  } catch (e) {
+    debugPrint('rescheduleVisitFromChat failed for visit ${visit.id}: $e');
     if (!context.mounted) return;
     ScaffoldMessenger.of(
       context,

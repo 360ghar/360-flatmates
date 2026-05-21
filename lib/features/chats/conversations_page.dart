@@ -64,7 +64,8 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage> {
           );
         }),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ConversationsPage._matchIncomingLike failed for like ${like.id}: $e');
       if (mounted) _showMatchFailure(locale);
     } finally {
       if (mounted) setState(() => _matchingLikeIds.remove(like.id));

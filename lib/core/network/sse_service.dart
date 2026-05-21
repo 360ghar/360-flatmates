@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 /// A single parsed Server-Sent Event.
 class SseEvent {
   const SseEvent({required this.type, required this.data});
@@ -149,7 +151,9 @@ class SseService {
                   _controller!.add(
                     SseEvent(type: eventType ?? 'message', data: parsed),
                   );
-                } catch (_) {}
+                } catch (e) {
+                  debugPrint('SseService: failed to parse event data: $e');
+                }
               }
               eventType = null;
               buffer.clear();
@@ -165,7 +169,9 @@ class SseService {
             }
           },
           onDone: () {},
-          onError: (_) {},
+          onError: (e) {
+            debugPrint('SseService: stream error: $e');
+          },
         );
 
     await _responseSubscription?.asFuture();

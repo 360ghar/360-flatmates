@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../storage/auth_token_storage.dart';
@@ -22,7 +23,8 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
     late final supabase.SupabaseClient client;
     try {
       client = supabase.Supabase.instance.client;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('RefreshingAuthTokenProvider.getAccessToken: Supabase client not available: $e');
       await _storage.clear();
       return null;
     }
@@ -42,10 +44,12 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
           await _storage.clear();
           return null;
         }
-      } on AuthException catch (_) {
+      } on AuthException catch (e) {
+        debugPrint('RefreshingAuthTokenProvider.getAccessToken: session refresh auth error: $e');
         await _storage.clear();
         return null;
-      } catch (_) {
+      } catch (e) {
+        debugPrint('RefreshingAuthTokenProvider.getAccessToken: session refresh failed: $e');
         return _storage.read();
       }
     }
@@ -64,8 +68,9 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
   Future<void> clearSession() async {
     try {
       await supabase.Supabase.instance.client.auth.signOut();
-    } catch (_) {
+    } catch (e) {
       // Ignore SDK cleanup failures.
+      debugPrint('RefreshingAuthTokenProvider.clearSession: signOut failed: $e');
     } finally {
       await _storage.clear();
     }
@@ -91,7 +96,8 @@ bool _isJwtExpired(
     return DateTime.now()
         .add(skew)
         .isAfter(DateTime.fromMillisecondsSinceEpoch(expiry * 1000));
-  } catch (_) {
+  } catch (e) {
+    debugPrint('_isJwtExpired: failed to decode token: $e');
     return false;
   }
 }

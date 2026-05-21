@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -87,7 +88,8 @@ class ImageUploadService {
     try {
       await controller.initialize();
       return controller.value.duration;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ImageUploadService._getVideoDuration failed: $e');
       return Duration.zero;
     } finally {
       await controller.dispose();

@@ -53,7 +53,8 @@ class _MatchQnANudgeSheetState extends ConsumerState<MatchQnANudgeSheet> {
       if (mounted) {
         Navigator.of(context).pop();
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MatchQnANudgeSheet._submitAnswers failed for conversation ${widget.conversationId}: $e');
       if (mounted) {
         final locale = AppLocalizations.of(context);
         ScaffoldMessenger.of(

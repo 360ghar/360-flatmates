@@ -52,7 +52,8 @@ class ChatDialogs {
           SnackBar(content: Text(e.userMessage(locale.toUserMessageL10n()))),
         );
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ChatDialogs.showBlockDialog failed for peer $peerId: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -121,7 +122,8 @@ class ChatDialogs {
           SnackBar(content: Text(e.userMessage(locale.toUserMessageL10n()))),
         );
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ChatDialogs.showReportDialog failed for peer $peerId: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -167,7 +169,8 @@ class ChatDialogs {
           SnackBar(content: Text(e.userMessage(locale.toUserMessageL10n()))),
         );
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ChatDialogs.showUnmatchDialog failed for conversation $conversationId: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,

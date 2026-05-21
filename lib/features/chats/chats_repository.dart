@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -89,17 +90,39 @@ class ChatsRepository {
     return ConversationSummaryModel.fromJson(data);
   }
 
-  Future<List<ChatMessage>> fetchMessages(int conversationId) async {
+  Future<MessageListResponse> fetchMessages(int conversationId) async {
     final response = await _ref
         .read(apiClientProvider)
         .get(FlatmatesEndpoints.conversationMessages(conversationId));
-    final rows = (response.data as List? ?? const []);
-    return rows
+    final data = response.data;
+    if (data is Map) {
+      final map = Map<String, dynamic>.from(data);
+      final rows = (map['messages'] as List? ?? const []);
+      final messages = rows
+          .map(
+            (item) =>
+                ChatMessage.fromJson(Map<String, dynamic>.from(item as Map)),
+          )
+          .toList();
+      return MessageListResponse(
+        messages: messages,
+        total: (map['total'] as num?)?.toInt() ?? messages.length,
+        hasMore: map['has_more'] as bool? ?? false,
+      );
+    }
+    // Fallback: handle legacy responses that return a raw list
+    final rows = (data as List? ?? const []);
+    final messages = rows
         .map(
           (item) =>
               ChatMessage.fromJson(Map<String, dynamic>.from(item as Map)),
         )
         .toList();
+    return MessageListResponse(
+      messages: messages,
+      total: messages.length,
+      hasMore: false,
+    );
   }
 
   Stream<List<ChatMessage>> watchMessages(int conversationId) {
@@ -116,7 +139,8 @@ class ChatsRepository {
 
     Future<void> pollMessages() async {
       try {
-        emitMessages(await fetchMessages(conversationId));
+        final response = await fetchMessages(conversationId);
+        emitMessages(response.messages);
       } catch (error, stackTrace) {
         if (!controller.isClosed && !hasEmittedMessages) {
           controller.addError(error, stackTrace);
@@ -159,7 +183,8 @@ class ChatsRepository {
                   startPollingIfNeeded();
                 },
               );
-        } catch (_) {
+        } catch (e) {
+          debugPrint('ChatsRepository.watchMessages: realtime subscription failed, falling back to polling: $e');
           startPollingIfNeeded();
         }
       },
@@ -276,7 +301,7 @@ final conversationProvider =
           ref.watch(chatsRepositoryProvider).fetchConversation(conversationId),
     );
 
-final messagesProvider = FutureProvider.family<List<ChatMessage>, int>(
+final messagesProvider = FutureProvider.family<MessageListResponse, int>(
   (ref, conversationId) =>
       ref.watch(chatsRepositoryProvider).fetchMessages(conversationId),
 );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -120,8 +121,9 @@ class VisitsRepository {
           'time_slot_label': ?timeSlotLabel,
         },
       );
-    } catch (_) {
+    } catch (e) {
       // Visit was scheduled; notification is best-effort
+      debugPrint('VisitsRepository.scheduleVisitAndNotify: chat notification failed: $e');
     }
     return visitId;
   }

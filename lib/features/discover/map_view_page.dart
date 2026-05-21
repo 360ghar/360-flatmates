@@ -398,7 +398,8 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
           ),
         ),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('MapViewPage._handleContact failed: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,

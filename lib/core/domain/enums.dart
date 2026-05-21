@@ -4,11 +4,13 @@
 
 enum UserMode {
   roomPoster,
+  seeker,
   coHunter,
   openToBoth;
 
   static UserMode fromApi(String value) => switch (value) {
     'room_poster' => UserMode.roomPoster,
+    'seeker' => UserMode.seeker,
     'co_hunter' => UserMode.coHunter,
     'open_to_both' => UserMode.openToBoth,
     _ => UserMode.coHunter,
@@ -16,12 +18,14 @@ enum UserMode {
 
   String toApi() => switch (this) {
     UserMode.roomPoster => 'room_poster',
+    UserMode.seeker => 'seeker',
     UserMode.coHunter => 'co_hunter',
     UserMode.openToBoth => 'open_to_both',
   };
 
   String get label => switch (this) {
     UserMode.roomPoster => 'List My Flat / Find Flatmate',
+    UserMode.seeker => 'Looking for a Room',
     UserMode.coHunter => 'Find a Flat / Flatmate',
     UserMode.openToBoth => 'Open to Both',
   };
@@ -228,19 +232,25 @@ enum PetPreference {
 
 enum ProfileStatus {
   draft,
+  pendingReview,
   active,
-  suspended;
+  paused,
+  rejected;
 
   static ProfileStatus fromApi(String value) => switch (value) {
     'draft' => ProfileStatus.draft,
+    'pending_review' => ProfileStatus.pendingReview,
     'active' => ProfileStatus.active,
-    'suspended' => ProfileStatus.suspended,
+    'paused' => ProfileStatus.paused,
+    'rejected' => ProfileStatus.rejected,
     _ => ProfileStatus.draft,
   };
 
   String toApi() => switch (this) {
     ProfileStatus.draft => 'draft',
+    ProfileStatus.pendingReview => 'pending_review',
     ProfileStatus.active => 'active',
-    ProfileStatus.suspended => 'suspended',
+    ProfileStatus.paused => 'paused',
+    ProfileStatus.rejected => 'rejected',
   };
 }

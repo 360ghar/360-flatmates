@@ -13,7 +13,9 @@ final class EnvLoader {
     try {
       await dotenv.load(fileName: fileName, isOptional: true);
       if (dotenv.env.isNotEmpty) return true;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[EnvLoader] Error loading $fileName: $e');
+    }
 
     debugPrint(
       '[EnvLoader] $fileName not found in asset bundle – falling back '

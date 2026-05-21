@@ -9,28 +9,31 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'analytics_events.dart';
 
 class AnalyticsService {
-  AnalyticsService({
-    required FirebaseAnalytics analytics,
-    required FirebaseCrashlytics crashlytics,
+  AnalyticsService._({
+    required FirebaseAnalytics? analytics,
+    required FirebaseCrashlytics? crashlytics,
     required this.isEnabled,
   })  : _analytics = analytics,
         _crashlytics = crashlytics;
 
-  final FirebaseAnalytics _analytics;
-  final FirebaseCrashlytics _crashlytics;
+  final FirebaseAnalytics? _analytics;
+  final FirebaseCrashlytics? _crashlytics;
   final bool isEnabled;
 
+  /// Creates a disabled instance without touching any Firebase singletons.
+  AnalyticsService._disabled()
+      : _analytics = null,
+        _crashlytics = null,
+        isEnabled = false;
+
   static Future<AnalyticsService> create({required bool firebaseReady}) async {
+    if (!firebaseReady) {
+      return AnalyticsService._disabled();
+    }
+
+    // Only access Firebase singletons when Firebase was successfully initialized.
     final analytics = FirebaseAnalytics.instance;
     final crashlytics = FirebaseCrashlytics.instance;
-
-    if (!firebaseReady) {
-      return AnalyticsService(
-        analytics: analytics,
-        crashlytics: crashlytics,
-        isEnabled: false,
-      );
-    }
 
     // Pass uncaught Flutter errors to Crashlytics.
     FlutterError.onError = crashlytics.recordFlutterFatalError;
@@ -49,7 +52,7 @@ class AnalyticsService {
       await crashlytics.setCustomKey('platform', Platform.operatingSystem);
     } catch (_) {}
 
-    return AnalyticsService(
+    return AnalyticsService._(
       analytics: analytics,
       crashlytics: crashlytics,
       isEnabled: true,
@@ -64,22 +67,22 @@ class AnalyticsService {
   }) async {
     if (!isEnabled) return;
     try {
-      await _analytics.logEvent(name: name, parameters: parameters);
+      await _analytics!.logEvent(name: name, parameters: parameters);
     } catch (_) {}
   }
 
   Future<void> setUserId(String? id) async {
     if (!isEnabled) return;
     try {
-      await _analytics.setUserId(id: id);
-      await _crashlytics.setUserIdentifier(id ?? '');
+      await _analytics!.setUserId(id: id);
+      await _crashlytics!.setUserIdentifier(id ?? '');
     } catch (_) {}
   }
 
   Future<void> logScreenView({required String screenName}) async {
     if (!isEnabled) return;
     try {
-      await _analytics.logScreenView(screenName: screenName);
+      await _analytics!.logScreenView(screenName: screenName);
     } catch (_) {}
   }
 
@@ -117,22 +120,18 @@ class AnalyticsService {
   Future<void> recordError(Object error, StackTrace stack, {bool fatal = false}) async {
     if (!isEnabled) return;
     try {
-      await _crashlytics.recordError(error, stack, fatal: fatal);
+      await _crashlytics!.recordError(error, stack, fatal: fatal);
     } catch (_) {}
   }
 
   Future<void> setCustomKey(String key, Object value) async {
     if (!isEnabled) return;
     try {
-      await _crashlytics.setCustomKey(key, value);
+      await _crashlytics!.setCustomKey(key, value);
     } catch (_) {}
   }
 }
 
 final analyticsServiceProvider = Provider<AnalyticsService>(
-  (ref) => AnalyticsService(
-    analytics: FirebaseAnalytics.instance,
-    crashlytics: FirebaseCrashlytics.instance,
-    isEnabled: false,
-  ),
+  (ref) => AnalyticsService._disabled(),
 );

@@ -56,10 +56,11 @@ Future<void> bootstrap() async {
   try {
     await Firebase.initializeApp();
     firebaseInitialized = true;
-  } catch (_) {
+  } catch (e) {
     // Firebase may not be configured yet (e.g. missing google-services.json /
     // GoogleService-Info.plist). Allow the app to start so it can still be
     // developed and tested without Firebase.
+    debugPrint('[bootstrap] Firebase init skipped: $e');
   }
   if (firebaseInitialized) {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

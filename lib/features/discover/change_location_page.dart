@@ -145,7 +145,8 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
         );
         if (mounted) context.pop();
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ChangeLocationPage._save failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,

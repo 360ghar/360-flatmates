@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../bootstrap/bootstrap_controller.dart';
@@ -56,9 +57,9 @@ class MessagesController extends FamilyNotifier<MessagesState, int> {
   Future<void> load(int conversationId) async {
     try {
       final repo = ref.read(chatsRepositoryProvider);
-      final messages = await repo.fetchMessages(conversationId);
+      final response = await repo.fetchMessages(conversationId);
       state = state.copyWith(
-        messages: messages,
+        messages: response.messages,
         isLoading: false,
         clearError: true,
       );
@@ -106,7 +107,9 @@ class MessagesController extends FamilyNotifier<MessagesState, int> {
     try {
       final repo = ref.read(chatsRepositoryProvider);
       await repo.markMessagesAsRead(conversationId);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('MessagesController.markAsRead failed for conversation $conversationId: $e');
+    }
   }
 }
 

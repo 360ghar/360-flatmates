@@ -140,7 +140,9 @@ class _LocationPickerModalState extends ConsumerState<LocationPickerModal> {
                 locationName = parts.join(', ');
               }
             }
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('LocationPickerModal._useCurrentLocation: geocoding failed: $e');
+          }
           if (!mounted) return;
           widget.onLocationSelected(
             LocationData(
@@ -152,7 +154,8 @@ class _LocationPickerModalState extends ConsumerState<LocationPickerModal> {
           Navigator.of(context).pop();
         }
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('LocationPickerModal._useCurrentLocation failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -216,7 +219,8 @@ class _LocationPickerModalState extends ConsumerState<LocationPickerModal> {
           context,
         ).showSnackBar(SnackBar(content: Text(locale.locationDetailsFailed)));
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('LocationPickerModal._onSuggestionTap failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,

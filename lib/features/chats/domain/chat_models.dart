@@ -166,6 +166,18 @@ class ConversationSummaryModel with _$ConversationSummaryModel {
   }
 }
 
+class MessageListResponse {
+  const MessageListResponse({
+    required this.messages,
+    required this.total,
+    required this.hasMore,
+  });
+
+  final List<ChatMessage> messages;
+  final int total;
+  final bool hasMore;
+}
+
 class IncomingLikeModel {
   const IncomingLikeModel({
     required this.id,
