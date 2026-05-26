@@ -179,7 +179,9 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
       final bootstrap = ref.read(bootstrapControllerProvider).valueOrNull;
       final catalogCities =
           bootstrap?.catalogOptions('flatmates_popular_cities') ?? const [];
-      final cities = resolveCities(catalogCities);
+      final cities = resolveCities(catalogCities)
+          .where((c) => !c.comingSoon)
+          .toList();
 
       CatalogOption? match;
       double minDist = double.infinity;

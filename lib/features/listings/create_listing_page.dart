@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../bootstrap/bootstrap_controller.dart';
 import '../bootstrap/catalog_helpers.dart';
+import '../discover/application/discover_feed_controller.dart';
 import '../discover/discover_repository.dart';
 import '../shared/presentation/components.dart';
 import 'listings_repository.dart';
@@ -213,7 +214,7 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
       final listingId = await ref
           .read(listingsRepositoryProvider)
           .createListing(request);
-      ref.invalidate(discoverListingsProvider);
+      ref.read(discoverFeedControllerProvider.notifier).refresh();
       await ref.read(bootstrapControllerProvider.notifier).load();
       if (!mounted) return;
       ScaffoldMessenger.of(

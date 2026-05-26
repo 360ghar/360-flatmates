@@ -13,15 +13,71 @@ class FlatmatesMapController {
   final MapController _mapController;
   MapController get controller => _mapController;
 
+  TickerProvider? _vsync;
+  AnimationController? _animController;
+
   LatLng get center => _mapController.camera.center;
   double get zoom => _mapController.camera.zoom;
+
+  /// Attach a [TickerProvider] (usually `this` from a State that mixes in
+  /// [TickerProviderStateMixin]) so [animateTo] can drive a real animation.
+  /// Without a ticker, [animateTo] falls back to an instant move.
+  void attachTicker(TickerProvider vsync) {
+    _vsync = vsync;
+  }
 
   void move(LatLng center, double zoom) {
     _mapController.move(center, zoom);
   }
 
+  /// Smoothly animates the camera to [center] at [zoom] over ~400ms using
+  /// [Curves.easeInOut]. Requires [attachTicker] to have been called; otherwise
+  /// performs an instant move.
   Future<void> animateTo(LatLng center, {double zoom = 14}) async {
-    _mapController.move(center, zoom, id: 'animate');
+    final vsync = _vsync;
+    if (vsync == null) {
+      _mapController.move(center, zoom);
+      return;
+    }
+
+    // Cancel any in-flight animation so we can interrupt it cleanly.
+    _animController?.stop();
+    _animController?.dispose();
+
+    final startCenter = _mapController.camera.center;
+    final startZoom = _mapController.camera.zoom;
+
+    final controller = AnimationController(
+      vsync: vsync,
+      duration: const Duration(milliseconds: 400),
+    );
+    _animController = controller;
+
+    final curved = CurvedAnimation(parent: controller, curve: Curves.easeInOut);
+
+    void tick() {
+      final t = curved.value;
+      final lat = startCenter.latitude +
+          (center.latitude - startCenter.latitude) * t;
+      final lng = startCenter.longitude +
+          (center.longitude - startCenter.longitude) * t;
+      final z = startZoom + (zoom - startZoom) * t;
+      _mapController.move(LatLng(lat, lng), z, id: 'animate');
+    }
+
+    curved.addListener(tick);
+
+    try {
+      await controller.forward();
+    } on TickerCanceled {
+      // Animation interrupted — fine, a newer animation took over.
+    } finally {
+      curved.removeListener(tick);
+      if (identical(_animController, controller)) {
+        controller.dispose();
+        _animController = null;
+      }
+    }
   }
 
   void fitBounds(
@@ -44,6 +100,9 @@ class FlatmatesMapController {
   }
 
   void dispose() {
+    _animController?.dispose();
+    _animController = null;
+    _vsync = null;
     // MapController does not need explicit disposal in flutter_map.
   }
 }

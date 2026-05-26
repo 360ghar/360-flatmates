@@ -19,7 +19,15 @@ final class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await _tokenProvider.getAccessToken();
+    String? token;
+    try {
+      token = await _tokenProvider.getAccessToken();
+    } on TransientAuthRefreshException {
+      // Transient refresh failure (network down, etc.). Proceed without auth;
+      // backend will likely return 401 and onError can retry once. Do NOT
+      // clear the session — the user may still be logged in.
+      token = null;
+    }
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
@@ -48,7 +56,27 @@ final class AuthInterceptor extends Interceptor {
 
       _refreshCompleter = Completer<bool>();
       try {
-        final newToken = await _tokenProvider.getAccessToken();
+        String? newToken;
+        try {
+          newToken = await _tokenProvider.getAccessToken();
+        } on TransientAuthRefreshException catch (e) {
+          // Refresh failed for transport reasons. Don't clear the session —
+          // let the user retry once the network is back. Propagate the
+          // ORIGINAL 401 to the caller so they see a real error, and fail
+          // any queued requests with the same transient error.
+          _refreshCompleter?.complete(false);
+          _refreshCompleter = null;
+          _failQueue(err.stackTrace);
+          handler.next(
+            DioException(
+              requestOptions: err.requestOptions,
+              error: e,
+              type: DioExceptionType.connectionError,
+              stackTrace: err.stackTrace,
+            ),
+          );
+          return;
+        }
         if (newToken != null && newToken.isNotEmpty) {
           final opts = err.requestOptions;
           opts.extra['_retried'] = true;

@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/errors/app_failure.dart';
 import '../../bootstrap/bootstrap_controller.dart';
-import '../../discover/discover_repository.dart';
+import '../../discover/application/discover_feed_controller.dart';
 import '../listings_repository.dart';
 import '../domain/listing_draft_state.dart';
 
@@ -289,8 +289,8 @@ class ListingDraftController extends Notifier<ListingDraftState> {
           .read(listingsRepositoryProvider)
           .createListing(request);
 
-      // Invalidate discover cache
-      ref.invalidate(discoverListingsProvider);
+      // Refresh discover feed so the new listing shows up.
+      ref.read(discoverFeedControllerProvider.notifier).refresh();
 
       await ref.read(bootstrapControllerProvider.notifier).load();
 

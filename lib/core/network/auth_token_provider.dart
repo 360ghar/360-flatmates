@@ -8,6 +8,19 @@ import '../storage/auth_token_storage.dart';
 
 typedef AuthException = supabase.AuthException;
 
+/// Thrown by [AuthTokenProvider.getAccessToken] when a token refresh attempt
+/// failed for a transient reason (e.g. network timeout) and the local session
+/// is otherwise present. Callers should treat the current request as
+/// unauthenticated *for this attempt only* and MUST NOT clear the session —
+/// the user may still be logged in once connectivity returns. Distinguishing
+/// this from a `null` return prevents transient errors from forcing logout.
+class TransientAuthRefreshException implements Exception {
+  TransientAuthRefreshException(this.cause);
+  final Object cause;
+  @override
+  String toString() => 'TransientAuthRefreshException: $cause';
+}
+
 abstract interface class AuthTokenProvider {
   Future<String?> getAccessToken();
 
@@ -51,7 +64,14 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
         return null;
       } catch (e) {
         debugPrint('RefreshingAuthTokenProvider.getAccessToken: session refresh failed: $e');
-        return _storage.read();
+        // Refresh failed for a non-auth reason (transport, timeout, etc.).
+        // The local token is known expired so we cannot return it (would
+        // cause a 401→refresh loop under the new single-flight). But we
+        // also don't want to return plain `null` here — that's the same
+        // signal as "no session at all", which makes AuthInterceptor clear
+        // the session and force a re-login on what may just be a flaky
+        // network. Throw a typed exception so the caller can distinguish.
+        throw TransientAuthRefreshException(e);
       }
     }
 

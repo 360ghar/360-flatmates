@@ -35,7 +35,8 @@ class MapViewPage extends ConsumerStatefulWidget {
   ConsumerState<MapViewPage> createState() => _MapViewPageState();
 }
 
-class _MapViewPageState extends ConsumerState<MapViewPage> {
+class _MapViewPageState extends ConsumerState<MapViewPage>
+    with TickerProviderStateMixin {
   final _locationRadiusDebouncer = ActionDebouncer();
   final ScrollController _cardScrollController = ScrollController();
 
@@ -43,6 +44,13 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
       FlatmatesMapController();
   List<PropertyListing>? _previousListings;
   List<PropertyListing> _currentFiltered = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Provide a vsync so FlatmatesMapController.animateTo can animate.
+    _flatmatesMapController.attachTicker(this);
+  }
 
   @override
   void dispose() {
@@ -127,9 +135,10 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
         if (nextLoc != null &&
             (prevLoc?.latitude != nextLoc.latitude ||
                 prevLoc?.longitude != nextLoc.longitude)) {
-          _flatmatesMapController.move(
+          // Preserve the user's current zoom level and animate smoothly.
+          _flatmatesMapController.animateTo(
             LatLng(nextLoc.latitude, nextLoc.longitude),
-            kDefaultInitialZoom,
+            zoom: _flatmatesMapController.zoom,
           );
         }
       },

@@ -35,7 +35,17 @@ class FlatmatesNetworkImage extends ConsumerWidget {
       return imageUrl;
     }
     final base = ref.read(appConfigProvider).apiBaseUrl;
-    return Uri.parse(base).resolve(imageUrl).toString();
+    // Normalize-join: preserves the full base path (e.g. `/api/v1`) regardless
+    // of whether `base` has a trailing slash or `imageUrl` has a leading one.
+    // `Uri.resolve` would strip the last path segment of the base when the
+    // base lacks a trailing slash, dropping `/api/v1` from the resolved URL.
+    final trimmedBase = base.endsWith('/')
+        ? base.substring(0, base.length - 1)
+        : base;
+    final trimmedPath = imageUrl.startsWith('/')
+        ? imageUrl.substring(1)
+        : imageUrl;
+    return '$trimmedBase/$trimmedPath';
   }
 
   @override
@@ -99,6 +109,18 @@ class _ResilientImage extends StatefulWidget {
 
 class _ResilientImageState extends State<_ResilientImage> {
   bool _useFallback = false;
+
+  @override
+  void didUpdateWidget(_ResilientImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When the URL changes (e.g. element recycled during list scroll), reset
+    // the fallback flag so the new image gets another shot at CachedNetworkImage
+    // (and its memCacheWidth/memCacheHeight downscaling) instead of being stuck
+    // on the uncached Image.network path.
+    if (oldWidget.url != widget.url && _useFallback) {
+      setState(() => _useFallback = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -300,6 +300,7 @@ class _SearchFiltersPageState extends ConsumerState<SearchFiltersPage> {
     final locale = AppLocalizations.of(context);
     final bootstrap = ref.watch(bootstrapControllerProvider);
     final showSkeleton = bootstrap.isLoading && bootstrap.valueOrNull == null;
+    final showError = bootstrap.hasError && bootstrap.valueOrNull == null;
     final activeFilters = _activeFilters;
 
     return FlatmatesScreen(
@@ -317,6 +318,12 @@ class _SearchFiltersPageState extends ConsumerState<SearchFiltersPage> {
       ),
       body: showSkeleton
           ? const SearchFilterFormSkeleton()
+          : showError
+          ? FlatmatesErrorState(
+              message: locale.couldNotLoadListing,
+              onRetry: () =>
+                  ref.read(bootstrapControllerProvider.notifier).load(),
+            )
           : Column(
               children: [
                 Expanded(
