@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/map/map_controller.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_shadows.dart';
@@ -40,10 +41,7 @@ class MiniMapView extends StatelessWidget {
             ),
           ),
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.flatmates.app',
-            ),
+            createOsmTileLayer(),
             MarkerLayer(
               markers: [
                 Marker(

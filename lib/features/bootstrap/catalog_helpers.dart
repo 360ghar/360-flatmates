@@ -10,6 +10,8 @@ class CatalogOption {
   final String id;
   final String label;
   final Map<String, dynamic> meta;
+
+  bool get comingSoon => (meta['coming_soon'] as bool?) ?? false;
 }
 
 extension FlatmatesCatalogs on BootstrapData {

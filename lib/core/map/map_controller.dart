@@ -21,7 +21,7 @@ class FlatmatesMapController {
   }
 
   Future<void> animateTo(LatLng center, {double zoom = 14}) async {
-    move(center, zoom);
+    _mapController.move(center, zoom, id: 'animate');
   }
 
   void fitBounds(

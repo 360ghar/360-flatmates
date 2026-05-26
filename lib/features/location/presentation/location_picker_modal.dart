@@ -424,7 +424,9 @@ class _LocationPickerModalState extends ConsumerState<LocationPickerModal> {
                           ...filteredCities.map(
                             (city) => _CityTile(
                               city: city,
-                              onTap: () => _selectCatalogCity(city),
+                              onTap: city.comingSoon
+                                  ? null
+                                  : () => _selectCatalogCity(city),
                             ),
                           ),
                       ],
@@ -484,14 +486,64 @@ class _PlaceSuggestionTile extends StatelessWidget {
 
 class _CityTile extends StatelessWidget {
   final CatalogOption city;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _CityTile({required this.city, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final locale = AppLocalizations.of(context);
     final state = (city.meta['state'] as String?) ?? '';
+    if (city.comingSoon) {
+      return Opacity(
+        opacity: 0.6,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          leading: Icon(
+            Icons.location_city_rounded,
+            size: 20,
+            color: AppSemanticColors.textTertiaryFor(theme.brightness),
+          ),
+          title: Text(
+            city.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: AppSemanticColors.textTertiaryFor(theme.brightness),
+            ),
+          ),
+          subtitle: state.isNotEmpty
+              ? Text(
+                  state,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppSemanticColors.textTertiaryFor(theme.brightness),
+                  ),
+                )
+              : null,
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppSemanticColors.paper2,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              locale.comingSoon,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: AppSemanticColors.textTertiaryFor(theme.brightness),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,

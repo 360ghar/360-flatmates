@@ -432,6 +432,61 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
                       itemBuilder: (context, index) {
                         final city = visibleCities[index];
                         final selected = _selectedCity?.id == city.id;
+                        if (city.comingSoon) {
+                          return Opacity(
+                            opacity: 0.6,
+                            child: FlatmatesCard(
+                              onTap: null,
+                              borderColor: AppSemanticColors.line
+                                  .withValues(alpha: 0.35),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    color: AppSemanticColors.textTertiaryFor(
+                                      theme.brightness,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.md),
+                                  Expanded(
+                                    child: Text(
+                                      city.label,
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                        color:
+                                            AppSemanticColors.textTertiaryFor(
+                                              theme.brightness,
+                                            ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppSemanticColors.paper2,
+                                      borderRadius:
+                                          BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      locale.comingSoon,
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                        color:
+                                            AppSemanticColors.textTertiaryFor(
+                                              theme.brightness,
+                                            ),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
                         return FlatmatesCard(
                           onTap: () => setState(() => _selectedCity = city),
                           backgroundColor: selected

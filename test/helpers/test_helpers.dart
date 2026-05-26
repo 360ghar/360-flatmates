@@ -157,7 +157,9 @@ BootstrapData fakeBootstrapData() => BootstrapData(
       version: 1,
       payload: {
         'items': [
-          {'id': 'bangalore', 'label': 'Bangalore'},
+          {'id': 'bangalore', 'label': 'Bangalore', 'latitude': 12.9716, 'longitude': 77.5946, 'state': 'Karnataka'},
+          {'id': 'gurgaon', 'label': 'Gurgaon', 'latitude': 28.4595, 'longitude': 77.0266, 'state': 'Haryana'},
+          {'id': 'hyderabad', 'label': 'Hyderabad', 'coming_soon': true, 'latitude': 17.385, 'longitude': 78.4867, 'state': 'Telangana'},
         ],
       },
     ),

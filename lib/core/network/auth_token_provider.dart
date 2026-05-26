@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -17,6 +18,7 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
   RefreshingAuthTokenProvider(this._storage);
 
   final AuthTokenStorage _storage;
+  Future<supabase.Session?>? _refreshInflight;
 
   @override
   Future<String?> getAccessToken() async {
@@ -37,8 +39,7 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
 
     if (session.isExpired || _isJwtExpired(session.accessToken)) {
       try {
-        final refreshed = await client.auth.refreshSession();
-        session = refreshed.session ?? client.auth.currentSession;
+        session = await _refreshSession(client);
         if (session != null &&
             (session.isExpired || _isJwtExpired(session.accessToken))) {
           await _storage.clear();
@@ -74,6 +75,25 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
     } finally {
       await _storage.clear();
     }
+  }
+
+  // Single-flight: concurrent callers share one Supabase refresh RPC.
+  Future<supabase.Session?> _refreshSession(supabase.SupabaseClient client) {
+    final existing = _refreshInflight;
+    if (existing != null) return existing;
+    final future = _doRefresh(client);
+    _refreshInflight = future;
+    future.whenComplete(() {
+      if (identical(_refreshInflight, future)) {
+        _refreshInflight = null;
+      }
+    });
+    return future;
+  }
+
+  Future<supabase.Session?> _doRefresh(supabase.SupabaseClient client) async {
+    final refreshed = await client.auth.refreshSession();
+    return refreshed.session ?? client.auth.currentSession;
   }
 }
 

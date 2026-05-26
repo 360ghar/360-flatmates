@@ -73,11 +73,13 @@ detectCurrentLocation({required List<CatalogOption> catalogCities}) async {
   }
 
   final cities = resolveCities(catalogCities);
-  debugPrint('LocationHelpers: using ${cities.length} catalog cities');
+  // Only consider active (non-coming-soon) cities for location matching.
+  final activeCities = cities.where((c) => !c.comingSoon).toList();
+  debugPrint('LocationHelpers: using ${activeCities.length} active catalog cities (skipping ${cities.length - activeCities.length} coming-soon)');
 
   CatalogOption? closest;
   double minDist = double.infinity;
-  for (final city in cities) {
+  for (final city in activeCities) {
     final lat = (city.meta['latitude'] as num?)?.toDouble();
     final lng = (city.meta['longitude'] as num?)?.toDouble();
     if (lat == null || lng == null) continue;
@@ -112,7 +114,7 @@ detectCurrentLocation({required List<CatalogOption> catalogCities}) async {
       debugPrint(
         'LocationHelpers: geocoding locality=$locality, adminArea=$adminArea',
       );
-      for (final city in cities) {
+      for (final city in activeCities) {
         final label = city.label.toLowerCase();
         if (_matchesLocation(
           label,
@@ -143,7 +145,9 @@ detectCurrentLocation({required List<CatalogOption> catalogCities}) async {
 }
 
 List<CatalogOption> resolveCities(List<CatalogOption> catalogCities) {
-  return catalogCities;
+  final active = catalogCities.where((c) => !c.comingSoon).toList();
+  final comingSoon = catalogCities.where((c) => c.comingSoon).toList();
+  return [...active, ...comingSoon];
 }
 
 bool _matchesLocation(

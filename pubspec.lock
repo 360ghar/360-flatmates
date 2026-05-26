@@ -217,14 +217,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
-  code_assets:
-    dependency: transitive
-    description:
-      name: code_assets
-      sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   code_builder:
     dependency: transitive
     description:
@@ -845,14 +837,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  hooks:
-    dependency: transitive
-    description:
-      name: hooks
-      sha256: "025f060e86d2d4c3c47b56e33caf7f93bf9283340f26d23424ebcfccf34f621e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.3"
   html:
     dependency: transitive
     description:
@@ -1117,14 +1101,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  native_toolchain_c:
-    dependency: transitive
-    description:
-      name: native_toolchain_c
-      sha256: "6ba77bb18063eebe9de401f5e6437e95e1438af0a87a3a39084fbd37c90df572"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.17.6"
   nested:
     dependency: transitive
     description:
@@ -1141,14 +1117,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
-  objective_c:
-    dependency: transitive
-    description:
-      name: objective_c
-      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.3.0"
   octo_image:
     dependency: transitive
     description:
@@ -1209,10 +1177,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_foundation
-      sha256: "2a376b7d6392d80cd3705782d2caa734ca4727776db0b6ec36ef3f1855197699"
+      sha256: "6d13aece7b3f5c5a9731eaf553ff9dcbc2eff41087fd2df587fd0fed9a3eb0c4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.0"
+    version: "2.5.1"
   path_provider_linux:
     dependency: transitive
     description:
@@ -1357,14 +1325,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.7.3"
-  record_use:
-    dependency: transitive
-    description:
-      name: record_use
-      sha256: "2551bd8eecfe95d14ae75f6021ad0248be5c27f138c2ec12fcb52b500b3ba1ed"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.0"
   retry:
     dependency: transitive
     description:
@@ -1891,5 +1851,5 @@ packages:
     source: hosted
     version: "2.1.0"
 sdks:
-  dart: ">=3.10.3 <4.0.0"
-  flutter: ">=3.38.4"
+  dart: ">=3.10.0 <4.0.0"
+  flutter: ">=3.38.0"

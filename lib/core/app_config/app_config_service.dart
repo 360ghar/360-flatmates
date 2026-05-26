@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -62,6 +63,12 @@ class AppConfigService {
             queryParameters: {
               'platform': defaultTargetPlatform.name,
             },
+            // 404 is expected when the endpoint isn't deployed yet — accept
+            // it as a valid response so Dio doesn't throw and pollute logs.
+            options: Options(
+              validateStatus: (status) =>
+                  status != null && (status < 300 || status == 404),
+            ),
           );
       final data = response.data;
       if (data is Map<String, dynamic>) {

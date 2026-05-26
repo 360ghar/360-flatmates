@@ -344,7 +344,9 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
                         return _CityRow(
                           city: city,
                           selected: selected,
-                          onTap: () => setState(() => _selectedCity = city),
+                          onTap: city.comingSoon
+                              ? null
+                              : () => setState(() => _selectedCity = city),
                         );
                       },
                     ),
@@ -418,11 +420,59 @@ class _CityRow extends StatelessWidget {
 
   final CatalogOption city;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final locale = AppLocalizations.of(context);
+    if (city.comingSoon) {
+      return Opacity(
+        opacity: 0.6,
+        child: FlatmatesCard(
+          onTap: null,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md + AppSpacing.xs,
+          ),
+          borderColor: AppSemanticColors.line.withValues(alpha: 0.35),
+          child: Row(
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                color: AppSemanticColors.textTertiaryFor(theme.brightness),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  city.label,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: AppSemanticColors.textTertiaryFor(theme.brightness),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppSemanticColors.paper2,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  locale.comingSoon,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: AppSemanticColors.textTertiaryFor(theme.brightness),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return FlatmatesCard(
       onTap: onTap,
       padding: const EdgeInsets.symmetric(

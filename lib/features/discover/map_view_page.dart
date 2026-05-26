@@ -117,6 +117,24 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
     final selectedLocation = ref.watch(
       locationControllerProvider.select((s) => s.selectedLocation),
     );
+
+    // Re-center map when the user picks a new location.
+    ref.listen<LocationState>(
+      locationControllerProvider,
+      (prev, next) {
+        final prevLoc = prev?.selectedLocation;
+        final nextLoc = next.selectedLocation;
+        if (nextLoc != null &&
+            (prevLoc?.latitude != nextLoc.latitude ||
+                prevLoc?.longitude != nextLoc.longitude)) {
+          _flatmatesMapController.move(
+            LatLng(nextLoc.latitude, nextLoc.longitude),
+            kDefaultInitialZoom,
+          );
+        }
+      },
+    );
+
     final locale = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -386,7 +404,7 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
       final conversationId = await ref
           .read(discoverRepositoryProvider)
           .likeListing(item.id);
-      ref.invalidate(discoverListingsProvider);
+      ref.read(discoverFeedControllerProvider.notifier).refresh();
       ref.invalidate(conversationsProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

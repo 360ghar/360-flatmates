@@ -64,15 +64,8 @@ class _AppState extends ConsumerState<App> {
     final remoteConfig = await configService.fetchConfig();
 
     if (!mounted || remoteConfig == null) {
-      // Config fetch failed or not available — let the app continue normally.
-      if (remoteConfig == null) {
-        try {
-          analytics.recordError(
-            Exception('App config fetch returned null'),
-            StackTrace.current,
-          );
-        } catch (_) {}
-      }
+      // Config fetch failed or endpoint not deployed — let the app continue.
+      // A 404 (endpoint not deployed) is expected, not an error worth logging.
       _appConfigChecked = true;
       return;
     }

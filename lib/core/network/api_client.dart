@@ -24,10 +24,12 @@ final class ApiClient {
     if (enableLogging) {
       _dio.interceptors.add(
         LogInterceptor(
-          requestBody: true,
-          responseBody: false,
+          request: false,
+          requestBody: false,
           requestHeader: false,
+          responseBody: false,
           responseHeader: false,
+          error: true,
         ),
       );
     }
@@ -40,9 +42,14 @@ final class ApiClient {
   Future<Response<dynamic>> get(
     String path, {
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) async {
     try {
-      return await _dio.get(path, queryParameters: queryParameters);
+      return await _dio.get(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
     } on DioException catch (e, st) {
       throw ErrorPresenter.fromDio(e, st);
     }
@@ -52,12 +59,14 @@ final class ApiClient {
     String path, {
     Object? data,
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) async {
     try {
       return await _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
+        options: options,
       );
     } on DioException catch (e, st) {
       throw ErrorPresenter.fromDio(e, st);
@@ -68,9 +77,15 @@ final class ApiClient {
     String path, {
     Object? data,
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) async {
     try {
-      return await _dio.put(path, data: data, queryParameters: queryParameters);
+      return await _dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
     } on DioException catch (e, st) {
       throw ErrorPresenter.fromDio(e, st);
     }
@@ -80,12 +95,14 @@ final class ApiClient {
     String path, {
     Object? data,
     Map<String, dynamic>? queryParameters,
+    Options? options,
   }) async {
     try {
       return await _dio.delete(
         path,
         data: data,
         queryParameters: queryParameters,
+        options: options,
       );
     } on DioException catch (e, st) {
       throw ErrorPresenter.fromDio(e, st);

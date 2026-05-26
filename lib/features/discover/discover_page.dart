@@ -64,15 +64,17 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     final pos = updated.currentPosition;
     final address = updated.currentAddress;
     if (pos != null && address != null && address.isNotEmpty) {
-      ref
-          .read(locationControllerProvider.notifier)
-          .selectLocation(
-            LocationData(
-              name: address,
-              latitude: pos.latitude,
-              longitude: pos.longitude,
-            ),
-          );
+      final location = LocationData(
+        name: address,
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+      );
+      ref.read(locationControllerProvider.notifier).selectLocation(location);
+      ref.read(discoverFeedControllerProvider.notifier).updateLocationFilter(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        radiusKm: DiscoverFeedController.defaultLocationRadiusKm,
+      );
     }
   }
 
