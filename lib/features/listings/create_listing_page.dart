@@ -97,7 +97,9 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
         _availableFrom = listing.availableFrom;
       });
     } catch (e) {
-      debugPrint('CreateListingPage._loadListingForEdit failed for listing $listingId: $e');
+      debugPrint(
+        'CreateListingPage._loadListingForEdit failed for listing $listingId: $e',
+      );
     }
   }
 

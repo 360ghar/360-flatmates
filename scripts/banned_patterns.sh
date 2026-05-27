@@ -79,6 +79,18 @@ else
   echo "OK"
 fi
 
+# 7. Raw EdgeInsets.all(<digits>) in features (should use AppSpacing tokens)
+echo -n "  Raw EdgeInsets.all(N) in features... "
+HITS=$(grep -rEn 'EdgeInsets\.all\(\s*[0-9]+\s*\)' lib/features/ --include='*.dart' 2>/dev/null || true)
+if [ -n "$HITS" ]; then
+  COUNT=$(echo "$HITS" | wc -l | tr -d ' ')
+  echo "FAIL ($COUNT occurrences)"
+  echo "$HITS"
+  ERRORS=$((ERRORS + 1))
+else
+  echo "OK"
+fi
+
 if [ "$ERRORS" -gt 0 ]; then
   echo ""
   echo "Found $ERRORS banned pattern(s). Fix before merging."

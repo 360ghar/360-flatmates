@@ -35,6 +35,7 @@ class OnboardingState with _$OnboardingState {
     @Default([]) List<String> nonNegotiables,
     @Default(false) bool isSubmitting,
     @Default(false) bool isComplete,
+    @Default(false) bool isHydrated,
     String? error,
   }) = _OnboardingState;
 

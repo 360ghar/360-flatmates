@@ -26,6 +26,15 @@ class OnboardingPage extends ConsumerWidget {
     final locale = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
+    if (!state.isHydrated) {
+      // Draft is still being read from SharedPreferences; render a placeholder
+      // so we don't flash the default splash and then bounce the user into a
+      // mid-flow step.
+      return const FlatmatesScreen(
+        body: Center(child: FlatmatesSkeleton.card()),
+      );
+    }
+
     if (state.isComplete) {
       Future.microtask(() {
         if (context.mounted) context.go('/discover');

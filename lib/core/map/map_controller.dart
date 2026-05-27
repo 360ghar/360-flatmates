@@ -57,9 +57,10 @@ class FlatmatesMapController {
 
     void tick() {
       final t = curved.value;
-      final lat = startCenter.latitude +
-          (center.latitude - startCenter.latitude) * t;
-      final lng = startCenter.longitude +
+      final lat =
+          startCenter.latitude + (center.latitude - startCenter.latitude) * t;
+      final lng =
+          startCenter.longitude +
           (center.longitude - startCenter.longitude) * t;
       final z = startZoom + (zoom - startZoom) * t;
       _mapController.move(LatLng(lat, lng), z, id: 'animate');

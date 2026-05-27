@@ -115,7 +115,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     if (!_isConfirmed || _isDeleting) return;
     setState(() => _isDeleting = true);
 
-    final success = await ref.read(authControllerProvider.notifier).deleteAccount();
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .deleteAccount();
 
     if (!mounted) return;
 
@@ -124,9 +126,9 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     } else {
       final locale = AppLocalizations.of(context);
       setState(() => _isDeleting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(locale.deleteAccountFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(locale.deleteAccountFailed)));
     }
   }
 }

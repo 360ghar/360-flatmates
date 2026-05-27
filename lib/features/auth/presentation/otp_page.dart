@@ -76,7 +76,9 @@ class _OtpPageState extends ConsumerState<OtpPage> with CodeAutoFill {
     } catch (e) {
       // SMS auto-fill not available on this platform (e.g. iOS simulator).
       // The user will enter the OTP manually.
-      debugPrint('OtpPage._startListeningForSms: SMS auto-fill unavailable: $e');
+      debugPrint(
+        'OtpPage._startListeningForSms: SMS auto-fill unavailable: $e',
+      );
     }
   }
 
@@ -232,9 +234,7 @@ class _OtpPageState extends ConsumerState<OtpPage> with CodeAutoFill {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(digitCount, (index) {
                   return Padding(
-                    padding: EdgeInsets.only(
-                      right: index < gapCount ? gap : 0,
-                    ),
+                    padding: EdgeInsets.only(right: index < gapCount ? gap : 0),
                     child: SizedBox(
                       width: boxWidth,
                       height: boxWidth + AppSpacing.sm,
@@ -292,8 +292,7 @@ class _OtpPageState extends ConsumerState<OtpPage> with CodeAutoFill {
               );
             },
           ),
-          if (auth.status == AuthStatus.error &&
-              auth.errorMessage != null) ...[
+          if (auth.status == AuthStatus.error && auth.errorMessage != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
               auth.errorMessage!,
@@ -325,9 +324,7 @@ class _OtpPageState extends ConsumerState<OtpPage> with CodeAutoFill {
             key: const Key('otp_submit_button'),
             label: locale.verifyOtpCta,
             fullWidth: true,
-            onPressed: auth.status == AuthStatus.submitting
-                ? null
-                : _submitOtp,
+            onPressed: auth.status == AuthStatus.submitting ? null : _submitOtp,
           ),
         ],
       ),

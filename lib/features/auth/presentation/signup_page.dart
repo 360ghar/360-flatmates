@@ -59,9 +59,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 TextField(
                   key: const Key('signup_name_input'),
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: locale.fullNameLabel,
-                  ),
+                  decoration: InputDecoration(labelText: locale.fullNameLabel),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 TextField(
@@ -83,9 +81,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   key: const Key('signup_password_input'),
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: locale.passwordLabel,
-                  ),
+                  decoration: InputDecoration(labelText: locale.passwordLabel),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 TermsCheckbox(
@@ -110,8 +106,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             key: const Key('signup_submit_button'),
             label: locale.createAccountCta,
             fullWidth: true,
-            onPressed: auth.status == AuthStatus.submitting ||
-                    !_termsAccepted
+            onPressed: auth.status == AuthStatus.submitting || !_termsAccepted
                 ? null
                 : () {
                     ref

@@ -39,7 +39,9 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
     try {
       client = supabase.Supabase.instance.client;
     } catch (e) {
-      debugPrint('RefreshingAuthTokenProvider.getAccessToken: Supabase client not available: $e');
+      debugPrint(
+        'RefreshingAuthTokenProvider.getAccessToken: Supabase client not available: $e',
+      );
       await _storage.clear();
       return null;
     }
@@ -59,11 +61,15 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
           return null;
         }
       } on AuthException catch (e) {
-        debugPrint('RefreshingAuthTokenProvider.getAccessToken: session refresh auth error: $e');
+        debugPrint(
+          'RefreshingAuthTokenProvider.getAccessToken: session refresh auth error: $e',
+        );
         await _storage.clear();
         return null;
       } catch (e) {
-        debugPrint('RefreshingAuthTokenProvider.getAccessToken: session refresh failed: $e');
+        debugPrint(
+          'RefreshingAuthTokenProvider.getAccessToken: session refresh failed: $e',
+        );
         // Refresh failed for a non-auth reason (transport, timeout, etc.).
         // The local token is known expired so we cannot return it (would
         // cause a 401→refresh loop under the new single-flight). But we
@@ -91,7 +97,9 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
       await supabase.Supabase.instance.client.auth.signOut();
     } catch (e) {
       // Ignore SDK cleanup failures.
-      debugPrint('RefreshingAuthTokenProvider.clearSession: signOut failed: $e');
+      debugPrint(
+        'RefreshingAuthTokenProvider.clearSession: signOut failed: $e',
+      );
     } finally {
       await _storage.clear();
     }

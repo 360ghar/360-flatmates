@@ -240,7 +240,9 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
         widget.conversationId,
       );
     } catch (e) {
-      debugPrint('ChatThreadPage._submitQnA failed for conversation ${widget.conversationId}: $e');
+      debugPrint(
+        'ChatThreadPage._submitQnA failed for conversation ${widget.conversationId}: $e',
+      );
     }
     _markQnANudgeDismissed();
     if (mounted) {

@@ -330,6 +330,7 @@
   "profilePhotoTitle": "Add your photos",
   "profilePhotoSubtitle": "A great photo helps you get more matches.",
   "profilePhotoNudge": "Profiles with 3+ photos get 4x more matches!",
+  "profilePhotoMinimumRequired": "Add at least one photo to continue.",
   "addPhotoCta": "Add photo",
   "quizProgress": "{answered} of {total} answered",
   "@quizProgress": {

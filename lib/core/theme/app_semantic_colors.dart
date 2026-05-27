@@ -115,6 +115,16 @@ abstract final class AppSemanticColors {
   static const Color compatMedium = warning;
   static const Color compatLow = error;
 
+  // Map marker palette (discover map view)
+  static const Color mapMarkerRoom = Color(0xFFFF9800);
+  static const Color mapMarkerProperty = Color(0xFF2196F3);
+  static const Color mapMarkerCluster = Color(0xFF673AB7);
+
+  // Swipe card fallback gradient (when no profile photo is present)
+  static const Color swipeCardFallbackStart = Color(0xFFD4A574);
+  static const Color swipeCardFallbackMid = accent;
+  static const Color swipeCardFallbackEnd = Color(0xFF8B4513);
+
   // Frost / glassmorphism tokens
   static const Color frostOverlayLight = Color(0xE0F4F3EE);
   static const Color frostOverlayDark = Color(0xE01A1612);

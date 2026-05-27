@@ -747,7 +747,7 @@ The backend is an existing FastAPI monolith backed by PostgreSQL. The flatmate p
 
 - **WhatsApp share card** — Generated on-device using RepaintBoundary with three templates: original card, WhatsApp square (1080x1080), Instagram story (1080x1920). Includes QR code with deep link.
 
-- **Real-time chat** — Supabase Realtime subscription on `chat_messages` table filtered by `conversation_id`. Falls back to 5-second polling if realtime unavailable.
+- **Real-time chat** — Supabase Realtime subscription on `user_messages` table filtered by `conversation_id`. Falls back to SSE event-driven refetch (subscribes to `new_message` events on `/flatmates/sse` and refetches the message list) when realtime is unavailable. No HTTP polling.
 
 - **Auth flow** — Supabase Phone Auth for OTP. Access token stored in FlutterSecureStorage. Dio auth interceptor handles Bearer token injection and 401 refresh with request queuing.
 

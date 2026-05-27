@@ -169,32 +169,41 @@ void main() {
       expect(tokenProvider.refreshCallCount, 3);
     });
 
-    test('does not clear session on transient refresh failure during 401 retry', () async {
-      final (:dio, :tokenProvider, :adapter) = createTestDio(
-        initialToken: 'stale-token',
-      );
+    test(
+      'does not clear session on transient refresh failure during 401 retry',
+      () async {
+        final (:dio, :tokenProvider, :adapter) = createTestDio(
+          initialToken: 'stale-token',
+        );
 
-      // First request succeeds (with stale token attached on initial onRequest).
-      // Backend rejects with 401; onError tries to refresh; refresh throws
-      // TransientAuthRefreshException; the interceptor must NOT clear the
-      // session and MUST surface a non-401 DioException to the caller.
-      adapter.addResponse('{"error": "unauthorized"}', 401);
-      // Call #1 is onRequest (attaches stale-token); call #2 is the refresh
-      // attempt inside onError — that's the one we want to fail transiently.
-      tokenProvider.throwTransientOnCall(2);
+        // First request succeeds (with stale token attached on initial onRequest).
+        // Backend rejects with 401; onError tries to refresh; refresh throws
+        // TransientAuthRefreshException; the interceptor must NOT clear the
+        // session and MUST surface a non-401 DioException to the caller.
+        adapter.addResponse('{"error": "unauthorized"}', 401);
+        // Call #1 is onRequest (attaches stale-token); call #2 is the refresh
+        // attempt inside onError — that's the one we want to fail transiently.
+        tokenProvider.throwTransientOnCall(2);
 
-      Object? caughtError;
-      try {
-        await dio.get('/protected');
-      } catch (e) {
-        caughtError = e;
-      }
+        Object? caughtError;
+        try {
+          await dio.get('/protected');
+        } catch (e) {
+          caughtError = e;
+        }
 
-      expect(caughtError, isA<DioException>());
-      expect((caughtError as DioException).type, DioExceptionType.connectionError);
-      expect(tokenProvider.sessionCleared, isFalse,
-          reason: 'Transient refresh failure must not force logout');
-    });
+        expect(caughtError, isA<DioException>());
+        expect(
+          (caughtError as DioException).type,
+          DioExceptionType.connectionError,
+        );
+        expect(
+          tokenProvider.sessionCleared,
+          isFalse,
+          reason: 'Transient refresh failure must not force logout',
+        );
+      },
+    );
 
     test('_failQueue rejects queued handlers with DioException', () async {
       // Verify the fix: when token is null, failQueue should reject

@@ -31,6 +31,9 @@ extension _SwipeDeckActions on _SwipeDeckPageState {
 
     HapticFeedback.lightImpact();
 
+    await ref.read(swipeQuotaControllerProvider.notifier).ensureReady();
+    if (!mounted) return;
+
     final quota = ref.read(swipeQuotaControllerProvider);
     if (action == 'super_like' && quota.superLikesRemaining <= 0) {
       final locale = AppLocalizations.of(context);

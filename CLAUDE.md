@@ -72,7 +72,7 @@ lib/
     onboarding/                 → multi-step state machine with draft persistence [domain]
     discover/                   → listing feed + map + search filters [application/data/domain/presentation+widgets]
     swipe/                      → Tinder-like card deck with deal-breaker filtering [presentation+widgets]
-    chats/                      → conversations + messages (polling + optimistic send) [application/domain/presentation+widgets]
+    chats/                      → conversations + messages (Supabase realtime + SSE refetch fallback + optimistic send) [application/domain/presentation+widgets]
     listings/                   → multi-step listing builder + manage [application/domain/presentation+widgets]
     visits/                     → schedule/confirm/reschedule visits
     notifications/              → notification list
@@ -162,7 +162,7 @@ spacing, border radii, component behavior, and per-screen layout specs.
 - `FlatmatesEndpoints` centralizes all API path constants — no hardcoded backend paths.
 - Image uploads go to Supabase Storage via `ImageUploadService` (supports photos and video tours up to 50MB).
 - Compatibility scoring runs client-side in `core/compatibility/` with 6 weighted dimensions.
-- Chat uses `MessagesController` (FamilyNotifier with 5s polling + optimistic message sending), not raw FutureProvider.
+- Chat uses Supabase realtime (`user_messages` table, filtered by `conversation_id`) for the open thread, with an SSE event-driven refetch fallback when realtime drops. `MessagesController` is a `FamilyNotifier` that handles optimistic message sending; live message arrival flows through `messagesStreamProvider`, not the controller. No HTTP polling.
 - Banned patterns (enforced by `scripts/banned_patterns.sh`): no `error.toString()` in pages, no `apiClientProvider` in pages (use a repository), no `Supabase.instance` in pages, no raw `Image.network` in features (use `FlatmatesNetworkImage`), page files under 500 lines.
 
 ## iOS Simulator Browser Preview

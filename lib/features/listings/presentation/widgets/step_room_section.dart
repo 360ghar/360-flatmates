@@ -229,7 +229,7 @@ class _StepRoomSectionState extends ConsumerState<StepRoomSection> {
         if (_showPhotoTips) ...[
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.edgeLg,
             decoration: BoxDecoration(
               color: AppSemanticColors.coralSoftFor(
                 theme.brightness,
@@ -312,7 +312,7 @@ class _StepRoomSectionState extends ConsumerState<StepRoomSection> {
                         onTap: () => widget.onRemovePhoto(e.key),
                         customBorder: const CircleBorder(),
                         child: const Padding(
-                          padding: EdgeInsets.all(6),
+                          padding: AppSpacing.edgeSm,
                           child: Icon(
                             Icons.close,
                             color: Colors.white,
@@ -419,7 +419,7 @@ class _StepRoomSectionState extends ConsumerState<StepRoomSection> {
         if (widget.videoUploading)
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: AppSpacing.edgeLg,
               child: CircularProgressIndicator(),
             ),
           )

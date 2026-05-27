@@ -13,8 +13,8 @@ class AnalyticsService {
     required FirebaseAnalytics? analytics,
     required FirebaseCrashlytics? crashlytics,
     required this.isEnabled,
-  })  : _analytics = analytics,
-        _crashlytics = crashlytics;
+  }) : _analytics = analytics,
+       _crashlytics = crashlytics;
 
   final FirebaseAnalytics? _analytics;
   final FirebaseCrashlytics? _crashlytics;
@@ -22,9 +22,9 @@ class AnalyticsService {
 
   /// Creates a disabled instance without touching any Firebase singletons.
   AnalyticsService._disabled()
-      : _analytics = null,
-        _crashlytics = null,
-        isEnabled = false;
+    : _analytics = null,
+      _crashlytics = null,
+      isEnabled = false;
 
   static Future<AnalyticsService> create({required bool firebaseReady}) async {
     if (!firebaseReady) {
@@ -88,26 +88,21 @@ class AnalyticsService {
 
   // Convenience methods for required events
 
-  Future<void> logAppOpen() =>
-      logEvent(name: AnalyticsEvents.appOpen);
+  Future<void> logAppOpen() => logEvent(name: AnalyticsEvents.appOpen);
 
-  Future<void> logLogin() =>
-      logEvent(name: AnalyticsEvents.authCompleted);
+  Future<void> logLogin() => logEvent(name: AnalyticsEvents.authCompleted);
 
   Future<void> logSignup() =>
       logEvent(name: AnalyticsEvents.onboardingCompleted);
 
-  Future<void> logLogout() =>
-      logEvent(name: AnalyticsEvents.userSignedOut);
+  Future<void> logLogout() => logEvent(name: AnalyticsEvents.userSignedOut);
 
   Future<void> logNotificationReceived() =>
       logEvent(name: 'notification_received');
 
-  Future<void> logNotificationOpened() =>
-      logEvent(name: 'notification_opened');
+  Future<void> logNotificationOpened() => logEvent(name: 'notification_opened');
 
-  Future<void> logForceUpdateShown() =>
-      logEvent(name: 'force_update_shown');
+  Future<void> logForceUpdateShown() => logEvent(name: 'force_update_shown');
 
   Future<void> logOptionalUpdateShown() =>
       logEvent(name: 'optional_update_shown');
@@ -117,7 +112,11 @@ class AnalyticsService {
 
   // -- Crashlytics --
 
-  Future<void> recordError(Object error, StackTrace stack, {bool fatal = false}) async {
+  Future<void> recordError(
+    Object error,
+    StackTrace stack, {
+    bool fatal = false,
+  }) async {
     if (!isEnabled) return;
     try {
       await _crashlytics!.recordError(error, stack, fatal: fatal);

@@ -8,7 +8,6 @@ import 'package:latlong2/latlong.dart';
 
 import '../../core/map/map_controller.dart';
 import '../../core/theme/app_motion.dart';
-import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_semantic_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/debouncer.dart';
@@ -23,9 +22,9 @@ import '../shared/presentation/flatmates_error_state.dart';
 import '../shared/presentation/flatmates_skeleton.dart';
 import 'application/discover_feed_controller.dart';
 import 'discover_repository.dart';
-import 'presentation/widgets/discover_listing_card.dart';
 import 'presentation/widgets/map_filter_bar.dart';
 import 'presentation/widgets/map_listing_sheets.dart';
+import 'presentation/widgets/map_listings_bottom_sheet.dart';
 import 'presentation/widgets/map_marker_builder.dart';
 
 class MapViewPage extends ConsumerStatefulWidget {
@@ -127,22 +126,19 @@ class _MapViewPageState extends ConsumerState<MapViewPage>
     );
 
     // Re-center map when the user picks a new location.
-    ref.listen<LocationState>(
-      locationControllerProvider,
-      (prev, next) {
-        final prevLoc = prev?.selectedLocation;
-        final nextLoc = next.selectedLocation;
-        if (nextLoc != null &&
-            (prevLoc?.latitude != nextLoc.latitude ||
-                prevLoc?.longitude != nextLoc.longitude)) {
-          // Preserve the user's current zoom level and animate smoothly.
-          _flatmatesMapController.animateTo(
-            LatLng(nextLoc.latitude, nextLoc.longitude),
-            zoom: _flatmatesMapController.zoom,
-          );
-        }
-      },
-    );
+    ref.listen<LocationState>(locationControllerProvider, (prev, next) {
+      final prevLoc = prev?.selectedLocation;
+      final nextLoc = next.selectedLocation;
+      if (nextLoc != null &&
+          (prevLoc?.latitude != nextLoc.latitude ||
+              prevLoc?.longitude != nextLoc.longitude)) {
+        // Preserve the user's current zoom level and animate smoothly.
+        _flatmatesMapController.animateTo(
+          LatLng(nextLoc.latitude, nextLoc.longitude),
+          zoom: _flatmatesMapController.zoom,
+        );
+      }
+    });
 
     final locale = AppLocalizations.of(context);
     final theme = Theme.of(context);
@@ -264,143 +260,11 @@ class _MapViewPageState extends ConsumerState<MapViewPage>
           ),
 
           // Bottom draggable sheet with listing cards
-          DraggableScrollableSheet(
-            initialChildSize: 0.35,
-            minChildSize: 0.08,
-            maxChildSize: 0.45,
-            snap: true,
-            snapSizes: const [0.08, 0.35, 0.45],
-            builder: (context, scrollController) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: frostOverlayColor,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(AppRadius.card),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom + 76,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Drag handle
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.sm,
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.2,
-                                ),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Listing count
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg,
-                            0,
-                            AppSpacing.lg,
-                            AppSpacing.sm,
-                          ),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              locale.clusterListingsCount(filtered.length),
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppSemanticColors.textPrimaryFor(
-                                  theme.brightness,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Horizontal card list — fixed height, own scroll
-                        SizedBox(
-                          height: 180,
-                          child: filtered.isEmpty
-                              ? FlatmatesEmptyState(
-                                  title: locale.noListingsMatchFilters,
-                                  icon: Icons.search_off_rounded,
-                                )
-                              : NotificationListener<ScrollNotification>(
-                                  onNotification: (notification) {
-                                    if (notification
-                                            is ScrollUpdateNotification ||
-                                        notification is ScrollEndNotification) {
-                                      final offset =
-                                          _cardScrollController.offset;
-                                      final itemWidth = 130.0 + AppSpacing.sm;
-                                      final index = (offset / itemWidth)
-                                          .round()
-                                          .clamp(0, filtered.length - 1);
-                                      final visibleItem = filtered[index];
-                                      final currentSelected = ref.read(
-                                        selectedPropertyProvider,
-                                      );
-                                      if (currentSelected?.id !=
-                                          visibleItem.id) {
-                                        ref
-                                                .read(
-                                                  selectedPropertyProvider
-                                                      .notifier,
-                                                )
-                                                .state =
-                                            visibleItem;
-                                      }
-                                    }
-                                    return false;
-                                  },
-                                  child: ListView.builder(
-                                    controller: _cardScrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.md,
-                                    ),
-                                    itemCount: filtered.length,
-                                    itemBuilder: (context, index) {
-                                      final item = filtered[index];
-                                      final selectedProperty = ref.watch(
-                                        selectedPropertyProvider,
-                                      );
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: AppSpacing.sm,
-                                        ),
-                                        child: SizedBox(
-                                          width: 130,
-                                          child: DiscoverListingCard(
-                                            item: item,
-                                            isSelected:
-                                                item.id == selectedProperty?.id,
-                                            onTap: () => context.push(
-                                              '/flat-details/${item.id}',
-                                            ),
-                                            onLike: () => _likeListing(item),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+          MapListingsBottomSheet(
+            listings: filtered,
+            scrollController: _cardScrollController,
+            onTap: (item) => context.push('/flat-details/${item.id}'),
+            onLike: _likeListing,
           ),
         ],
       ),

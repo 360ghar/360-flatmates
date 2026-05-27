@@ -186,12 +186,7 @@ class _ResilientImageState extends State<_ResilientImage> {
 }
 
 class _Placeholder extends StatelessWidget {
-  const _Placeholder({
-    this.width,
-    this.height,
-    this.borderRadius,
-    this.color,
-  });
+  const _Placeholder({this.width, this.height, this.borderRadius, this.color});
 
   final double? width;
   final double? height;

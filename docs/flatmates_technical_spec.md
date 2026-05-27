@@ -159,7 +159,7 @@ This implementation establishes the platform foundation, the first usable produc
 - Flatmate profile editing
 - Listing discovery through real property APIs
 - Listing-like to chat creation
-- Two-user conversations with Supabase Realtime plus 5-second API polling fallback, photo sharing, icebreaker chips, read receipts, and report/block/unmatch
+- Two-user conversations with Supabase Realtime (primary) and SSE-driven refetch fallback when realtime is unavailable, photo sharing, icebreaker chips, read receipts, and report/block/unmatch
 - Flatmate visit request, confirmation, reschedule, and cancellation
 - 8-step listing builder (location, society, room, photos, flat, costs, about, review)
 - Manage listing page with status badges, share, and boost

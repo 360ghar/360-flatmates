@@ -112,8 +112,9 @@ class FlatDetailsCarousel extends StatelessWidget {
                     _FrostedIconButton(
                       key: const Key('flat_back_button'),
                       icon: Icons.arrow_back_rounded,
-                      tooltip: MaterialLocalizations.of(context)
-                          .backButtonTooltip,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).backButtonTooltip,
                       onTap: onBack,
                     ),
                     Row(

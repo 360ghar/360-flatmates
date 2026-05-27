@@ -164,14 +164,27 @@ class _ProfilePhotoPageState extends ConsumerState<ProfilePhotoPage> {
             const SizedBox(height: AppSpacing.screen + AppSpacing.lg),
             if (_uploading)
               const Center(child: FlatmatesSkeleton.card())
-            else
+            else ...[
               FlatmatesButton(
                 key: const Key('onboarding_photo_next'),
                 label: locale.onboardingNext,
                 fullWidth: true,
-                onPressed: () => widget.onComplete(_photoUrls),
+                onPressed: _photoUrls.isEmpty
+                    ? null
+                    : () => widget.onComplete(_photoUrls),
                 icon: Icons.arrow_forward_rounded,
               ),
+              if (_photoUrls.isEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  locale.profilePhotoMinimumRequired,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppSemanticColors.textSecondaryFor(theme.brightness),
+                  ),
+                ),
+              ],
+            ],
           ],
         ),
       ),
@@ -206,7 +219,7 @@ class _PhotoTile extends StatelessWidget {
               onTap: onRemove,
               customBorder: const CircleBorder(),
               child: const Padding(
-                padding: EdgeInsets.all(6),
+                padding: AppSpacing.edgeSm,
                 child: Icon(Icons.close, color: Colors.white, size: 16),
               ),
             ),

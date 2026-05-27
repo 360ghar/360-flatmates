@@ -75,10 +75,7 @@ final class AuthRepository {
   }
 
   Future<void> sendPasswordResetOtp(String phone) async {
-    await _supabase.auth.signInWithOtp(
-      phone: phone,
-      shouldCreateUser: false,
-    );
+    await _supabase.auth.signInWithOtp(phone: phone, shouldCreateUser: false);
   }
 
   Future<void> verifyPasswordResetOtp({
@@ -92,7 +89,9 @@ final class AuthRepository {
     );
     final session = response.session ?? _supabase.auth.currentSession;
     if (session == null) {
-      throw StateError('Session missing after password reset OTP verification.');
+      throw StateError(
+        'Session missing after password reset OTP verification.',
+      );
     }
     await _tokenStorage.save(session.accessToken);
   }

@@ -13,7 +13,7 @@ class ProfileRepository {
     required Map<String, dynamic> payload,
   }) async {
     final response = await _ref
-        .watch(apiClientProvider)
+        .read(apiClientProvider)
         .put(FlatmatesEndpoints.flatmatesProfile, data: payload);
     final responseData = response.data;
     return FlatmatesProfileModel.fromJson(
@@ -23,7 +23,7 @@ class ProfileRepository {
 
   Future<FlatmatesProfileModel> fetchProfile() async {
     final response = await _ref
-        .watch(apiClientProvider)
+        .read(apiClientProvider)
         .get(FlatmatesEndpoints.flatmatesProfile);
     final responseData = response.data;
     return FlatmatesProfileModel.fromJson(

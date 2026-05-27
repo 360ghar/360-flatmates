@@ -10,6 +10,7 @@ import 'package:sms_autofill/sms_autofill.dart';
 
 import '../auth_controller.dart';
 import '../password_reset_controller.dart';
+import '../../../core/errors/l10n_bridge.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../shared/presentation/components.dart';
@@ -33,8 +34,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
   String _currentOtp = '';
   bool _isListening = false;
 
-  String get _phone =>
-      ref.read(pendingPhoneProvider) ?? '';
+  String get _phone => ref.read(pendingPhoneProvider) ?? '';
 
   static const _resendCooldownSeconds = 60;
   int _countdownSeconds = _resendCooldownSeconds;
@@ -80,7 +80,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
       }
     } catch (e) {
       debugPrint(
-          'ResetPasswordPage._startListeningForSms: SMS auto-fill unavailable: $e');
+        'ResetPasswordPage._startListeningForSms: SMS auto-fill unavailable: $e',
+      );
     }
   }
 
@@ -171,7 +172,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
     if (!mounted) return;
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).passwordResetSuccess)),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).passwordResetSuccess),
+        ),
       );
       context.go('/login');
     }
@@ -190,13 +193,17 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(locale.resetPasswordTitle,
-              style: theme.textTheme.headlineMedium),
+          Text(
+            locale.resetPasswordTitle,
+            style: theme.textTheme.headlineMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
-          Text(locale.resetPasswordSubtitle(_phone),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppSemanticColors.textSecondaryFor(theme.brightness),
-              )),
+          Text(
+            locale.resetPasswordSubtitle(_phone),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppSemanticColors.textSecondaryFor(theme.brightness),
+            ),
+          ),
           if (_isListening) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
@@ -227,9 +234,7 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(digitCount, (index) {
                   return Padding(
-                    padding: EdgeInsets.only(
-                      right: index < gapCount ? gap : 0,
-                    ),
+                    padding: EdgeInsets.only(right: index < gapCount ? gap : 0),
                     child: SizedBox(
                       width: boxWidth,
                       height: boxWidth + AppSpacing.sm,
@@ -330,7 +335,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
                 ),
                 if (_passwordController.text.isNotEmpty &&
                     _confirmPasswordController.text.isNotEmpty &&
-                    _passwordController.text != _confirmPasswordController.text) ...[
+                    _passwordController.text !=
+                        _confirmPasswordController.text) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     locale.passwordsDoNotMatch,
@@ -338,10 +344,10 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
                   ),
                 ],
                 if (resetState.step == PasswordResetStep.error &&
-                    resetState.errorMessage != null) ...[
+                    resetState.failure != null) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    resetState.errorMessage!,
+                    resetState.failure!.userMessage(locale.toUserMessageL10n()),
                     style: TextStyle(color: AppSemanticColors.error),
                   ),
                 ],
@@ -357,7 +363,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
                     locale.resendOtpCountdown(_countdownSeconds),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppSemanticColors.textSecondaryFor(
-                          theme.brightness),
+                        theme.brightness,
+                      ),
                     ),
                   )
                 : FlatmatesButton.tertiary(

@@ -141,7 +141,9 @@ class _LocationPickerModalState extends ConsumerState<LocationPickerModal> {
               }
             }
           } catch (e) {
-            debugPrint('LocationPickerModal._useCurrentLocation: geocoding failed: $e');
+            debugPrint(
+              'LocationPickerModal._useCurrentLocation: geocoding failed: $e',
+            );
           }
           if (!mounted) return;
           widget.onLocationSelected(

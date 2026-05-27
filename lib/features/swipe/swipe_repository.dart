@@ -183,7 +183,7 @@ class SwipeRepository {
     }
 
     final response = await _ref
-        .watch(apiClientProvider)
+        .read(apiClientProvider)
         .get(
           FlatmatesEndpoints.flatmatesProfiles,
           queryParameters: queryParams,

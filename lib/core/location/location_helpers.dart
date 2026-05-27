@@ -75,7 +75,9 @@ detectCurrentLocation({required List<CatalogOption> catalogCities}) async {
   final cities = resolveCities(catalogCities);
   // Only consider active (non-coming-soon) cities for location matching.
   final activeCities = cities.where((c) => !c.comingSoon).toList();
-  debugPrint('LocationHelpers: using ${activeCities.length} active catalog cities (skipping ${cities.length - activeCities.length} coming-soon)');
+  debugPrint(
+    'LocationHelpers: using ${activeCities.length} active catalog cities (skipping ${cities.length - activeCities.length} coming-soon)',
+  );
 
   CatalogOption? closest;
   double minDist = double.infinity;

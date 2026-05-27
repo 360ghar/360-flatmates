@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_semantic_colors.dart';
@@ -139,6 +140,18 @@ class CompatibilityEngine {
     const values = ['early_bird', 'flexible', 'night_owl'];
     final ai = values.indexOf(a);
     final bi = values.indexOf(b);
+    if (ai < 0 || bi < 0) {
+      _warnUnknownEnum('sleep_schedule', a, b, values);
+      return CompatibilityDimension(
+        key: 'sleep_schedule',
+        weight: 0.20,
+        userValue: a,
+        peerValue: b,
+        score: 0,
+        isMatch: false,
+        summary: 'Sleep habits',
+      );
+    }
     double score;
     if (ai == bi) {
       score = 100;
@@ -162,6 +175,18 @@ class CompatibilityEngine {
     const values = ['minimal', 'tidy', 'spotless'];
     final ai = values.indexOf(a);
     final bi = values.indexOf(b);
+    if (ai < 0 || bi < 0) {
+      _warnUnknownEnum('cleanliness', a, b, values);
+      return CompatibilityDimension(
+        key: 'cleanliness',
+        weight: 0.20,
+        userValue: a,
+        peerValue: b,
+        score: 0,
+        isMatch: false,
+        summary: 'Cleanliness',
+      );
+    }
     final gap = (ai - bi).abs();
     final score = switch (gap) {
       0 => 100.0,
@@ -275,6 +300,18 @@ class CompatibilityEngine {
     const values = ['no_overnight_guests', 'occasional_ok', 'open_house'];
     final ai = values.indexOf(a);
     final bi = values.indexOf(b);
+    if (ai < 0 || bi < 0) {
+      _warnUnknownEnum('guests_policy', a, b, values);
+      return CompatibilityDimension(
+        key: 'guests_policy',
+        weight: 0.15,
+        userValue: a,
+        peerValue: b,
+        score: 0,
+        isMatch: false,
+        summary: 'Guest policy',
+      );
+    }
     final gap = (ai - bi).abs();
     final score = switch (gap) {
       0 => 100.0,
@@ -289,6 +326,19 @@ class CompatibilityEngine {
       score: score,
       isMatch: gap <= 1,
       summary: 'Guest policy',
+    );
+  }
+
+  static void _warnUnknownEnum(
+    String key,
+    String a,
+    String b,
+    List<String> known,
+  ) {
+    if (kReleaseMode) return;
+    debugPrint(
+      '[CompatibilityEngine] Unknown $key value(s): a="$a" b="$b". '
+      'Expected one of $known. Scoring as 0.',
     );
   }
 

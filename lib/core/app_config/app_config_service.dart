@@ -7,11 +7,7 @@ import '../analytics/analytics_service.dart';
 import '../config/endpoints.dart';
 import '../providers.dart';
 
-enum AppUpdateStatus {
-  upToDate,
-  optionalUpdate,
-  forceUpdate,
-}
+enum AppUpdateStatus { upToDate, optionalUpdate, forceUpdate }
 
 class RemoteAppConfig {
   const RemoteAppConfig({
@@ -44,8 +40,7 @@ class RemoteAppConfig {
       updateUrl: json['update_url'] as String? ?? '',
       maintenanceEnabled: json['maintenance_enabled'] as bool? ?? false,
       maintenanceMessage: json['maintenance_message'] as String? ?? '',
-      optionalUpdateMessage:
-          json['optional_update_message'] as String? ?? '',
+      optionalUpdateMessage: json['optional_update_message'] as String? ?? '',
     );
   }
 }
@@ -58,11 +53,11 @@ class AppConfigService {
 
   Future<RemoteAppConfig?> fetchConfig() async {
     try {
-      final response = await ref.read(apiClientProvider).get(
+      final response = await ref
+          .read(apiClientProvider)
+          .get(
             FlatmatesEndpoints.appConfig,
-            queryParameters: {
-              'platform': defaultTargetPlatform.name,
-            },
+            queryParameters: {'platform': defaultTargetPlatform.name},
             // 404 is expected when the endpoint isn't deployed yet — accept
             // it as a valid response so Dio doesn't throw and pollute logs.
             options: Options(

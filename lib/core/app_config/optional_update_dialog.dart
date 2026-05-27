@@ -39,7 +39,9 @@ class OptionalUpdateDialog extends StatelessWidget {
     final locale = AppLocalizations.of(context);
     return AlertDialog(
       title: Text(locale.optionalUpdateTitle),
-      content: Text(message.isNotEmpty ? message : locale.optionalUpdateMessage),
+      content: Text(
+        message.isNotEmpty ? message : locale.optionalUpdateMessage,
+      ),
       actions: [
         TextButton(
           onPressed: () {

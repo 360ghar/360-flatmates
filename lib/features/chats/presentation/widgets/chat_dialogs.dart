@@ -170,7 +170,9 @@ class ChatDialogs {
         );
       }
     } catch (e) {
-      debugPrint('ChatDialogs.showUnmatchDialog failed for conversation $conversationId: $e');
+      debugPrint(
+        'ChatDialogs.showUnmatchDialog failed for conversation $conversationId: $e',
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,

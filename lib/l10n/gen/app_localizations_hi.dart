@@ -697,6 +697,10 @@ class AppLocalizationsHi extends AppLocalizations {
       '3+ फ़ोटो वाली प्रोफ़ाइल्स को 4 गुना ज़्यादा मैच मिलते हैं!';
 
   @override
+  String get profilePhotoMinimumRequired =>
+      'आगे बढ़ने के लिए कम से कम एक फ़ोटो जोड़ें।';
+
+  @override
   String get addPhotoCta => 'फ़ोटो जोड़ें';
 
   @override

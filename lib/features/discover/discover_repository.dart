@@ -353,10 +353,12 @@ class DiscoverRepository {
   }
 
   Future<void> reportListing(int propertyId, String reason) async {
-    await _ref.read(apiClientProvider).post(
-      FlatmatesEndpoints.reports,
-      data: {'reported_property_id': propertyId, 'reason': reason},
-    );
+    await _ref
+        .read(apiClientProvider)
+        .post(
+          FlatmatesEndpoints.reports,
+          data: {'reported_property_id': propertyId, 'reason': reason},
+        );
   }
 }
 

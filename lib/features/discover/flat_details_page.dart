@@ -468,13 +468,17 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
           .reportListing(widget.listingId, selected);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).reportListingSubmitted)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).reportListingSubmitted),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context).actionFailedRetry)),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).actionFailedRetry),
+          ),
         );
       }
     }

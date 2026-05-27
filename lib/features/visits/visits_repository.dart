@@ -123,7 +123,9 @@ class VisitsRepository {
       );
     } catch (e) {
       // Visit was scheduled; notification is best-effort
-      debugPrint('VisitsRepository.scheduleVisitAndNotify: chat notification failed: $e');
+      debugPrint(
+        'VisitsRepository.scheduleVisitAndNotify: chat notification failed: $e',
+      );
     }
     return visitId;
   }

@@ -160,6 +160,12 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
 
   void _triggerFlyOff({required bool superLike}) {
     final quota = ref.read(swipeQuotaControllerProvider);
+    if (!quota.isReady) {
+      // Quota still hydrating from prefs. Snap back rather than letting the
+      // user swipe past yesterday's persisted count.
+      _triggerSnapBack();
+      return;
+    }
     if (superLike && quota.superLikesRemaining <= 0) {
       if (mounted) {
         final locale = AppLocalizations.of(context);
@@ -221,6 +227,8 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
   Future<void> _processSwipeAction(String action) async {
     _recordProfileView();
     final locale = AppLocalizations.of(context);
+    await ref.read(swipeQuotaControllerProvider.notifier).ensureReady();
+    if (!mounted) return;
     final quota = ref.read(swipeQuotaControllerProvider);
 
     if (action == 'super_like' && quota.superLikesRemaining <= 0) {
@@ -320,7 +328,11 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
             durationSeconds: sample.durationSeconds,
             scrollDepthPercent: 100,
           )
-          .catchError((_) {}),
+          .catchError((Object e, StackTrace st) {
+            debugPrint(
+              'SwipeDeckPage.recordProfileView failed for ${sample.profileId}: $e',
+            );
+          }),
     );
   }
 

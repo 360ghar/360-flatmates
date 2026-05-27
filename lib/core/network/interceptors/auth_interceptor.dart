@@ -88,28 +88,43 @@ final class AuthInterceptor extends Interceptor {
           _processQueue(newToken);
           return;
         }
+        // No new token — session is genuinely gone. Clear and surface a 401.
         final capturedCompleter = _refreshCompleter!;
         capturedCompleter.complete(false);
         _refreshCompleter = null;
         await _tokenProvider.clearSession();
         _failQueue(err.stackTrace);
-      } catch (e) {
+        handler.next(
+          DioException(
+            requestOptions: err.requestOptions,
+            error: 'Session expired. Please sign in again.',
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: err.requestOptions,
+              statusCode: 401,
+            ),
+            stackTrace: err.stackTrace,
+          ),
+        );
+      } catch (e, st) {
+        // The retry itself failed (network or non-401 server error). Don't
+        // pretend this is a session-expiry; forward the real cause so the
+        // caller can render the actual error.
         _refreshCompleter?.complete(false);
         _refreshCompleter = null;
-        _failQueue(e is DioException ? e.stackTrace : null);
+        _failQueue(e is DioException ? e.stackTrace : st);
+        if (e is DioException) {
+          handler.next(e);
+        } else {
+          handler.next(
+            DioException(
+              requestOptions: err.requestOptions,
+              error: e,
+              stackTrace: st,
+            ),
+          );
+        }
       }
-      handler.next(
-        DioException(
-          requestOptions: err.requestOptions,
-          error: 'Session expired. Please sign in again.',
-          type: DioExceptionType.badResponse,
-          response: Response(
-            requestOptions: err.requestOptions,
-            statusCode: 401,
-          ),
-          stackTrace: err.stackTrace,
-        ),
-      );
     } else {
       handler.next(err);
     }

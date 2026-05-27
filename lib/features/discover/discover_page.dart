@@ -72,12 +72,14 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       ref.read(locationControllerProvider.notifier).selectLocation(location);
       final currentRadiusKm =
           ref.read(discoverFeedControllerProvider).filters.radiusKm ??
-              DiscoverFeedController.defaultLocationRadiusKm;
-      ref.read(discoverFeedControllerProvider.notifier).updateLocationFilter(
-        latitude: location.latitude,
-        longitude: location.longitude,
-        radiusKm: currentRadiusKm,
-      );
+          DiscoverFeedController.defaultLocationRadiusKm;
+      ref
+          .read(discoverFeedControllerProvider.notifier)
+          .updateLocationFilter(
+            latitude: location.latitude,
+            longitude: location.longitude,
+            radiusKm: currentRadiusKm,
+          );
     }
   }
 

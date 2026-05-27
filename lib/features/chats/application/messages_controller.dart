@@ -108,7 +108,9 @@ class MessagesController extends FamilyNotifier<MessagesState, int> {
       final repo = ref.read(chatsRepositoryProvider);
       await repo.markMessagesAsRead(conversationId);
     } catch (e) {
-      debugPrint('MessagesController.markAsRead failed for conversation $conversationId: $e');
+      debugPrint(
+        'MessagesController.markAsRead failed for conversation $conversationId: $e',
+      );
     }
   }
 }

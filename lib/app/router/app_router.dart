@@ -27,7 +27,7 @@ import '../../features/discover/map_view_page.dart';
 import '../../features/discover/search_filters_page.dart';
 import '../../features/listings/create_listing_page.dart';
 import '../../features/listings/listing_under_review_page.dart';
-import '../../features/listings/manage_listing_page.dart';
+import '../../features/listings/manage_listing_page.dart' as listings;
 import '../../features/notifications/notifications_page.dart';
 import '../../features/onboarding/onboarding_page.dart';
 import '../../features/onboarding/waitlist_page.dart';
@@ -174,9 +174,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/forgot-password',
-        builder: (context, state) => ForgotPasswordPage(
-          phone: state.uri.queryParameters['phone'],
-        ),
+        builder: (context, state) =>
+            ForgotPasswordPage(phone: state.uri.queryParameters['phone']),
       ),
       GoRoute(
         path: '/reset-password',
@@ -386,7 +385,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/manage-listings',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ManageListingPage(),
+        builder: (context, state) => const listings.ManageListingPage(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -492,6 +491,16 @@ class _ModeTab2Switcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const MapViewPage();
+    final mode = ref.watch(
+      bootstrapControllerProvider.select((v) => v.valueOrNull?.profile.mode),
+    );
+    // Keyed by mode so the branch's State is rebuilt cleanly when the
+    // user switches seeker_mode mid-session.
+    if (mode == 'room_poster') {
+      return const listings.ManageListingPage(
+        key: ValueKey('tab2_room_poster'),
+      );
+    }
+    return const MapViewPage(key: ValueKey('tab2_map'));
   }
 }

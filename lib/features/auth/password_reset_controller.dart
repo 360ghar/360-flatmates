@@ -1,6 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/errors/app_failure.dart';
+import '../../core/errors/error_presenter.dart';
 import 'auth_controller.dart';
 import 'data/auth_repository.dart';
 
@@ -9,24 +12,24 @@ enum PasswordResetStep { idle, sendingOtp, otpSent, verifying, success, error }
 class PasswordResetState {
   final PasswordResetStep step;
   final String? phone;
-  final String? errorMessage;
+  final AppFailure? failure;
 
   const PasswordResetState({
     this.step = PasswordResetStep.idle,
     this.phone,
-    this.errorMessage,
+    this.failure,
   });
 
   PasswordResetState copyWith({
     PasswordResetStep? step,
     String? phone,
-    String? errorMessage,
-  }) =>
-      PasswordResetState(
-        step: step ?? this.step,
-        phone: phone ?? this.phone,
-        errorMessage: errorMessage,
-      );
+    AppFailure? failure,
+    bool clearFailure = false,
+  }) => PasswordResetState(
+    step: step ?? this.step,
+    phone: phone ?? this.phone,
+    failure: clearFailure ? null : (failure ?? this.failure),
+  );
 }
 
 class PasswordResetController extends Notifier<PasswordResetState> {
@@ -37,7 +40,10 @@ class PasswordResetController extends Notifier<PasswordResetState> {
 
   void clearError() {
     if (state.step == PasswordResetStep.error) {
-      state = state.copyWith(step: PasswordResetStep.otpSent);
+      state = state.copyWith(
+        step: PasswordResetStep.otpSent,
+        clearFailure: true,
+      );
     }
   }
 
@@ -48,16 +54,14 @@ class PasswordResetController extends Notifier<PasswordResetState> {
     );
     try {
       await _repository.sendPasswordResetOtp(phone);
-      state = PasswordResetState(
-        step: PasswordResetStep.otpSent,
-        phone: phone,
-      );
-    } catch (e) {
-      debugPrint('PasswordResetController.sendOtp failed: $e');
+      state = PasswordResetState(step: PasswordResetStep.otpSent, phone: phone);
+    } catch (e, st) {
+      final failure = _toFailure(e, st);
+      debugPrint('PasswordResetController.sendOtp failed: ${failure.label}');
       state = PasswordResetState(
         step: PasswordResetStep.error,
         phone: phone,
-        errorMessage: e is Exception ? e.toString() : 'Something went wrong',
+        failure: failure,
       );
     }
   }
@@ -77,22 +81,32 @@ class PasswordResetController extends Notifier<PasswordResetState> {
       await _repository.signOut();
       state = state.copyWith(step: PasswordResetStep.success);
       return true;
-    } catch (e) {
-      debugPrint('PasswordResetController.verifyOtpAndSetPassword failed: $e');
+    } catch (e, st) {
+      final failure = _toFailure(e, st);
+      debugPrint(
+        'PasswordResetController.verifyOtpAndSetPassword failed: ${failure.label}',
+      );
       // Clean up the temporary session if it was created
       try {
         await _repository.signOut();
-      } catch (_) {}
-      state = state.copyWith(
-        step: PasswordResetStep.error,
-        errorMessage: e is Exception ? e.toString() : 'Something went wrong',
-      );
+      } catch (cleanupErr) {
+        debugPrint(
+          'PasswordResetController.verifyOtpAndSetPassword signOut cleanup failed: $cleanupErr',
+        );
+      }
+      state = state.copyWith(step: PasswordResetStep.error, failure: failure);
       return false;
     }
+  }
+
+  AppFailure _toFailure(Object e, StackTrace st) {
+    if (e is AppFailure) return e;
+    if (e is DioException) return ErrorPresenter.fromDio(e, st);
+    return UnknownFailure(underlyingError: e, stackTrace: st);
   }
 }
 
 final passwordResetControllerProvider =
     NotifierProvider<PasswordResetController, PasswordResetState>(
-  PasswordResetController.new,
-);
+      PasswordResetController.new,
+    );

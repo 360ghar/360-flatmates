@@ -415,12 +415,12 @@ class _PremiumPhotoFallback extends StatelessWidget {
   Widget build(BuildContext context) {
     final initials = initialsFromName(name);
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: const [
-            Color(0xFFD4A574),
-            Color(0xFFC96442),
-            Color(0xFF8B4513),
+          colors: [
+            AppSemanticColors.swipeCardFallbackStart,
+            AppSemanticColors.swipeCardFallbackMid,
+            AppSemanticColors.swipeCardFallbackEnd,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

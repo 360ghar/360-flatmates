@@ -578,7 +578,9 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
         XFile(file.path),
       ], text: '${locale.checkOutListingShare} $deepLink');
     } catch (e) {
-      debugPrint('ShareListingCard._share: image capture failed, falling back to text: $e');
+      debugPrint(
+        'ShareListingCard._share: image capture failed, falling back to text: $e',
+      );
       // Fallback to text-only share if image capture fails
       final l = widget.listing;
       final text = StringBuffer();

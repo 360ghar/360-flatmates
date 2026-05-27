@@ -34,6 +34,7 @@ mixin _$OnboardingState {
   List<String> get nonNegotiables => throw _privateConstructorUsedError;
   bool get isSubmitting => throw _privateConstructorUsedError;
   bool get isComplete => throw _privateConstructorUsedError;
+  bool get isHydrated => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
   /// Create a copy of OnboardingState
@@ -67,6 +68,7 @@ abstract class $OnboardingStateCopyWith<$Res> {
     List<String> nonNegotiables,
     bool isSubmitting,
     bool isComplete,
+    bool isHydrated,
     String? error,
   });
 }
@@ -102,6 +104,7 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
     Object? nonNegotiables = null,
     Object? isSubmitting = null,
     Object? isComplete = null,
+    Object? isHydrated = null,
     Object? error = freezed,
   }) {
     return _then(
@@ -170,6 +173,10 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
                 ? _value.isComplete
                 : isComplete // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isHydrated: null == isHydrated
+                ? _value.isHydrated
+                : isHydrated // ignore: cast_nullable_to_non_nullable
+                      as bool,
             error: freezed == error
                 ? _value.error
                 : error // ignore: cast_nullable_to_non_nullable
@@ -206,6 +213,7 @@ abstract class _$$OnboardingStateImplCopyWith<$Res>
     List<String> nonNegotiables,
     bool isSubmitting,
     bool isComplete,
+    bool isHydrated,
     String? error,
   });
 }
@@ -240,6 +248,7 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
     Object? nonNegotiables = null,
     Object? isSubmitting = null,
     Object? isComplete = null,
+    Object? isHydrated = null,
     Object? error = freezed,
   }) {
     return _then(
@@ -308,6 +317,10 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
             ? _value.isComplete
             : isComplete // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isHydrated: null == isHydrated
+            ? _value.isHydrated
+            : isHydrated // ignore: cast_nullable_to_non_nullable
+                  as bool,
         error: freezed == error
             ? _value.error
             : error // ignore: cast_nullable_to_non_nullable
@@ -337,6 +350,7 @@ class _$OnboardingStateImpl extends _OnboardingState {
     final List<String> nonNegotiables = const [],
     this.isSubmitting = false,
     this.isComplete = false,
+    this.isHydrated = false,
     this.error,
   }) : _photoUrls = photoUrls,
        _lifestyleAnswers = lifestyleAnswers,
@@ -408,11 +422,14 @@ class _$OnboardingStateImpl extends _OnboardingState {
   @JsonKey()
   final bool isComplete;
   @override
+  @JsonKey()
+  final bool isHydrated;
+  @override
   final String? error;
 
   @override
   String toString() {
-    return 'OnboardingState(step: $step, mode: $mode, fullName: $fullName, age: $age, profession: $profession, city: $city, locality: $locality, photoUrls: $photoUrls, lifestyleAnswers: $lifestyleAnswers, budgetMin: $budgetMin, budgetMax: $budgetMax, moveInTimeline: $moveInTimeline, preferences: $preferences, nonNegotiables: $nonNegotiables, isSubmitting: $isSubmitting, isComplete: $isComplete, error: $error)';
+    return 'OnboardingState(step: $step, mode: $mode, fullName: $fullName, age: $age, profession: $profession, city: $city, locality: $locality, photoUrls: $photoUrls, lifestyleAnswers: $lifestyleAnswers, budgetMin: $budgetMin, budgetMax: $budgetMax, moveInTimeline: $moveInTimeline, preferences: $preferences, nonNegotiables: $nonNegotiables, isSubmitting: $isSubmitting, isComplete: $isComplete, isHydrated: $isHydrated, error: $error)';
   }
 
   @override
@@ -456,6 +473,8 @@ class _$OnboardingStateImpl extends _OnboardingState {
                 other.isSubmitting == isSubmitting) &&
             (identical(other.isComplete, isComplete) ||
                 other.isComplete == isComplete) &&
+            (identical(other.isHydrated, isHydrated) ||
+                other.isHydrated == isHydrated) &&
             (identical(other.error, error) || other.error == error));
   }
 
@@ -478,6 +497,7 @@ class _$OnboardingStateImpl extends _OnboardingState {
     const DeepCollectionEquality().hash(_nonNegotiables),
     isSubmitting,
     isComplete,
+    isHydrated,
     error,
   );
 
@@ -511,6 +531,7 @@ abstract class _OnboardingState extends OnboardingState {
     final List<String> nonNegotiables,
     final bool isSubmitting,
     final bool isComplete,
+    final bool isHydrated,
     final String? error,
   }) = _$OnboardingStateImpl;
   const _OnboardingState._() : super._();
@@ -547,6 +568,8 @@ abstract class _OnboardingState extends OnboardingState {
   bool get isSubmitting;
   @override
   bool get isComplete;
+  @override
+  bool get isHydrated;
   @override
   String? get error;
 

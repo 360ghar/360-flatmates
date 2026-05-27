@@ -1364,6 +1364,12 @@ abstract class AppLocalizations {
   /// **'Profiles with 3+ photos get 4x more matches!'**
   String get profilePhotoNudge;
 
+  /// No description provided for @profilePhotoMinimumRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one photo to continue.'**
+  String get profilePhotoMinimumRequired;
+
   /// No description provided for @addPhotoCta.
   ///
   /// In en, this message translates to:

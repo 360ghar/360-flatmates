@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 
 import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../discover_repository.dart';
 
@@ -41,7 +42,9 @@ List<Marker> buildClusteredMarkers({
     if (groupItems.length == 1) {
       final item = groupItems.first;
       final isRoom = item.ownerId != null;
-      final color = isRoom ? const Color(0xFFFF9800) : const Color(0xFF2196F3);
+      final color = isRoom
+          ? AppSemanticColors.mapMarkerRoom
+          : AppSemanticColors.mapMarkerProperty;
       markers.add(
         Marker(
           point: LatLng(item.latitude!, item.longitude!),
@@ -235,7 +238,7 @@ class _ClusterMarkerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final clusterColor = const Color(0xFF673AB7);
+    const clusterColor = AppSemanticColors.mapMarkerCluster;
     final count = clusterItems.length;
 
     final rents = clusterItems.map((i) => i.monthlyRent.toInt()).toList()

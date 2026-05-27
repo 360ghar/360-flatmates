@@ -30,98 +30,96 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
     return Scaffold(
       appBar: FlatmatesHeader.backTitle(title: locale.scheduleTitle),
       body: FlatmatesAsyncView<List<VisitItem>>(
-          value: visits,
-          empty: FlatmatesEmptyState(
-            title: locale.emptyVisits,
-            subtitle: locale.scheduleSubtitle,
-            icon: Icons.calendar_today_rounded,
-          ),
-          onRetry: () => ref.invalidate(visitsProvider),
-          data: (items) {
-            // Organize into timeline sections
-            final upcoming = items
-                .where(
-                  (v) => v.status == 'scheduled' || v.status == 'confirmed',
-                )
-                .toList();
-            final requested = items
-                .where((v) => v.status == 'requested')
-                .toList();
-            final completed = items
-                .where((v) => v.status == 'completed')
-                .toList();
-
-            return RefreshIndicator(
-              onRefresh: () async => ref.invalidate(visitsProvider),
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.xl,
-                  AppSpacing.screen,
-                  AppSpacing.xl,
-                  120,
-                ),
-                children: [
-                  FlatmatesSectionHeader(
-                    title: locale.scheduleTitle,
-                    subtitle: locale.scheduleSubtitle,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (upcoming.isNotEmpty) ...[
-                    _SectionHeader(title: locale.visitStatusConfirmed),
-                    const SizedBox(height: AppSpacing.sm),
-                    ...upcoming.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: _VisitCard(
-                          item: item,
-                          locale: locale,
-                          theme: theme,
-                          badgeVariant: FlatmatesTrustBadgeVariant.verified,
-                          onConfirm: () => _confirmVisit(item),
-                          onCancel: () => _cancelVisit(item),
-                          onReschedule: () => _rescheduleVisit(item),
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (requested.isNotEmpty) ...[
-                    _SectionHeader(title: locale.visitStatusRequested),
-                    const SizedBox(height: AppSpacing.sm),
-                    ...requested.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: _VisitCard(
-                          item: item,
-                          locale: locale,
-                          theme: theme,
-                          badgeVariant: FlatmatesTrustBadgeVariant.reviewed,
-                          onConfirm: () => _confirmVisit(item),
-                          onCancel: () => _cancelVisit(item),
-                          onReschedule: () => _rescheduleVisit(item),
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (completed.isNotEmpty) ...[
-                    _SectionHeader(title: locale.visitStatusCompleted),
-                    const SizedBox(height: AppSpacing.sm),
-                    ...completed.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: _VisitCard(
-                          item: item,
-                          locale: locale,
-                          theme: theme,
-                          badgeVariant: FlatmatesTrustBadgeVariant.safe,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          },
+        value: visits,
+        empty: FlatmatesEmptyState(
+          title: locale.emptyVisits,
+          subtitle: locale.scheduleSubtitle,
+          icon: Icons.calendar_today_rounded,
         ),
+        onRetry: () => ref.invalidate(visitsProvider),
+        data: (items) {
+          // Organize into timeline sections
+          final upcoming = items
+              .where((v) => v.status == 'scheduled' || v.status == 'confirmed')
+              .toList();
+          final requested = items
+              .where((v) => v.status == 'requested')
+              .toList();
+          final completed = items
+              .where((v) => v.status == 'completed')
+              .toList();
+
+          return RefreshIndicator(
+            onRefresh: () async => ref.invalidate(visitsProvider),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.xl,
+                AppSpacing.screen,
+                AppSpacing.xl,
+                120,
+              ),
+              children: [
+                FlatmatesSectionHeader(
+                  title: locale.scheduleTitle,
+                  subtitle: locale.scheduleSubtitle,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                if (upcoming.isNotEmpty) ...[
+                  _SectionHeader(title: locale.visitStatusConfirmed),
+                  const SizedBox(height: AppSpacing.sm),
+                  ...upcoming.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: _VisitCard(
+                        item: item,
+                        locale: locale,
+                        theme: theme,
+                        badgeVariant: FlatmatesTrustBadgeVariant.verified,
+                        onConfirm: () => _confirmVisit(item),
+                        onCancel: () => _cancelVisit(item),
+                        onReschedule: () => _rescheduleVisit(item),
+                      ),
+                    ),
+                  ),
+                ],
+                if (requested.isNotEmpty) ...[
+                  _SectionHeader(title: locale.visitStatusRequested),
+                  const SizedBox(height: AppSpacing.sm),
+                  ...requested.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: _VisitCard(
+                        item: item,
+                        locale: locale,
+                        theme: theme,
+                        badgeVariant: FlatmatesTrustBadgeVariant.reviewed,
+                        onConfirm: () => _confirmVisit(item),
+                        onCancel: () => _cancelVisit(item),
+                        onReschedule: () => _rescheduleVisit(item),
+                      ),
+                    ),
+                  ),
+                ],
+                if (completed.isNotEmpty) ...[
+                  _SectionHeader(title: locale.visitStatusCompleted),
+                  const SizedBox(height: AppSpacing.sm),
+                  ...completed.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: _VisitCard(
+                        item: item,
+                        locale: locale,
+                        theme: theme,
+                        badgeVariant: FlatmatesTrustBadgeVariant.safe,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

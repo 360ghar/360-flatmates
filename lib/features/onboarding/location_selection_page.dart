@@ -9,6 +9,7 @@ import '../../core/location/place_suggestion.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../location/application/location_search_provider.dart';
+import '../location/presentation/location_picker_rows.dart';
 import '../bootstrap/bootstrap_controller.dart';
 import '../bootstrap/catalog_helpers.dart';
 import '../shared/presentation/components.dart';
@@ -148,9 +149,9 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
       final bootstrap = ref.read(bootstrapControllerProvider).valueOrNull;
       final catalogCities =
           bootstrap?.catalogOptions('flatmates_popular_cities') ?? const [];
-      final cities = resolveCities(catalogCities)
-          .where((c) => !c.comingSoon)
-          .toList();
+      final cities = resolveCities(
+        catalogCities,
+      ).where((c) => !c.comingSoon).toList();
 
       CatalogOption? match;
       double minDist = double.infinity;
@@ -242,12 +243,13 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 18),
-            _LocationActionRow(
+            LocationActionRow(
               icon: Icons.my_location_outlined,
               title: _locating
                   ? locale.detectingLocation
                   : locale.useCurrentLocation,
               onTap: _locating ? null : _useCurrentLocation,
+              vertical: 10,
             ),
             const SizedBox(height: 18),
             Divider(color: AppSemanticColors.line),
@@ -276,44 +278,11 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
               ...searchState.suggestions.map(
                 (suggestion) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: FlatmatesCard(
+                  child: LocationSuggestionRow(
+                    suggestion: suggestion,
                     onTap: _selectingPlace
                         ? null
                         : () => _selectPlace(suggestion),
-                    borderColor: AppSemanticColors.line.withValues(alpha: 0.35),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: AppSemanticColors.accent,
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                suggestion.mainText,
-                                style: theme.textTheme.bodyLarge,
-                              ),
-                              if (suggestion.secondaryText.isNotEmpty)
-                                Text(
-                                  suggestion.secondaryText,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: AppSemanticColors.textSecondaryFor(
-                                      theme.brightness,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          color: AppSemanticColors.line,
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),
@@ -343,7 +312,7 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
                       itemBuilder: (context, index) {
                         final city = visibleCities[index];
                         final selected = _selectedCity?.id == city.id;
-                        return _CityRow(
+                        return LocationCityRow(
                           city: city,
                           selected: selected,
                           onTap: city.comingSoon
@@ -368,135 +337,6 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _LocationActionRow extends StatelessWidget {
-  const _LocationActionRow({
-    required this.icon,
-    required this.title,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: [
-            Icon(icon, color: AppSemanticColors.accent),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: AppSemanticColors.accent,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Icon(Icons.chevron_right, color: AppSemanticColors.line),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CityRow extends StatelessWidget {
-  const _CityRow({
-    required this.city,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final CatalogOption city;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final locale = AppLocalizations.of(context);
-    if (city.comingSoon) {
-      return Opacity(
-        opacity: 0.6,
-        child: FlatmatesCard(
-          onTap: null,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md + AppSpacing.xs,
-          ),
-          borderColor: AppSemanticColors.line.withValues(alpha: 0.35),
-          child: Row(
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                color: AppSemanticColors.textTertiaryFor(theme.brightness),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  city.label,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppSemanticColors.textTertiaryFor(theme.brightness),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppSemanticColors.paper2,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  locale.comingSoon,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppSemanticColors.textTertiaryFor(theme.brightness),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    return FlatmatesCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md + AppSpacing.xs,
-      ),
-      backgroundColor: selected
-          ? AppSemanticColors.accent.withValues(alpha: 0.08)
-          : null,
-      borderColor: selected
-          ? AppSemanticColors.accent
-          : AppSemanticColors.line.withValues(alpha: 0.35),
-      child: Row(
-        children: [
-          Icon(Icons.location_on_outlined, color: AppSemanticColors.accent),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(child: Text(city.label, style: theme.textTheme.bodyLarge)),
-          if (selected)
-            Icon(Icons.check_circle_rounded, color: AppSemanticColors.accent)
-          else
-            Icon(Icons.chevron_right, color: AppSemanticColors.line),
-        ],
       ),
     );
   }

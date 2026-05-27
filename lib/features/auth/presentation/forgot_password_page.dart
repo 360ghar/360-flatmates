@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../auth_controller.dart';
 import '../password_reset_controller.dart';
+import '../../../core/errors/l10n_bridge.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../shared/presentation/components.dart';
@@ -46,13 +47,17 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(locale.forgotPasswordTitle,
-              style: theme.textTheme.headlineMedium),
+          Text(
+            locale.forgotPasswordTitle,
+            style: theme.textTheme.headlineMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
-          Text(locale.forgotPasswordSubtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppSemanticColors.textSecondaryFor(theme.brightness),
-              )),
+          Text(
+            locale.forgotPasswordSubtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppSemanticColors.textSecondaryFor(theme.brightness),
+            ),
+          ),
           const SizedBox(height: AppSpacing.screen),
           FlatmatesCard(
             child: Column(
@@ -67,10 +72,10 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                   ),
                 ),
                 if (resetState.step == PasswordResetStep.error &&
-                    resetState.errorMessage != null) ...[
+                    resetState.failure != null) ...[
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    resetState.errorMessage!,
+                    resetState.failure!.userMessage(locale.toUserMessageL10n()),
                     style: TextStyle(color: AppSemanticColors.error),
                   ),
                 ],
@@ -90,8 +95,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
                         .read(passwordResetControllerProvider.notifier)
                         .sendOtp(phone);
                     if (!context.mounted) return;
-                    final state =
-                        ref.read(passwordResetControllerProvider);
+                    final state = ref.read(passwordResetControllerProvider);
                     if (state.step == PasswordResetStep.otpSent) {
                       ref.read(pendingPhoneProvider.notifier).state = phone;
                       context.push('/reset-password');

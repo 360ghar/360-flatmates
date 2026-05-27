@@ -133,7 +133,10 @@ class _FlatmatesAvatarState extends State<FlatmatesAvatar>
             child: child,
           );
         },
-        child: Padding(padding: const EdgeInsets.all(3), child: avatar),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xs),
+          child: avatar,
+        ),
       );
     }
 
@@ -893,7 +896,7 @@ class FlatmatesNotificationCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.edgeLg,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

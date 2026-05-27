@@ -56,8 +56,12 @@ class DiscoverFeedState {
 class DiscoverFeedController extends Notifier<DiscoverFeedState> {
   static const double defaultLocationRadiusKm = 10.0;
   static const int _pageSize = 20;
+
+  // Monotonic version bumped each time filters change. A load that
+  // observes a different version after its `await` is stale and
+  // discards its result.
+  int _filterVersion = 0;
   bool _isLoadingActive = false;
-  bool _reloadAfterActiveLoad = false;
 
   @override
   DiscoverFeedState build() {
@@ -71,8 +75,10 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
 
   Future<void> load({bool clearAll = true}) async {
     if (_isLoadingActive) {
+      // A load is in flight. Mark the filter version as dirty by bumping
+      // it; the in-flight load will observe the mismatch and reload.
       if (clearAll) {
-        _reloadAfterActiveLoad = true;
+        _filterVersion++;
         state = state.copyWith(
           isLoading: true,
           isLoadingMore: false,
@@ -88,7 +94,7 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
       state = state.copyWith(isLoadingMore: true, clearError: true);
     }
 
-    DiscoverFilters? requestFilters;
+    final myVersion = _filterVersion;
     try {
       final profile = ref
           .read(bootstrapControllerProvider)
@@ -96,16 +102,16 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
           ?.profile;
       final repo = ref.read(discoverRepositoryProvider);
       final offset = clearAll ? 0 : state.fetchedCount;
-      requestFilters = state.filters;
       final newListings = await repo.fetchListings(
         currentUser: profile,
-        filters: requestFilters,
+        filters: state.filters,
         offset: offset,
         limit: _pageSize,
       );
 
-      if (!identical(requestFilters, state.filters)) {
-        _reloadAfterActiveLoad = true;
+      if (myVersion != _filterVersion) {
+        // Stale result — filters changed during the request.
+        // Skip applying it; the trailing reload below will re-fetch.
       } else {
         state = state.copyWith(
           listings: clearAll
@@ -120,21 +126,19 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
         );
       }
     } catch (e) {
-      if (requestFilters != null && !identical(requestFilters, state.filters)) {
-        _reloadAfterActiveLoad = true;
-      } else {
+      if (myVersion == _filterVersion) {
         state = state.copyWith(
           isLoading: false,
           isLoadingMore: false,
           error: e,
         );
       }
+      // If the version changed, the trailing reload will replace this error.
     } finally {
       _isLoadingActive = false;
     }
 
-    if (_reloadAfterActiveLoad) {
-      _reloadAfterActiveLoad = false;
+    if (myVersion != _filterVersion) {
       await load();
     }
   }

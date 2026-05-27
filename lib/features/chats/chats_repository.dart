@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config/endpoints.dart';
+import '../../core/network/sse_providers.dart';
+import '../../core/network/sse_service.dart';
 import '../../core/providers.dart';
 import 'domain/chat_models.dart';
 
@@ -128,7 +130,7 @@ class ChatsRepository {
   Stream<List<ChatMessage>> watchMessages(int conversationId) {
     late final StreamController<List<ChatMessage>> controller;
     StreamSubscription<List<ChatMessage>>? realtimeSubscription;
-    Timer? pollTimer;
+    StreamSubscription<SseEvent>? sseFallbackSubscription;
     var hasEmittedMessages = false;
 
     void emitMessages(List<ChatMessage> messages) {
@@ -137,7 +139,7 @@ class ChatsRepository {
       controller.add(messages);
     }
 
-    Future<void> pollMessages() async {
+    Future<void> refetch() async {
       try {
         final response = await fetchMessages(conversationId);
         emitMessages(response.messages);
@@ -152,15 +154,25 @@ class ChatsRepository {
       onListen: () {
         var realtimeHealthy = false;
 
-        void startPollingIfNeeded() {
-          if (realtimeHealthy || pollTimer != null) return;
-          pollTimer = Timer.periodic(
-            const Duration(seconds: 3),
-            (_) => unawaited(pollMessages()),
+        // Fallback path: listen for `new_message` SSE events and refetch.
+        // Activated only when Supabase realtime fails or drops. Cancelled
+        // automatically as soon as realtime recovers.
+        void startSseFallbackIfNeeded() {
+          if (realtimeHealthy || sseFallbackSubscription != null) return;
+          sseFallbackSubscription = _ref.read(sseServiceProvider).events.listen(
+            (event) {
+              if (event.type != 'new_message') return;
+              final convId = (event.data['conversation_id'] as num?)?.toInt();
+              // Refetch when the event is for this conversation, or when
+              // the payload omits a conversation id (defensive).
+              if (convId == null || convId == conversationId) {
+                unawaited(refetch());
+              }
+            },
           );
         }
 
-        unawaited(pollMessages());
+        unawaited(refetch());
 
         try {
           realtimeSubscription = Supabase.instance.client
@@ -173,23 +185,25 @@ class ChatsRepository {
                 (messages) {
                   if (!realtimeHealthy) {
                     realtimeHealthy = true;
-                    pollTimer?.cancel();
-                    pollTimer = null;
+                    sseFallbackSubscription?.cancel();
+                    sseFallbackSubscription = null;
                   }
                   emitMessages(messages);
                 },
                 onError: (_) {
                   realtimeHealthy = false;
-                  startPollingIfNeeded();
+                  startSseFallbackIfNeeded();
                 },
               );
         } catch (e) {
-          debugPrint('ChatsRepository.watchMessages: realtime subscription failed, falling back to polling: $e');
-          startPollingIfNeeded();
+          debugPrint(
+            'ChatsRepository.watchMessages: realtime subscription failed, falling back to SSE event refetch: $e',
+          );
+          startSseFallbackIfNeeded();
         }
       },
       onCancel: () async {
-        pollTimer?.cancel();
+        await sseFallbackSubscription?.cancel();
         await realtimeSubscription?.cancel();
       },
     );

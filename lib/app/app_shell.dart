@@ -55,16 +55,11 @@ class AppShell extends ConsumerWidget {
               top: false,
               child: NavigationBar(
                 height: 76,
-                selectedIndex: _mapToVisibleIndex(
-                  navigationShell.currentIndex,
-                  mode,
-                ),
+                selectedIndex: navigationShell.currentIndex.clamp(0, 4),
                 onDestinationSelected: (index) {
-                  final branchIndex = _mapToBranchIndex(index, mode);
                   navigationShell.goBranch(
-                    branchIndex,
-                    initialLocation:
-                        branchIndex == navigationShell.currentIndex,
+                    index,
+                    initialLocation: index == navigationShell.currentIndex,
                   );
                 },
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -146,15 +141,5 @@ class AppShell extends ConsumerWidget {
   /// Semantics.identifier is sufficient for Maestro testing.
   Widget _navIcon(String identifier, IconData icon) {
     return Semantics(identifier: identifier, child: Icon(icon));
-  }
-
-  int _mapToBranchIndex(int visibleIndex, String mode) {
-    if (visibleIndex < 0 || visibleIndex > 4) return 0;
-    return visibleIndex;
-  }
-
-  int _mapToVisibleIndex(int branchIndex, String mode) {
-    if (branchIndex < 0 || branchIndex > 4) return 0;
-    return branchIndex;
   }
 }

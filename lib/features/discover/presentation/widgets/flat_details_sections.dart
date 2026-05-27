@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
+import 'package:flatmates_app/core/theme/app_spacing.dart';
 
 /// Availability tile for the 2-column grid on the flat details page.
 class AvailabilityTile extends StatelessWidget {
@@ -11,7 +12,7 @@ class AvailabilityTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: AppSpacing.edgeMd,
       decoration: BoxDecoration(
         color: AppSemanticColors.secondarySurfaceFor(theme.brightness),
         borderRadius: BorderRadius.circular(14),

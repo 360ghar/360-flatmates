@@ -41,7 +41,9 @@ class _LegalContentPageState extends State<LegalContentPage> {
         _loading = false;
       });
     } catch (e) {
-      debugPrint('LegalContentPage._loadContent failed for ${widget.assetPath}: $e');
+      debugPrint(
+        'LegalContentPage._loadContent failed for ${widget.assetPath}: $e',
+      );
       if (!mounted) return;
       setState(() {
         _hasError = true;

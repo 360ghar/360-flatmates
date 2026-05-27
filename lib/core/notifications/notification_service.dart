@@ -119,9 +119,7 @@ class NotificationService {
           '[NotificationService] Provisional permission granted — quiet notifications.',
         );
       } else if (authorizationStatus == AuthorizationStatus.authorized) {
-        debugPrint(
-          '[NotificationService] Notification permission authorized.',
-        );
+        debugPrint('[NotificationService] Notification permission authorized.');
       } else if (authorizationStatus == AuthorizationStatus.notDetermined) {
         debugPrint(
           '[NotificationService] Permission not determined — may request again later.',

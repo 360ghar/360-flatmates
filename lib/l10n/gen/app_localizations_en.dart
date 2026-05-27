@@ -699,6 +699,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Profiles with 3+ photos get 4x more matches!';
 
   @override
+  String get profilePhotoMinimumRequired =>
+      'Add at least one photo to continue.';
+
+  @override
   String get addPhotoCta => 'Add photo';
 
   @override

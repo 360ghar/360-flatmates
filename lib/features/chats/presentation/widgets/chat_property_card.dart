@@ -36,7 +36,7 @@ class ChatPropertyCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 10),
       child: FlatmatesCard(
-        padding: const EdgeInsets.all(14),
+        padding: AppSpacing.edgeMd,
         child: GestureDetector(
           onTap: onToggleExpand,
           child: AnimatedSize(

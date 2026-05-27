@@ -38,6 +38,10 @@ final sseEventRouterProvider = Provider<void>((ref) {
       case 'conversation_updated':
       case 'conversation_read':
         ref.invalidate(conversationsProvider);
+        final convId = (event.data['conversation_id'] as num?)?.toInt();
+        if (convId != null) {
+          ref.invalidate(messagesProvider(convId));
+        }
         break;
       case 'new_match':
         ref.invalidate(conversationsProvider);
