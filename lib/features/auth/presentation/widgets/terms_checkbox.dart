@@ -1,9 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flatmates_app/core/config/constants.dart';
 import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
 import 'package:flatmates_app/core/theme/app_spacing.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../l10n/gen/app_localizations.dart';
+import 'package:flatmates_app/l10n/gen/app_localizations.dart';
 
 class TermsCheckbox extends StatelessWidget {
   const TermsCheckbox({
@@ -48,7 +49,15 @@ class TermsCheckbox extends StatelessWidget {
                     decorationColor: AppSemanticColors.accent,
                   ),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => context.push('/terms-of-service'),
+                    ..onTap = () async {
+                      final uri = Uri.parse(kTermsOfServiceUrl);
+                      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      if (!launched && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(locale.externalLinkUnavailable)),
+                        );
+                      }
+                    },
                 ),
                 TextSpan(text: locale.termsAgreementConjunction),
                 TextSpan(
@@ -59,7 +68,15 @@ class TermsCheckbox extends StatelessWidget {
                     decorationColor: AppSemanticColors.accent,
                   ),
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => context.push('/privacy-policy'),
+                    ..onTap = () async {
+                      final uri = Uri.parse(kPrivacyPolicyUrl);
+                      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      if (!launched && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(locale.externalLinkUnavailable)),
+                        );
+                      }
+                    },
                 ),
               ],
               style: theme.textTheme.bodySmall?.copyWith(

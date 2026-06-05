@@ -4,7 +4,7 @@
 abstract final class FlatmatesEndpoints {
   // -- Auth / User --
   static const me = '/users/me';
-  static const deleteAccount = '/users/me/delete';
+  static const deleteAccount = '/users/delete-account';
   static const userLocation = '/users/location';
 
   // -- Bootstrap & Profile --

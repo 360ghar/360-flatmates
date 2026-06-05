@@ -398,13 +398,13 @@ class _ContactActions extends StatelessWidget {
           FlatmatesMenuItem(
             icon: Icons.privacy_tip_outlined,
             label: locale.privacyPolicy,
-            onTap: () => context.push('/privacy-policy'),
+            onTap: () => _launchUrl(context, kPrivacyPolicyUrl),
           ),
           const Divider(height: 1, indent: 68, endIndent: 16),
           FlatmatesMenuItem(
             icon: Icons.description_outlined,
             label: locale.termsOfService,
-            onTap: () => context.push('/terms-of-service'),
+            onTap: () => _launchUrl(context, kTermsOfServiceUrl),
           ),
         ],
       ),
@@ -431,5 +431,15 @@ class _ContactActions extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(locale.supportEmailFallback(kSupportEmail))),
     );
+  }
+
+  Future<void> _launchUrl(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).externalLinkUnavailable)),
+      );
+    }
   }
 }

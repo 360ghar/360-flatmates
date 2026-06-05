@@ -5540,6 +5540,24 @@ abstract class AppLocalizations {
   /// **'Delete Account'**
   String get deleteAccountCta;
 
+  /// No description provided for @deleteAccountConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE to confirm:'**
+  String get deleteAccountConfirmLabel;
+
+  /// No description provided for @deleteAccountConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE here'**
+  String get deleteAccountConfirmHint;
+
+  /// No description provided for @deleteAccountButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Deletion Request'**
+  String get deleteAccountButton;
+
   /// No description provided for @deleteAccountTitle.
   ///
   /// In en, this message translates to:
@@ -5549,38 +5567,32 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountWarning.
   ///
   /// In en, this message translates to:
-  /// **'This action is permanent and cannot be undone. All your data including profile, listings, chats, and matches will be permanently deleted.'**
+  /// **'This action is permanent and cannot be undone. All your data including profile, listings, chats, and matches will be permanently deleted. To proceed, send us a deletion request email below and our team will reach out to confirm.'**
   String get deleteAccountWarning;
 
-  /// No description provided for @deleteAccountConfirmLabel.
+  /// No description provided for @deleteAccountEmailSubject.
   ///
   /// In en, this message translates to:
-  /// **'Type DELETE to confirm'**
-  String get deleteAccountConfirmLabel;
+  /// **'Account Deletion Request'**
+  String get deleteAccountEmailSubject;
 
-  /// No description provided for @deleteAccountConfirmHint.
+  /// No description provided for @deleteAccountEmailBody.
   ///
   /// In en, this message translates to:
-  /// **'Type DELETE'**
-  String get deleteAccountConfirmHint;
+  /// **'Hello 360 Ghar Support,\n\nI would like to request the deletion of my account.\n\nRegistered email: {email}\n\nThank you.'**
+  String deleteAccountEmailBody(String email);
 
-  /// No description provided for @deleteAccountButton.
+  /// No description provided for @deleteAccountRequestSent.
   ///
   /// In en, this message translates to:
-  /// **'Delete My Account'**
-  String get deleteAccountButton;
+  /// **'Email draft opened. Send it to start your deletion request.'**
+  String get deleteAccountRequestSent;
 
-  /// No description provided for @deleteAccountCancelled.
+  /// No description provided for @deleteAccountEmailFallback.
   ///
   /// In en, this message translates to:
-  /// **'Account deletion cancelled.'**
-  String get deleteAccountCancelled;
-
-  /// No description provided for @deleteAccountFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to delete account. Please try again or contact support.'**
-  String get deleteAccountFailed;
+  /// **'Email us at {email} with subject \"{subject}\" to request account deletion.'**
+  String deleteAccountEmailFallback(String email, String subject);
 
   /// No description provided for @forgotPasswordTitle.
   ///
@@ -5803,6 +5815,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Thanks for your feedback!'**
   String get feedbackSubmitSuccess;
+
+  /// No description provided for @signInWithGoogleCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get signInWithGoogleCta;
+
+  /// No description provided for @signUpWithGoogleCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up with Google'**
+  String get signUpWithGoogleCta;
+
+  /// No description provided for @continueWithGoogleCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogleCta;
+
+  /// No description provided for @googleSignInCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign-In was cancelled.'**
+  String get googleSignInCancelled;
+
+  /// No description provided for @googleSignInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign-In failed. Please try again.'**
+  String get googleSignInFailed;
 }
 
 class _AppLocalizationsDelegate

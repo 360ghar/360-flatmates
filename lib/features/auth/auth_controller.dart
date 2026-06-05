@@ -156,6 +156,33 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    clearError();
+    state = const AuthState(status: AuthStatus.submitting);
+    try {
+      await _repository.signInWithGoogle();
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        phone: _repository.currentPhone,
+      );
+    } on StateError catch (e) {
+      if (e.message.contains('missing ID token') ||
+          e.message.contains('not available')) {
+        state = AuthState(
+          status: AuthStatus.error,
+          errorMessage: e.message,
+        );
+      } else {
+        state = const AuthState(status: AuthStatus.unauthenticated);
+      }
+    } catch (error) {
+      state = AuthState(
+        status: AuthStatus.error,
+        errorMessage: _userSafeMessage(error),
+      );
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await ref.read(notificationServiceProvider).clearToken();
@@ -168,22 +195,6 @@ class AuthController extends Notifier<AuthState> {
       debugPrint('AuthController.signOut: repository.signOut failed: $e');
     }
     state = const AuthState(status: AuthStatus.unauthenticated);
-  }
-
-  Future<bool> deleteAccount() async {
-    try {
-      await ref.read(notificationServiceProvider).clearToken();
-    } catch (e) {
-      debugPrint('AuthController.deleteAccount: clearToken failed: $e');
-    }
-    try {
-      await _repository.deleteAccount();
-      state = const AuthState(status: AuthStatus.unauthenticated);
-      return true;
-    } catch (e) {
-      debugPrint('AuthController.deleteAccount: failed: $e');
-      return false;
-    }
   }
 }
 

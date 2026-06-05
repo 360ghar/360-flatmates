@@ -1390,13 +1390,32 @@
   "maintenanceMessage": "हम चीज़ें बेहतर बना रहे हैं। कृपया कुछ देर बाद दोबारा देखें।",
   "maintenanceRetry": "फिर से जांचें",
   "deleteAccountCta": "खाता हटाएं",
+  "deleteAccountConfirmLabel": "पुष्टि करने के लिए DELETE टाइप करें:",
+  "deleteAccountConfirmHint": "यहाँ DELETE टाइप करें",
+  "deleteAccountButton": "हटाने का अनुरोध भेजें",
   "deleteAccountTitle": "अपना खाता हटाएं",
-  "deleteAccountWarning": "यह कार्रवाई स्थायी है और इसे पूर्ववत नहीं किया जा सकता। आपका सारा डेटा जिसमें प्रोफ़ाइल, लिस्टिंग, चैट और मैच शामिल हैं, स्थायी रूप से हटा दिया जाएगा।",
-  "deleteAccountConfirmLabel": "पुष्टि करने के लिए DELETE टाइप करें",
-  "deleteAccountConfirmHint": "DELETE टाइप करें",
-  "deleteAccountButton": "मेरा खाता हटाएं",
-  "deleteAccountCancelled": "खाता हटाना रद्द किया गया।",
-  "deleteAccountFailed": "खाता हटाने में विफल। कृपया पुनः प्रयास करें या सहायता से संपर्क करें।",
+  "deleteAccountWarning": "यह कार्रवाई स्थायी है और इसे पूर्ववत नहीं किया जा सकता। आपका सारा डेटा जिसमें प्रोफ़ाइल, लिस्टिंग, चैट और मैच शामिल हैं, स्थायी रूप से हटा दिया जाएगा। आगे बढ़ने के लिए नीचे हमें एक हटाने का अनुरोध ईमेल भेजें और हमारी टीम पुष्टि के लिए संपर्क करेगी।",
+  "deleteAccountEmailSubject": "खाता हटाने का अनुरोध",
+  "deleteAccountEmailBody": "नमस्ते 360 Ghar सपोर्ट,\n\nमैं अपना खाता हटाने का अनुरोध करना चाहता/चाहती हूं।\n\nपंजीकृत ईमेल: {email}\n\nधन्यवाद।",
+  "@deleteAccountEmailBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountRequestSent": "ईमेल ड्राफ़्ट खोला गया। अपना हटाने का अनुरोध शुरू करने के लिए इसे भेजें।",
+  "deleteAccountEmailFallback": "खाता हटाने का अनुरोध करने के लिए विषय \"{subject}\" के साथ हमें {email} पर ईमेल करें।",
+  "@deleteAccountEmailFallback": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
   "forgotPasswordTitle": "पासवर्ड भूल गए",
   "forgotPasswordSubtitle": "अपना फोन नंबर दर्ज करें और हम पासवर्ड रीसेट करने के लिए OTP भेजेंगे।",
   "sendOtpCta": "OTP भेजें",
@@ -1440,5 +1459,10 @@
   "feedbackSeverityHigh": "उच्च",
   "feedbackSeverityCritical": "गंभीर",
   "feedbackSubmitCta": "सबमिट करें",
-  "feedbackSubmitSuccess": "आपकी प्रतिक्रिया के लिए धन्यवाद!"
+  "feedbackSubmitSuccess": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
+  "signInWithGoogleCta": "Google से साइन इन करें",
+  "signUpWithGoogleCta": "Google से खाता बनाएं",
+  "continueWithGoogleCta": "Google से जारी रखें",
+  "googleSignInCancelled": "Google साइन-इन रद्द किया गया।",
+  "googleSignInFailed": "Google साइन-इन विफल। कृपया पुनः प्रयास करें।"
 }

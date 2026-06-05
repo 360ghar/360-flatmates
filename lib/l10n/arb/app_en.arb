@@ -1390,13 +1390,32 @@
   "maintenanceMessage": "We're making things better. Please check back in a little while.",
   "maintenanceRetry": "Check again",
   "deleteAccountCta": "Delete Account",
+  "deleteAccountConfirmLabel": "Type DELETE to confirm:",
+  "deleteAccountConfirmHint": "Type DELETE here",
+  "deleteAccountButton": "Send Deletion Request",
   "deleteAccountTitle": "Delete Your Account",
-  "deleteAccountWarning": "This action is permanent and cannot be undone. All your data including profile, listings, chats, and matches will be permanently deleted.",
-  "deleteAccountConfirmLabel": "Type DELETE to confirm",
-  "deleteAccountConfirmHint": "Type DELETE",
-  "deleteAccountButton": "Delete My Account",
-  "deleteAccountCancelled": "Account deletion cancelled.",
-  "deleteAccountFailed": "Failed to delete account. Please try again or contact support.",
+  "deleteAccountWarning": "This action is permanent and cannot be undone. All your data including profile, listings, chats, and matches will be permanently deleted. To proceed, send us a deletion request email below and our team will reach out to confirm.",
+  "deleteAccountEmailSubject": "Account Deletion Request",
+  "deleteAccountEmailBody": "Hello 360 Ghar Support,\n\nI would like to request the deletion of my account.\n\nRegistered email: {email}\n\nThank you.",
+  "@deleteAccountEmailBody": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountRequestSent": "Email draft opened. Send it to start your deletion request.",
+  "deleteAccountEmailFallback": "Email us at {email} with subject \"{subject}\" to request account deletion.",
+  "@deleteAccountEmailFallback": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
   "forgotPasswordTitle": "Forgot Password",
   "forgotPasswordSubtitle": "Enter your phone number and we'll send you an OTP to reset your password.",
   "sendOtpCta": "Send OTP",
@@ -1440,5 +1459,10 @@
   "feedbackSeverityHigh": "High",
   "feedbackSeverityCritical": "Critical",
   "feedbackSubmitCta": "Submit",
-  "feedbackSubmitSuccess": "Thanks for your feedback!"
+  "feedbackSubmitSuccess": "Thanks for your feedback!",
+  "signInWithGoogleCta": "Sign in with Google",
+  "signUpWithGoogleCta": "Sign up with Google",
+  "continueWithGoogleCta": "Continue with Google",
+  "googleSignInCancelled": "Google Sign-In was cancelled.",
+  "googleSignInFailed": "Google Sign-In failed. Please try again."
 }

@@ -1,4 +1,7 @@
 const kPrivacyPolicyUrl = 'https://360ghar.com/policies/privacy-policy';
+
+// TODO: Replace with the actual Web application OAuth client ID from Google Cloud Console.
+const kGoogleWebClientId = 'YOUR_GOOGLE_WEB_CLIENT_ID';
 const kTermsOfServiceUrl = 'https://360ghar.com/policies/terms-of-service';
 const kSupportEmail = 'info@360ghar.com';
 

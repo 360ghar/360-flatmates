@@ -2964,27 +2964,38 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deleteAccountCta => 'खाता हटाएं';
 
   @override
+  String get deleteAccountConfirmLabel =>
+      'पुष्टि करने के लिए DELETE टाइप करें:';
+
+  @override
+  String get deleteAccountConfirmHint => 'यहाँ DELETE टाइप करें';
+
+  @override
+  String get deleteAccountButton => 'हटाने का अनुरोध भेजें';
+
+  @override
   String get deleteAccountTitle => 'अपना खाता हटाएं';
 
   @override
   String get deleteAccountWarning =>
-      'यह कार्रवाई स्थायी है और इसे पूर्ववत नहीं किया जा सकता। आपका सारा डेटा जिसमें प्रोफ़ाइल, लिस्टिंग, चैट और मैच शामिल हैं, स्थायी रूप से हटा दिया जाएगा।';
+      'यह कार्रवाई स्थायी है और इसे पूर्ववत नहीं किया जा सकता। आपका सारा डेटा जिसमें प्रोफ़ाइल, लिस्टिंग, चैट और मैच शामिल हैं, स्थायी रूप से हटा दिया जाएगा। आगे बढ़ने के लिए नीचे हमें एक हटाने का अनुरोध ईमेल भेजें और हमारी टीम पुष्टि के लिए संपर्क करेगी।';
 
   @override
-  String get deleteAccountConfirmLabel => 'पुष्टि करने के लिए DELETE टाइप करें';
+  String get deleteAccountEmailSubject => 'खाता हटाने का अनुरोध';
 
   @override
-  String get deleteAccountConfirmHint => 'DELETE टाइप करें';
+  String deleteAccountEmailBody(String email) {
+    return 'नमस्ते 360 Ghar सपोर्ट,\n\nमैं अपना खाता हटाने का अनुरोध करना चाहता/चाहती हूं।\n\nपंजीकृत ईमेल: $email\n\nधन्यवाद।';
+  }
 
   @override
-  String get deleteAccountButton => 'मेरा खाता हटाएं';
+  String get deleteAccountRequestSent =>
+      'ईमेल ड्राफ़्ट खोला गया। अपना हटाने का अनुरोध शुरू करने के लिए इसे भेजें।';
 
   @override
-  String get deleteAccountCancelled => 'खाता हटाना रद्द किया गया।';
-
-  @override
-  String get deleteAccountFailed =>
-      'खाता हटाने में विफल। कृपया पुनः प्रयास करें या सहायता से संपर्क करें।';
+  String deleteAccountEmailFallback(String email, String subject) {
+    return 'खाता हटाने का अनुरोध करने के लिए विषय \"$subject\" के साथ हमें $email पर ईमेल करें।';
+  }
 
   @override
   String get forgotPasswordTitle => 'पासवर्ड भूल गए';
@@ -3103,4 +3114,20 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get feedbackSubmitSuccess => 'आपकी प्रतिक्रिया के लिए धन्यवाद!';
+
+  @override
+  String get signInWithGoogleCta => 'Google से साइन इन करें';
+
+  @override
+  String get signUpWithGoogleCta => 'Google से खाता बनाएं';
+
+  @override
+  String get continueWithGoogleCta => 'Google से जारी रखें';
+
+  @override
+  String get googleSignInCancelled => 'Google साइन-इन रद्द किया गया।';
+
+  @override
+  String get googleSignInFailed =>
+      'Google साइन-इन विफल। कृपया पुनः प्रयास करें।';
 }

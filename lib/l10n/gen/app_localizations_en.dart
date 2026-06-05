@@ -2952,27 +2952,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountCta => 'Delete Account';
 
   @override
+  String get deleteAccountConfirmLabel => 'Type DELETE to confirm:';
+
+  @override
+  String get deleteAccountConfirmHint => 'Type DELETE here';
+
+  @override
+  String get deleteAccountButton => 'Send Deletion Request';
+
+  @override
   String get deleteAccountTitle => 'Delete Your Account';
 
   @override
   String get deleteAccountWarning =>
-      'This action is permanent and cannot be undone. All your data including profile, listings, chats, and matches will be permanently deleted.';
+      'This action is permanent and cannot be undone. All your data including profile, listings, chats, and matches will be permanently deleted. To proceed, send us a deletion request email below and our team will reach out to confirm.';
 
   @override
-  String get deleteAccountConfirmLabel => 'Type DELETE to confirm';
+  String get deleteAccountEmailSubject => 'Account Deletion Request';
 
   @override
-  String get deleteAccountConfirmHint => 'Type DELETE';
+  String deleteAccountEmailBody(String email) {
+    return 'Hello 360 Ghar Support,\n\nI would like to request the deletion of my account.\n\nRegistered email: $email\n\nThank you.';
+  }
 
   @override
-  String get deleteAccountButton => 'Delete My Account';
+  String get deleteAccountRequestSent =>
+      'Email draft opened. Send it to start your deletion request.';
 
   @override
-  String get deleteAccountCancelled => 'Account deletion cancelled.';
-
-  @override
-  String get deleteAccountFailed =>
-      'Failed to delete account. Please try again or contact support.';
+  String deleteAccountEmailFallback(String email, String subject) {
+    return 'Email us at $email with subject \"$subject\" to request account deletion.';
+  }
 
   @override
   String get forgotPasswordTitle => 'Forgot Password';
@@ -3092,4 +3102,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackSubmitSuccess => 'Thanks for your feedback!';
+
+  @override
+  String get signInWithGoogleCta => 'Sign in with Google';
+
+  @override
+  String get signUpWithGoogleCta => 'Sign up with Google';
+
+  @override
+  String get continueWithGoogleCta => 'Continue with Google';
+
+  @override
+  String get googleSignInCancelled => 'Google Sign-In was cancelled.';
+
+  @override
+  String get googleSignInFailed => 'Google Sign-In failed. Please try again.';
 }

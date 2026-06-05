@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,17 +10,22 @@ import '../core/theme/app_semantic_colors.dart';
 import '../features/bootstrap/bootstrap_controller.dart';
 import '../l10n/gen/app_localizations.dart';
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  DateTime? _lastBackPress;
+
+  @override
+  Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    // Use select so AppShell only rebuilds when mode changes,
-    // not on every bootstrap async lifecycle event.
     final mode =
         ref.watch(
           bootstrapControllerProvider.select(
@@ -31,53 +37,70 @@ class AppShell extends ConsumerWidget {
 
     final destinations = _buildDestinations(mode, locale);
 
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: AppSemanticColors.frostBlur,
-            sigmaY: AppSemanticColors.frostBlur,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AppSemanticColors.frostOverlayDark
-                  : AppSemanticColors.frostOverlayLight,
-              border: Border(
-                top: BorderSide(
-                  color: AppSemanticColors.line.withValues(alpha: 0.2),
-                  width: 0.5,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final now = DateTime.now();
+        if (_lastBackPress != null &&
+            now.difference(_lastBackPress!) < const Duration(seconds: 3)) {
+          SystemNavigator.pop();
+        } else {
+          _lastBackPress = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Press back again to exit'),
+              duration: Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        body: widget.navigationShell,
+        bottomNavigationBar: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: AppSemanticColors.frostBlur,
+              sigmaY: AppSemanticColors.frostBlur,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppSemanticColors.frostOverlayDark
+                    : AppSemanticColors.frostOverlayLight,
+                border: Border(
+                  top: BorderSide(
+                    color: AppSemanticColors.line.withValues(alpha: 0.2),
+                    width: 0.5,
+                  ),
                 ),
               ),
-            ),
-            child: SafeArea(
-              top: false,
-              child: NavigationBar(
-                height: 76,
-                selectedIndex: navigationShell.currentIndex.clamp(0, 4),
-                onDestinationSelected: (index) {
-                  navigationShell.goBranch(
-                    index,
-                    initialLocation: index == navigationShell.currentIndex,
-                  );
-                },
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                shadowColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                indicatorColor: AppSemanticColors.accent.withValues(
-                  alpha: 0.14,
+              child: SafeArea(
+                top: false,
+                child: NavigationBar(
+                  height: 76,
+                  selectedIndex: widget.navigationShell.currentIndex.clamp(0, 4),
+                  onDestinationSelected: (index) {
+                    widget.navigationShell.goBranch(
+                      index,
+                      initialLocation: index == widget.navigationShell.currentIndex,
+                    );
+                  },
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  indicatorColor: AppSemanticColors.accent.withValues(
+                    alpha: 0.14,
+                  ),
+                  indicatorShape: const RoundedRectangleBorder(
+                    borderRadius: AppRadius.smBorder,
+                  ),
+                  labelPadding: EdgeInsets.zero,
+                  destinations: destinations,
                 ),
-                indicatorShape: const RoundedRectangleBorder(
-                  borderRadius: AppRadius.smBorder,
-                ),
-                // Tighten icon→label gap so the cluster looks centered
-                // in the 76 px bar instead of floating with an invisible
-                // 8 px dead-zone (4 px Stack slack + 4 px default padding).
-                labelPadding: EdgeInsets.zero,
-                destinations: destinations,
               ),
             ),
           ),
