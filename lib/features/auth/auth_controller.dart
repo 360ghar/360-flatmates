@@ -138,6 +138,10 @@ class AuthController extends Notifier<AuthState> {
     }
 
     if (error is StateError) {
+      final msg = error.message.toLowerCase();
+      if (msg.contains('session missing') || msg.contains('no current user')) {
+        return 'failure:auth_session_missing';
+      }
       return 'failure:unknown';
     }
     debugPrint('AuthController._userSafeMessage: unhandled ${error.runtimeType}: $error');

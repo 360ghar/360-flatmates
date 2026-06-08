@@ -127,7 +127,7 @@ class FlatDetailsMedia extends StatelessWidget {
 
   Future<void> _openUrl(String url) async {
     final uri = Uri.tryParse(url);
-    if (uri != null) {
+    if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
