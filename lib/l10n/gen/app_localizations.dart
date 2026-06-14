@@ -500,6 +500,12 @@ abstract class AppLocalizations {
   /// **'Interest sent. The owner can now chat with you.'**
   String get contactRequestSent;
 
+  /// No description provided for @likeRemovedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from your likes'**
+  String get likeRemovedToast;
+
   /// No description provided for @contactRequestWithConversation.
   ///
   /// In en, this message translates to:
@@ -1271,7 +1277,7 @@ abstract class AppLocalizations {
   /// No description provided for @navExplore.
   ///
   /// In en, this message translates to:
-  /// **'Search'**
+  /// **'Explore'**
   String get navExplore;
 
   /// No description provided for @navProfile.
@@ -4970,12 +4976,6 @@ abstract class AppLocalizations {
   /// **'Download 360 FlatMates to connect'**
   String get downloadToConnect;
 
-  /// No description provided for @scanToConnect.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan to connect'**
-  String get scanToConnect;
-
   /// No description provided for @findYourFlatmateShare.
   ///
   /// In en, this message translates to:
@@ -5539,6 +5539,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get Directions'**
   String get getDirectionsLabel;
+
+  /// No description provided for @openInMapsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Maps'**
+  String get openInMapsLabel;
 
   /// No description provided for @propertyFallbackLabel.
   ///

@@ -252,6 +252,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Interest sent. The owner can now chat with you.';
 
   @override
+  String get likeRemovedToast => 'Removed from your likes';
+
+  @override
   String contactRequestWithConversation(int conversationId) {
     return 'Interest sent. Conversation #$conversationId is ready.';
   }
@@ -647,7 +650,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navPost => 'Post';
 
   @override
-  String get navExplore => 'Search';
+  String get navExplore => 'Explore';
 
   @override
   String get navProfile => 'Me';
@@ -2610,9 +2613,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadToConnect => 'Download 360 FlatMates to connect';
 
   @override
-  String get scanToConnect => 'Scan to connect';
-
-  @override
   String get findYourFlatmateShare => 'Find your flatmate on 360 FlatMates!';
 
   @override
@@ -2942,6 +2942,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get getDirectionsLabel => 'Get Directions';
+
+  @override
+  String get openInMapsLabel => 'Open in Maps';
 
   @override
   String get propertyFallbackLabel => 'Property';

@@ -22,12 +22,17 @@ class MiniMapView extends StatelessWidget {
   final double height;
   final String? markerLabel;
 
+  /// When provided, the whole map becomes tappable (e.g. to open the location
+  /// in an external maps app). When null, the map stays purely non-interactive.
+  final VoidCallback? onTap;
+
   const MiniMapView({
     required this.latitude,
     required this.longitude,
     super.key,
     this.height = 200,
     this.markerLabel,
+    this.onTap,
   });
 
   @override
@@ -35,61 +40,135 @@ class MiniMapView extends StatelessWidget {
     final center = LatLng(latitude, longitude);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: AppRadius.mdBorder,
-      child: SizedBox(
-        height: height,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            FlutterMap(
-              options: MapOptions(
-                initialCenter: center,
-                initialZoom: 15,
-                minZoom: kDefaultMinZoom,
-                maxZoom: kDefaultMaxZoom,
-                // Fully non-interactive single-pin map.
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.none,
-                ),
+    final mapContent = SizedBox(
+      height: height,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: center,
+              initialZoom: 15,
+              minZoom: kDefaultMinZoom,
+              maxZoom: kDefaultMaxZoom,
+              // Fully non-interactive single-pin map.
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.none,
               ),
-              children: [
-                TileLayerFactory.build(context),
-                RichAttributionWidget(
-                  attributions: [
-                    TextSourceAttribution(
-                      TileLayerFactory.attribution,
-                      textStyle: TextStyle(
-                        fontSize: 8,
-                        color: isDark
-                            ? AppSemanticColors.paper3
-                            : AppSemanticColors.ink2,
-                      ),
+            ),
+            children: [
+              TileLayerFactory.build(context),
+              RichAttributionWidget(
+                attributions: [
+                  TextSourceAttribution(
+                    TileLayerFactory.attribution,
+                    textStyle: TextStyle(
+                      fontSize: 8,
+                      color: isDark
+                          ? AppSemanticColors.paper3
+                          : AppSemanticColors.ink2,
                     ),
-                  ],
-                ),
-              ],
-            ),
-            // The pin: map is locked on `center`, so screen-center == `center`.
-            const IgnorePointer(
-              child: Padding(
-                // Anchor the tip of the pin (icon bottom) on the centre point.
-                padding: EdgeInsets.only(bottom: 40),
-                child: Icon(
-                  Icons.location_on,
-                  color: AppSemanticColors.accent,
-                  size: 40,
-                ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          // The pin: map is locked on `center`, so screen-center == `center`.
+          const IgnorePointer(
+            child: Padding(
+              // Anchor the tip of the pin (icon bottom) on the centre point.
+              padding: EdgeInsets.only(bottom: 40),
+              child: Icon(
+                Icons.location_on,
+                color: AppSemanticColors.accent,
+                size: 40,
               ),
             ),
-            // Attribution overlay
+          ),
+          // Attribution overlay
+          Positioned(
+            bottom: AppSpacing.xs,
+            left: AppSpacing.xs,
+            child: _AttributionWidget(isDark: isDark),
+          ),
+          // "Tap to open" affordance — only shown when the map is tappable.
+          if (onTap != null)
             Positioned(
-              bottom: AppSpacing.xs,
-              left: AppSpacing.xs,
-              child: _AttributionWidget(isDark: isDark),
+              top: AppSpacing.xs,
+              right: AppSpacing.xs,
+              child: IgnorePointer(child: _OpenInMapsHint(isDark: isDark)),
             ),
-          ],
+        ],
+      ),
+    );
+
+    final clipped = ClipRRect(
+      borderRadius: AppRadius.mdBorder,
+      child: mapContent,
+    );
+
+    if (onTap == null) {
+      return clipped;
+    }
+
+    return Semantics(
+      button: true,
+      label: AppLocalizations.of(context).openInMapsLabel,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: AppRadius.mdBorder,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: const Key('flat_map_open'),
+          onTap: onTap,
+          borderRadius: AppRadius.mdBorder,
+          child: mapContent,
         ),
+      ),
+    );
+  }
+}
+
+/// Small frosted badge hinting that the map can be opened externally.
+class _OpenInMapsHint extends StatelessWidget {
+  final bool isDark;
+
+  const _OpenInMapsHint({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppSemanticColors.darkSurfaceElevated
+            : AppSemanticColors.card,
+        borderRadius: AppRadius.smBorder,
+        boxShadow: [
+          AppShadows.floatingFor(isDark ? Brightness.dark : Brightness.light),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.open_in_new_rounded,
+            size: 12,
+            color: AppSemanticColors.accent,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            AppLocalizations.of(context).openInMapsLabel,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppSemanticColors.accent,
+            ),
+          ),
+        ],
       ),
     );
   }

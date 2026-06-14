@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/endpoints.dart';
@@ -253,22 +254,6 @@ class DiscoverRepository {
     );
   }
 
-  Future<Map<String, dynamic>?> fetchOwnerPeer(int ownerId) async {
-    try {
-      final response = await _ref
-          .read(apiClientProvider)
-          .get('${FlatmatesEndpoints.flatmatesProfiles}/$ownerId');
-      final data = response.data;
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
-      }
-      return null;
-    } catch (e) {
-      debugPrint('DiscoverRepository.fetchOwnerPeer: $e');
-      return null;
-    }
-  }
-
   Future<int?> setLiked(int propertyId, bool liked) async {
     final response = await _ref
         .read(apiClientProvider)
@@ -448,7 +433,67 @@ final discoverListingsProvider = FutureProvider<List<PropertyListing>>((ref) {
       .fetchListings(currentUser: profile, filters: effectiveFilters);
 });
 
-final propertyListingProvider = FutureProvider.family<PropertyListing, int>(
-  (ref, propertyId) =>
-      ref.watch(discoverRepositoryProvider).fetchListing(propertyId),
-);
+/// Owns the detail-page state for a single listing so that likes can be
+/// applied optimistically (instant heart flip) with rollback on failure,
+/// instead of a full network refetch round-trip.
+class PropertyListingController
+    extends FamilyAsyncNotifier<PropertyListing, int> {
+  @override
+  FutureOr<PropertyListing> build(int arg) {
+    return ref.watch(discoverRepositoryProvider).fetchListing(arg);
+  }
+
+  /// Toggles the like state optimistically. Returns the conversation_id (or
+  /// null) on success. Rolls back and rethrows on failure so callers can toast.
+  Future<int?> toggleLike() async {
+    final current = state.valueOrNull;
+    if (current == null) return null;
+    final newLiked = !(current.liked ?? false);
+    return _applyLiked(current, newLiked);
+  }
+
+  /// Ensures the listing is liked (used by contact / schedule-visit flows that
+  /// imply a like). Optimistically likes if not already liked. Always returns
+  /// the conversation_id from the backend (or null).
+  Future<int?> ensureLiked() async {
+    final current = state.valueOrNull;
+    if (current == null) return null;
+    if (current.liked ?? false) {
+      // Already liked; still hit the backend to obtain a conversation_id.
+      return ref.read(discoverRepositoryProvider).setLiked(current.id, true);
+    }
+    return _applyLiked(current, true);
+  }
+
+  Future<int?> _applyLiked(PropertyListing current, bool newLiked) async {
+    // Apply optimistic state immediately so the heart responds instantly.
+    // `likeCount` here is a client-side estimate reflecting the viewer's own
+    // action; it reconciles with the authoritative server count on the next
+    // full refetch (pull-to-refresh or re-navigation). We deliberately do NOT
+    // refetch here — a background reconcile would race against rapid re-toggles
+    // and could clobber a newer optimistic value with a stale server count.
+    state = AsyncData(
+      current.copyWith(
+        liked: newLiked,
+        likeCount: current.likeCount + (newLiked ? 1 : -1),
+      ),
+    );
+    try {
+      final cid = await ref
+          .read(discoverRepositoryProvider)
+          .setLiked(current.id, newLiked);
+      return cid;
+    } catch (e) {
+      // Rollback on failure.
+      state = AsyncData(current);
+      rethrow;
+    }
+  }
+}
+
+final propertyListingProvider =
+    AsyncNotifierProvider.family<
+      PropertyListingController,
+      PropertyListing,
+      int
+    >(PropertyListingController.new);

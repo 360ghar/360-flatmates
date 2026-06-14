@@ -7,6 +7,8 @@ import 'package:geolocator/geolocator.dart';
 import '../../../core/location/google_places_service.dart';
 import '../../../core/location/location_data.dart';
 import '../../../core/location/place_suggestion.dart';
+import '../../bootstrap/bootstrap_controller.dart';
+import '../../profile/profile_repository.dart';
 
 class LocationState {
   final Position? currentPosition;
@@ -196,6 +198,18 @@ class LocationController extends Notifier<LocationState> {
 
   void selectLocation(LocationData location) {
     state = state.copyWith(selectedLocation: location);
+  }
+
+  Future<void> selectAndPersistLocation(LocationData location) async {
+    state = state.copyWith(selectedLocation: location);
+    try {
+      await ref
+          .read(profileRepositoryProvider)
+          .updateProfile(payload: {'city': location.name});
+      await ref.read(bootstrapControllerProvider.notifier).refresh();
+    } catch (e) {
+      debugPrint('LocationController.selectAndPersistLocation: $e');
+    }
   }
 
   Future<void> useCurrentLocation() async {

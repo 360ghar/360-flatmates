@@ -8,75 +8,67 @@ import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chats/chats_repository.dart';
 import '../../../shared/presentation/components.dart';
 
-class OwnerProfileSheet extends ConsumerWidget {
-  const OwnerProfileSheet({
-    required this.ownerId,
-    required this.listingOwnerName,
-    required this.onSendMessage,
+/// View-only flatmate profile modal. Mirrors [OwnerProfileSheet] but omits the
+/// Contact CTA — used when tapping a flatmate profile card to inspect details.
+class FlatmateProfileSheet extends ConsumerWidget {
+  const FlatmateProfileSheet({
+    required this.userId,
+    this.nameFallback,
     super.key,
   });
 
-  final int ownerId;
-  final String listingOwnerName;
-  final VoidCallback onSendMessage;
+  final int userId;
+  final String? nameFallback;
 
   static Future<void> show({
     required BuildContext context,
-    required int ownerId,
-    required String listingOwnerName,
-    required VoidCallback onSendMessage,
+    required int userId,
+    String? nameFallback,
   }) {
     return FlatmatesBottomSheet.show<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => OwnerProfileSheet(
-        ownerId: ownerId,
-        listingOwnerName: listingOwnerName,
-        onSendMessage: onSendMessage,
-      ),
+      builder: (context) =>
+          FlatmateProfileSheet(userId: userId, nameFallback: nameFallback),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profileAsync = ref.watch(peerProfileProvider(ownerId));
+    final profileAsync = ref.watch(peerProfileProvider(userId));
 
     return profileAsync.when(
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: AppSpacing.section),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, _) => _OwnerProfileBody(
+      error: (_, _) => _FlatmateProfileBody(
         peerData: null,
-        listingOwnerName: listingOwnerName,
-        onSendMessage: onSendMessage,
+        nameFallback: nameFallback,
         showError: true,
       ),
       // A null payload is the actual failure path (fetchPeerProfile catches
       // errors and returns null rather than throwing), so treat it like an
       // error: show the "couldn't load" hint and suppress the misleading
       // 0% match ring.
-      data: (peerData) => _OwnerProfileBody(
+      data: (peerData) => _FlatmateProfileBody(
         peerData: peerData,
-        listingOwnerName: listingOwnerName,
-        onSendMessage: onSendMessage,
+        nameFallback: nameFallback,
         showError: peerData == null,
       ),
     );
   }
 }
 
-class _OwnerProfileBody extends StatelessWidget {
-  const _OwnerProfileBody({
+class _FlatmateProfileBody extends StatelessWidget {
+  const _FlatmateProfileBody({
     required this.peerData,
-    required this.listingOwnerName,
-    required this.onSendMessage,
+    required this.nameFallback,
     this.showError = false,
   });
 
   final Map<String, dynamic>? peerData;
-  final String listingOwnerName;
-  final VoidCallback onSendMessage;
+  final String? nameFallback;
   final bool showError;
 
   @override
@@ -85,7 +77,8 @@ class _OwnerProfileBody extends StatelessWidget {
     final locale = AppLocalizations.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final name = peerData?['full_name'] as String? ?? listingOwnerName;
+    final name =
+        peerData?['full_name'] as String? ?? nameFallback ?? 'Flatmate';
     final imageUrl = peerData?['profile_image_url'] as String?;
     final mode = peerData?['mode'] as String?;
     final city = peerData?['city'] as String?;
@@ -176,17 +169,6 @@ class _OwnerProfileBody extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: AppSpacing.lg),
-
-        // Send message CTA
-        SizedBox(
-          width: double.infinity,
-          child: FlatmatesButton(
-            label: locale.contactCta,
-            onPressed: onSendMessage,
-            icon: Icons.send_rounded,
-          ),
-        ),
         const SizedBox(height: AppSpacing.xl),
       ],
     );

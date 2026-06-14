@@ -26,7 +26,7 @@ class BudgetFilterCard extends StatelessWidget {
     final locale = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return FilterSectionCard(
+    return CompactFilterSection(
       title: locale.budgetFilterLabel,
       subtitle: locale.budgetRangeLabel(
         formatBudget(budgetValues.start),

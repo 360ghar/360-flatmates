@@ -5,11 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/errors/app_failure.dart';
+import '../chats/chats_repository.dart'
+    show
+        conversationsProvider,
+        incomingLikesProvider,
+        outgoingLikesProvider,
+        peerProfileProvider;
 import '../../core/errors/l10n_bridge.dart';
 import '../../core/theme/theme.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../bootstrap/bootstrap_controller.dart';
 import '../shared/presentation/components.dart';
+import 'application/discover_feed_controller.dart';
 import 'discover_repository.dart';
 import 'presentation/widgets/full_screen_gallery.dart';
 import 'presentation/widgets/flat_details_about.dart';
@@ -32,16 +39,12 @@ class FlatDetailsPage extends ConsumerStatefulWidget {
 class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
   int _currentImageIndex = 0;
   bool _contacting = false;
-  Map<String, dynamic>? _ownerPeer;
-  bool _peerFetched = false;
   int? _conversationId;
 
   @override
   void didUpdateWidget(covariant FlatDetailsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.listingId != widget.listingId) {
-      _peerFetched = false;
-      _ownerPeer = null;
       _currentImageIndex = 0;
     }
   }
@@ -59,11 +62,20 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     return listingState.when(
       data: (listing) {
         final hasLiked = listing.liked ?? false;
-        final hasOwnerId = (listing.owner?.id ?? listing.ownerId) != null;
-        final matchPercentage = (_ownerPeer?['match_percentage'] as num?)
-            ?.toDouble();
-
-        _maybeFetchOwnerPeer(listing);
+        final ownerId = listing.owner?.id ?? listing.ownerId;
+        // Only treat the owner as tappable / matchable when the viewer is a
+        // resolved, different user. Unresolved bootstrap (null) is "unknown".
+        final isSelfOwned = currentUserId == null || currentUserId == ownerId;
+        final canViewOwner = ownerId != null && !isSelfOwned;
+        // Watching the peer profile here warms it so the sheet opens with data
+        // ready, and sources the header match ring reactively.
+        final matchPercentage = canViewOwner
+            ? (ref
+                          .watch(peerProfileProvider(ownerId))
+                          .valueOrNull?['match_percentage']
+                      as num?)
+                  ?.toDouble()
+            : null;
 
         return FlatmatesScreen(
           useSafeArea: false,
@@ -92,7 +104,7 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
                           onShare: () => _showShareSheet(listing),
                           onFavorite: () => _handleShortlist(listing),
                           isFavorite: hasLiked,
-                          onOwnerTap: hasOwnerId
+                          onOwnerTap: canViewOwner
                               ? () => _handleOwnerTap(listing)
                               : null,
                           onImageTap: listing.imageUrls.isNotEmpty
@@ -164,30 +176,6 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     );
   }
 
-  void _maybeFetchOwnerPeer(PropertyListing listing) {
-    if (_peerFetched) return;
-    final ownerId = listing.owner?.id ?? listing.ownerId;
-    if (ownerId == null) return;
-
-    final currentUserId = ref
-        .read(bootstrapControllerProvider)
-        .valueOrNull
-        ?.profile
-        .id;
-    // Only skip if bootstrap has loaded AND the user is the owner.
-    if (currentUserId != null && currentUserId == ownerId) {
-      _peerFetched = true;
-      return;
-    }
-
-    _peerFetched = true;
-    ref.read(discoverRepositoryProvider).fetchOwnerPeer(ownerId).then((data) {
-      if (mounted) {
-        setState(() => _ownerPeer = data);
-      }
-    });
-  }
-
   Future<void> _openGallery(List<String> images) {
     return FullScreenGallery.open(
       context: context,
@@ -208,14 +196,23 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     );
   }
 
+  /// Invalidates the providers that surface like state on other screens so the
+  /// change is reflected app-wide. Mirrors the discover feed's onLike handler.
+  void _syncLikeAcrossViews() {
+    ref.read(discoverFeedControllerProvider.notifier).refresh();
+    ref.invalidate(discoverListingsProvider);
+    ref.invalidate(conversationsProvider);
+    ref.invalidate(incomingLikesProvider);
+    ref.invalidate(outgoingLikesProvider);
+  }
+
   Future<void> _handleShortlist(PropertyListing listing) async {
     try {
-      final hasLiked = listing.liked ?? false;
       final cid = await ref
-          .read(discoverRepositoryProvider)
-          .setLiked(listing.id, !hasLiked);
+          .read(propertyListingProvider(widget.listingId).notifier)
+          .toggleLike();
       if (cid != null) _conversationId = cid;
-      ref.invalidate(propertyListingProvider(widget.listingId));
+      _syncLikeAcrossViews();
     } catch (e) {
       if (mounted) {
         final locale = AppLocalizations.of(context);
@@ -233,11 +230,12 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
 
     try {
       final hasLiked = listing.liked ?? false;
-      final repo = ref.read(discoverRepositoryProvider);
-      final cid = await repo.setLiked(listing.id, true);
+      final cid = await ref
+          .read(propertyListingProvider(widget.listingId).notifier)
+          .ensureLiked();
       if (cid != null) _conversationId = cid;
       if (!hasLiked) {
-        ref.invalidate(propertyListingProvider(widget.listingId));
+        _syncLikeAcrossViews();
       }
 
       if (mounted && cid != null) {
@@ -301,15 +299,17 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     if (_conversationId != null) {
       cid = _conversationId!;
     } else {
-      final repo = ref.read(discoverRepositoryProvider);
-      final result = await repo.setLiked(listing.id, true);
+      final wasLiked = listing.liked ?? false;
+      final result = await ref
+          .read(propertyListingProvider(widget.listingId).notifier)
+          .ensureLiked();
       if (result == null) {
         if (mounted) FlatmatesToast.error(context, locale.actionFailedRetry);
         return;
       }
       _conversationId = result;
       cid = result;
-      ref.invalidate(propertyListingProvider(widget.listingId));
+      if (!wasLiked) _syncLikeAcrossViews();
     }
 
     try {
@@ -402,16 +402,13 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
         .valueOrNull
         ?.profile
         .id;
-    if (currentUserId != null && currentUserId == ownerId) return;
-
-    // Trigger a fetch if we haven't fetched yet, so the sheet has data.
-    if (!_peerFetched) {
-      _maybeFetchOwnerPeer(listing);
-    }
+    // Hardened self-owner guard: an unresolved (null) viewer is treated as
+    // "not allowed to open" rather than silently bypassing the check.
+    if (currentUserId == null || currentUserId == ownerId) return;
 
     OwnerProfileSheet.show(
       context: context,
-      peerData: _ownerPeer,
+      ownerId: ownerId,
       listingOwnerName: listing.ownerName ?? 'Owner',
       onSendMessage: () {
         Navigator.of(context).pop();

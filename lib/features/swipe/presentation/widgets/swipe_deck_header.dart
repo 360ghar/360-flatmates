@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/utils/debouncer.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../bootstrap/bootstrap_controller.dart';
 import '../../../discover/application/discover_feed_controller.dart';
+import '../../../discover/presentation/widgets/filter_sheet.dart';
 import '../../../location/application/location_controller.dart';
 import '../../../location/presentation/location_picker_modal.dart';
 
@@ -150,7 +150,7 @@ class _SwipeDeckHeaderState extends ConsumerState<SwipeDeckHeader> {
         IconButton.filledTonal(
           key: const Key('swipe_filter_tune'),
           tooltip: locale.searchFiltersTitle,
-          onPressed: () => context.push('/search-filters'),
+          onPressed: () => showFiltersSheet(context),
           icon: const Icon(Icons.tune_rounded),
         ),
       ],

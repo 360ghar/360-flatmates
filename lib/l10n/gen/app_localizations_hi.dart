@@ -252,6 +252,9 @@ class AppLocalizationsHi extends AppLocalizations {
       'रुचि भेज दी गई है। अब मालिक आपसे चैट कर सकता है।';
 
   @override
+  String get likeRemovedToast => 'आपकी पसंद से हटा दिया गया';
+
+  @override
   String contactRequestWithConversation(int conversationId) {
     return 'रुचि भेज दी गई है। बातचीत #$conversationId तैयार है।';
   }
@@ -647,7 +650,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get navPost => 'पोस्ट';
 
   @override
-  String get navExplore => 'सर्च';
+  String get navExplore => 'एक्सप्लोर';
 
   @override
   String get navProfile => 'मैं';
@@ -2623,9 +2626,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get downloadToConnect => 'जुड़ने के लिए 360 फ्लैटमेट्स डाउनलोड करें';
 
   @override
-  String get scanToConnect => 'जुड़ने के लिए स्कैन करें';
-
-  @override
   String get findYourFlatmateShare => '360 फ्लैटमेट्स पर अपना फ्लैटमेट ढूंढें!';
 
   @override
@@ -2957,6 +2957,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get getDirectionsLabel => 'दिशा-निर्देश प्राप्त करें';
+
+  @override
+  String get openInMapsLabel => 'मैप्स में खोलें';
 
   @override
   String get propertyFallbackLabel => 'प्रॉपर्टी';

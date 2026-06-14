@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_semantic_colors.dart';
@@ -8,6 +9,21 @@ import '../../../../l10n/gen/app_localizations.dart';
 import '../../../location/presentation/map_widgets.dart';
 import '../../../shared/presentation/components.dart';
 import '../../domain/property_listing.dart';
+
+/// Opens the property location in an external maps app (view-only, distinct
+/// from `GetDirectionsButton` which launches turn-by-turn directions).
+Future<void> _openInMaps(double latitude, double longitude) async {
+  final uri = Uri.parse(
+    'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+  );
+  try {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  } catch (e) {
+    debugPrint('FlatDetailsLocation._openInMaps: $e');
+  }
+}
 
 class FlatDetailsLocation extends StatelessWidget {
   const FlatDetailsLocation({
@@ -41,6 +57,7 @@ class FlatDetailsLocation extends StatelessWidget {
               latitude: l.latitude!,
               longitude: l.longitude!,
               height: 220,
+              onTap: () => _openInMaps(l.latitude!, l.longitude!),
             ),
             const SizedBox(height: AppSpacing.sm),
             GetDirectionsButton(

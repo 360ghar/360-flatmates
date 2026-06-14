@@ -116,7 +116,10 @@ class AuthController extends Notifier<AuthState> {
   /// Called by [BootstrapController] after bootstrap data is fetched. The
   /// router reads [AuthState.authStage] to route profile-completion and
   /// onboarding screens.
-  void updateGateStage(AuthStage stage, {List<String> missingFields = const []}) {
+  void updateGateStage(
+    AuthStage stage, {
+    List<String> missingFields = const [],
+  }) {
     state = state.copyWith(
       authStage: stage,
       missingProfileFields: missingFields,

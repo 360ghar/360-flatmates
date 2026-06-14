@@ -26,7 +26,6 @@ import '../../features/discover/change_location_page.dart';
 import '../../features/location_search/location_search_page.dart';
 import '../../features/discover/flat_details_page.dart';
 import '../../features/discover/map_view_page.dart';
-import '../../features/discover/search_filters_page.dart';
 import '../../features/feedback/domain/feedback_model.dart';
 import '../../features/feedback/presentation/feedback_form_page.dart';
 import '../../features/listings/create_listing_page.dart';
@@ -110,7 +109,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           location == '/notifications' ||
           location == '/notification-settings' ||
           location == '/schedule-visit' ||
-          location == '/search-filters' ||
           location.startsWith('/help-safety') ||
           location == '/privacy-policy' ||
           location == '/terms-of-service' ||
@@ -308,11 +306,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/location-search',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const LocationSearchPage(),
-      ),
-      GoRoute(
-        path: '/search-filters',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SearchFiltersPage(),
       ),
       GoRoute(
         path: '/map',

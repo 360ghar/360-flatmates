@@ -16,7 +16,10 @@ class BootstrapController extends AsyncNotifier<BootstrapData?> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    // Retain the previous value while reloading so widgets watching
+    // `valueOrNull` (e.g. the Discover page's profile/city) don't flicker to
+    // null mid-refresh. `isLoading` stays true for any spinner that needs it.
+    state = const AsyncLoading<BootstrapData?>().copyWithPrevious(state);
     state = await AsyncValue.guard(() => _fetchBootstrapData());
   }
 
@@ -40,9 +43,10 @@ class BootstrapController extends AsyncNotifier<BootstrapData?> {
       final authController = ref.read(authControllerProvider.notifier);
       authController.updateGateStage(
         AuthStage.fromWire(stageMap['stage'] as String?),
-        missingFields: (stageMap['missing_fields'] as List?)
-            ?.map((e) => e.toString())
-            .toList() ??
+        missingFields:
+            (stageMap['missing_fields'] as List?)
+                ?.map((e) => e.toString())
+                .toList() ??
             [],
       );
     }

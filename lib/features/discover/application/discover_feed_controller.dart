@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../bootstrap/bootstrap_controller.dart';
+import '../../chats/chats_repository.dart';
 import '../discover_repository.dart';
 import 'move_in_filter.dart';
 
@@ -148,6 +149,37 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
   Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore) return;
     await load(clearAll: false);
+  }
+
+  /// Optimistically toggles the liked state of a listing in the feed.
+  ///
+  /// The card fills/unfills instantly; on network failure the previous
+  /// list is restored. Returns the `conversation_id` (non-null when a
+  /// like created/reused a conversation).
+  Future<int?> toggleLike(int propertyId) async {
+    final original = state.listings;
+    final index = original.indexWhere((listing) => listing.id == propertyId);
+    if (index < 0) return null;
+
+    final item = original[index];
+    final newLiked = !(item.liked ?? false);
+    final optimistic = [...original];
+    optimistic[index] = item.copyWith(liked: newLiked);
+    state = state.copyWith(listings: optimistic);
+
+    try {
+      final conversationId = await ref
+          .read(discoverRepositoryProvider)
+          .setLiked(propertyId, newLiked);
+      if (newLiked) {
+        ref.invalidate(conversationsProvider);
+      }
+      return conversationId;
+    } catch (e) {
+      // Roll back the optimistic change on failure.
+      state = state.copyWith(listings: original);
+      rethrow;
+    }
   }
 
   Future<void> refresh() async {

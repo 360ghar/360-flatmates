@@ -24,6 +24,7 @@ import '../shared/presentation/flatmates_toast.dart';
 import 'application/map_listings_controller.dart';
 import 'discover_repository.dart';
 import 'presentation/widgets/discover_map.dart';
+import 'presentation/widgets/filter_sheet.dart';
 import 'presentation/widgets/map_filter_bar.dart';
 import 'presentation/widgets/map_listing_sheets.dart';
 import 'presentation/widgets/map_listings_bottom_sheet.dart';
@@ -223,8 +224,7 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               IconButton(
-                                onPressed: () =>
-                                    context.push('/search-filters'),
+                                onPressed: () => _showFilterSheet(context),
                                 icon: const Icon(Icons.search_rounded),
                                 style: IconButton.styleFrom(
                                   backgroundColor:
@@ -376,7 +376,7 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
   }
 
   void _showFilterSheet(BuildContext context) {
-    context.push('/search-filters');
+    showFiltersSheet(context);
   }
 
   void _handleListingTap(PropertyListing item) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +20,7 @@ import 'application/discover_feed_controller.dart';
 import 'presentation/widgets/discover_header.dart';
 import 'presentation/widgets/discover_listing_card.dart';
 import 'presentation/widgets/discover_support_sections.dart';
+import 'presentation/widgets/filter_sheet.dart';
 import 'presentation/widgets/home_section_widgets.dart';
 import 'presentation/widgets/staggered_card_appear.dart';
 
@@ -128,7 +131,11 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
       },
       onLocationSelected: (location) {
         didSelectLocation = true;
-        ref.read(locationControllerProvider.notifier).selectLocation(location);
+        unawaited(
+          ref
+              .read(locationControllerProvider.notifier)
+              .selectAndPersistLocation(location),
+        );
         ref
             .read(discoverFeedControllerProvider.notifier)
             .updateLocationFilter(
@@ -200,7 +207,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  HomeSearchBar(onTap: () => context.push('/search-filters')),
+                  HomeSearchBar(onTap: () => showFiltersSheet(context)),
                   const SizedBox(height: AppSpacing.sm),
                   if (filtered.length < 5 && city != null) ...[
                     WaitlistNudgeCard(

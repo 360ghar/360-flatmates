@@ -10,6 +10,7 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../discover/presentation/widgets/flatmate_profile_sheet.dart';
 import '../shared/presentation/components.dart';
 import '../swipe/match_qna_nudge.dart';
 import 'application/chat_actions_controller.dart';
@@ -311,6 +312,11 @@ class _LikesTab extends StatelessWidget {
             imageUrl: item.peer.profileImageUrl,
             blurImage: true,
             matchButtonLabel: locale.matchAction,
+            onTap: () => FlatmateProfileSheet.show(
+              context: context,
+              userId: item.peer.id,
+              nameFallback: item.peer.fullName,
+            ),
             onMatchTap: matchingLikeIds.contains(item.id)
                 ? null
                 : () => onMatchTap(item),
@@ -367,6 +373,11 @@ class _LikedTab extends StatelessWidget {
             matchPercentage: item.peer.matchPercentage,
             imageUrl: item.peer.profileImageUrl,
             matchButtonLabel: '',
+            onTap: () => FlatmateProfileSheet.show(
+              context: context,
+              userId: item.peer.id,
+              nameFallback: item.peer.fullName,
+            ),
             onMatchTap: null,
           );
         },

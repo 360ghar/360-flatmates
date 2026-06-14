@@ -1132,6 +1132,7 @@ class FlatmatesProfileGridCard extends StatefulWidget {
     super.key,
     this.age,
     this.blurImage = false,
+    this.onTap,
   });
 
   final String name;
@@ -1144,6 +1145,11 @@ class FlatmatesProfileGridCard extends StatefulWidget {
   final String matchButtonLabel;
   final bool blurImage;
 
+  /// Optional whole-card tap. When non-null the card body (everything except
+  /// the match button) responds to taps with press-scale feedback. The match
+  /// button manages its own [onMatchTap] independently.
+  final VoidCallback? onTap;
+
   @override
   State<FlatmatesProfileGridCard> createState() =>
       _FlatmatesProfileGridCardState();
@@ -1152,6 +1158,7 @@ class FlatmatesProfileGridCard extends StatefulWidget {
 class _FlatmatesProfileGridCardState extends State<FlatmatesProfileGridCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ringController;
+  double _scale = 1.0;
 
   @override
   void initState() {
@@ -1178,7 +1185,7 @@ class _FlatmatesProfileGridCardState extends State<FlatmatesProfileGridCard>
         ? compatibilityScoreColor(widget.matchPercentage!)
         : AppSemanticColors.accent;
 
-    return Column(
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
@@ -1306,6 +1313,38 @@ class _FlatmatesProfileGridCardState extends State<FlatmatesProfileGridCard>
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+      ],
+    );
+
+    // Make the body (image + name/location/profession) tappable when an
+    // onTap is provided. The match button below is a separate hit target and
+    // manages its own callback independently, so this never swallows it.
+    final tappableBody = widget.onTap == null
+        ? body
+        : Listener(
+            onPointerDown: (_) => setState(() => _scale = 0.97),
+            onPointerUp: (_) => setState(() => _scale = 1.0),
+            onPointerCancel: (_) => setState(() => _scale = 1.0),
+            child: AnimatedScale(
+              scale: _scale,
+              duration: AppMotion.buttonPress,
+              curve: Curves.easeOutCubic,
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: const Key('flatmate_card_tap'),
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: widget.onTap,
+                  child: body,
+                ),
+              ),
+            ),
+          );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: tappableBody),
         if (widget.matchButtonLabel.isNotEmpty) ...[
           const SizedBox(height: 6),
           SizedBox(

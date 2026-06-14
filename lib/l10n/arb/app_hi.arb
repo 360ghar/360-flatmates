@@ -179,6 +179,7 @@
     }
   },
   "contactRequestSent": "रुचि भेज दी गई है। अब मालिक आपसे चैट कर सकता है।",
+  "likeRemovedToast": "आपकी पसंद से हटा दिया गया",
   "contactRequestWithConversation": "रुचि भेज दी गई है। बातचीत #{conversationId} तैयार है।",
   "@contactRequestWithConversation": {
     "placeholders": {
@@ -335,7 +336,7 @@
   "navLikesChat": "इनबॉक्स",
   "navSchedule": "शेड्यूल",
   "navPost": "पोस्ट",
-  "navExplore": "सर्च",
+  "navExplore": "एक्सप्लोर",
   "navProfile": "मैं",
   "navVisits": "विज़िट",
   "onboardingGetStarted": "शुरू करें",
@@ -1127,7 +1128,6 @@
   "matchCreateFailed": "मैच नहीं बन सका। फिर से प्रयास करें।",
   "couldNotLoadConversations": "बातचीत लोड नहीं हो सकी",
   "downloadToConnect": "जुड़ने के लिए 360 फ्लैटमेट्स डाउनलोड करें",
-  "scanToConnect": "जुड़ने के लिए स्कैन करें",
   "findYourFlatmateShare": "360 फ्लैटमेट्स पर अपना फ्लैटमेट ढूंढें!",
   "checkOutListingShare": "360 फ्लैटमेट्स पर इस लिस्टिंग को देखें!",
   "passwordUpdateFailed": "पासवर्ड अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
@@ -1354,6 +1354,7 @@
   "selectLocationLabel": "लोकेशन चुनें",
   "locationSectionTitle": "लोकेशन",
   "getDirectionsLabel": "दिशा-निर्देश प्राप्त करें",
+  "openInMapsLabel": "मैप्स में खोलें",
   "propertyFallbackLabel": "प्रॉपर्टी",
   "distanceMeters": "{distance}मी दूर",
   "@distanceMeters": {

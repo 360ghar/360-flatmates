@@ -11,6 +11,7 @@ import '../../../shared/presentation/flatmates_network_image.dart';
 import '../../../shared/presentation/flatmates_ui.dart';
 import '../../discover_repository.dart';
 import '../../../swipe/application/swipe_deck_controller.dart';
+import 'flatmate_profile_sheet.dart';
 
 class NewInCitySection extends StatelessWidget {
   const NewInCitySection({
@@ -139,6 +140,7 @@ class MovingSoonSection extends StatelessWidget {
               return SizedBox(
                 width: 120,
                 child: FlatmatesCard(
+                  onTap: () => context.push('/flat-details/${item.id}'),
                   padding: EdgeInsets.zero,
                   child: Stack(
                     children: [
@@ -498,7 +500,7 @@ class MeetFlatmatesSection extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: displayProfiles.length,
                 separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.sm),
+                    const SizedBox(width: AppSpacing.xs),
                 itemBuilder: (context, index) {
                   final profile = displayProfiles[index];
                   final name = profile.fullName?.split(' ').first ?? 'Flatmate';
@@ -509,10 +511,17 @@ class MeetFlatmatesSection extends ConsumerWidget {
                           : null);
 
                   return SizedBox(
-                    width: 84,
+                    width: 68,
                     child: FlatmatesCard(
-                      onTap: () => context.go('/swipe'),
-                      padding: const EdgeInsets.all(4.0),
+                      onTap: () => FlatmateProfileSheet.show(
+                        context: context,
+                        userId: profile.id,
+                        nameFallback: profile.fullName,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 2.0,
+                        vertical: 4.0,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                       backgroundColor: Colors.transparent,
                       elevation: 0,

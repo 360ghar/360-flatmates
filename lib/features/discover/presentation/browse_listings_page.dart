@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,9 +12,9 @@ import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../../chats/chats_repository.dart';
 import '../../shared/presentation/flatmates_empty_state.dart';
 import '../../shared/presentation/flatmates_error_state.dart';
+import '../../shared/presentation/flatmates_like_button.dart';
 import '../../shared/presentation/flatmates_network_image.dart';
 import '../../shared/presentation/flatmates_price_text.dart';
 import '../../shared/presentation/flatmates_toast.dart';
@@ -20,6 +22,7 @@ import '../../shared/presentation/flatmates_search_bar.dart';
 import '../../shared/presentation/flatmates_skeleton.dart';
 import '../discover_repository.dart';
 import '../application/discover_feed_controller.dart';
+import 'widgets/filter_sheet.dart';
 
 final _isSearchActiveProvider = StateProvider<bool>((ref) => false);
 final _cardPressedProvider = StateProvider.family<bool, int>(
@@ -66,94 +69,89 @@ class _BrowseListingsPageState extends ConsumerState<BrowseListingsPage> {
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: 'Back',
         ),
-        title: Text(locale.homePickedForYou),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.sm,
-              AppSpacing.lg,
-              AppSpacing.md,
-            ),
-            child: Row(
-              children: [
-                if (isSearchActive) ...[
-                  Expanded(
-                    child: FlatmatesSearchBar(
-                      controller: _searchController,
-                      hint: locale.searchCityOrAreaHint,
-                      onChanged: (query) {
-                        ref
-                            .read(discoverFeedControllerProvider.notifier)
-                            .updateSearchQuery(query.isEmpty ? null : query);
-                      },
-                      trailingIcon: _searchController.text.isNotEmpty
-                          ? Icons.close_rounded
-                          : null,
-                      onTrailingTap: () {
-                        _searchController.clear();
-                        ref
-                            .read(discoverFeedControllerProvider.notifier)
-                            .updateSearchQuery(null);
-                      },
-                      autofocus: _searchController.text.isEmpty,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                ] else ...[
-                  IconButton.outlined(
-                    onPressed: () =>
-                        ref.read(_isSearchActiveProvider.notifier).state = true,
-                    icon: const Icon(Icons.search_rounded),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                ],
-                IconButton.filledTonal(
-                  key: const Key('browse_filter_tune'),
-                  onPressed: () => context.push('/search-filters'),
-                  icon: const Icon(Icons.tune_rounded),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: feedState.isLoading && filtered.isEmpty
-                ? const FlatmatesSkeleton.browseListings()
-                : filtered.isEmpty && feedState.hasError
-                ? FlatmatesErrorState(
-                    message: locale.actionFailedRetry,
-                    onRetry: () => ref
+        titleSpacing: 0,
+        title: isSearchActive
+            ? Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: FlatmatesSearchBar(
+                  controller: _searchController,
+                  hint: locale.searchCityOrAreaHint,
+                  onChanged: (query) {
+                    ref
                         .read(discoverFeedControllerProvider.notifier)
-                        .refresh(),
-                  )
-                : filtered.isEmpty
-                ? FlatmatesEmptyState(
-                    title: locale.homeNoResults,
-                    subtitle: locale.homeNoResultsSubtitle,
-                    icon: Icons.search_off_rounded,
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      0,
-                      AppSpacing.lg,
-                      120,
-                    ),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, index) {
-                      return _BrowseListingsCard(
-                        item: filtered[index],
-                        index: index,
-                      );
-                    },
-                  ),
+                        .updateSearchQuery(query.isEmpty ? null : query);
+                  },
+                  trailingIcon: _searchController.text.isNotEmpty
+                      ? Icons.close_rounded
+                      : null,
+                  onTrailingTap: () {
+                    _searchController.clear();
+                    ref
+                        .read(discoverFeedControllerProvider.notifier)
+                        .updateSearchQuery(null);
+                  },
+                  autofocus: _searchController.text.isEmpty,
+                ),
+              )
+            : Text(locale.homePickedForYou),
+        actions: [
+          if (isSearchActive)
+            IconButton(
+              key: const Key('browse_search_close'),
+              tooltip: 'Close search',
+              onPressed: () {
+                _searchController.clear();
+                ref
+                    .read(discoverFeedControllerProvider.notifier)
+                    .updateSearchQuery(null);
+                ref.read(_isSearchActiveProvider.notifier).state = false;
+              },
+              icon: const Icon(Icons.close_rounded),
+            )
+          else
+            IconButton(
+              key: const Key('browse_search_open'),
+              tooltip: 'Search',
+              onPressed: () =>
+                  ref.read(_isSearchActiveProvider.notifier).state = true,
+              icon: const Icon(Icons.search_rounded),
+            ),
+          IconButton(
+            key: const Key('browse_filter_tune'),
+            tooltip: locale.searchFiltersTitle,
+            onPressed: () => showFiltersSheet(context),
+            icon: const Icon(Icons.tune_rounded),
           ),
+          const SizedBox(width: AppSpacing.xs),
         ],
       ),
+      body: feedState.isLoading && filtered.isEmpty
+          ? const FlatmatesSkeleton.browseListings()
+          : filtered.isEmpty && feedState.hasError
+          ? FlatmatesErrorState(
+              message: locale.actionFailedRetry,
+              onRetry: () =>
+                  ref.read(discoverFeedControllerProvider.notifier).refresh(),
+            )
+          : filtered.isEmpty
+          ? FlatmatesEmptyState(
+              title: locale.homeNoResults,
+              subtitle: locale.homeNoResultsSubtitle,
+              icon: Icons.search_off_rounded,
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                120,
+              ),
+              itemCount: filtered.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (context, index) {
+                return _BrowseListingsCard(item: filtered[index], index: index);
+              },
+            ),
     );
   }
 }
@@ -170,7 +168,32 @@ class _BrowseListingsCard extends ConsumerStatefulWidget {
 }
 
 class _BrowseListingsCardState extends ConsumerState<_BrowseListingsCard> {
-  final Set<int> _pendingLikeIds = {};
+  Future<void> _handleLike() async {
+    final locale = AppLocalizations.of(context);
+    final wasLiked = widget.item.liked ?? false;
+    try {
+      final conversationId = await ref
+          .read(discoverFeedControllerProvider.notifier)
+          .toggleLike(widget.item.id);
+      if (!mounted) return;
+      if (wasLiked) {
+        FlatmatesToast.success(context, locale.likeRemovedToast);
+      } else {
+        FlatmatesToast.success(
+          context,
+          conversationId == null
+              ? locale.contactRequestSent
+              : locale.contactRequestWithConversation(conversationId),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e is AppFailure
+          ? e.userMessage(locale.toUserMessageL10n())
+          : locale.actionFailedRetry;
+      FlatmatesToast.error(context, msg);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +253,7 @@ class _BrowseListingsCardState extends ConsumerState<_BrowseListingsCard> {
             onTap: () => context.push('/flat-details/${item.id}'),
             borderRadius: AppRadius.cardBorder,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.horizontal(
@@ -354,52 +378,15 @@ class _BrowseListingsCardState extends ConsumerState<_BrowseListingsCard> {
                     right: AppSpacing.sm,
                     top: AppSpacing.sm,
                   ),
-                  child: SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: IconButton(
-                      key: Key('browse_like_${item.id}'),
-                      onPressed: () {
-                        if (_pendingLikeIds.contains(item.id)) return;
-                        _pendingLikeIds.add(item.id);
-                        ref
-                            .read(discoverRepositoryProvider)
-                            .setLiked(item.id, true)
-                            .then((conversationId) {
-                              _pendingLikeIds.remove(item.id);
-                              ref
-                                  .read(discoverFeedControllerProvider.notifier)
-                                  .refresh();
-                              ref.invalidate(conversationsProvider);
-                              if (!context.mounted) return;
-                              FlatmatesToast.success(
-                                context,
-                                conversationId == null
-                                    ? locale.contactRequestSent
-                                    : locale.contactRequestWithConversation(
-                                        conversationId,
-                                      ),
-                              );
-                            })
-                            .catchError((e) {
-                              _pendingLikeIds.remove(item.id);
-                              if (!context.mounted) return;
-                              final msg = e is AppFailure
-                                  ? e.userMessage(locale.toUserMessageL10n())
-                                  : locale.actionFailedRetry;
-                              FlatmatesToast.error(context, msg);
-                            });
-                      },
-                      icon: const Icon(Icons.favorite_border_rounded, size: 14),
-                      tooltip: 'Like',
-                      padding: EdgeInsets.zero,
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppSemanticColors.accentSoft,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(7),
-                        ),
-                      ),
-                    ),
+                  child: FlatmatesLikeButton(
+                    key: Key('browse_like_${item.id}'),
+                    liked: item.liked ?? false,
+                    onTap: () => unawaited(_handleLike()),
+                    size: 34,
+                    iconSize: 16,
+                    radius: 8,
+                    backgroundColor: AppSemanticColors.accentSoft,
+                    unlikedColor: AppSemanticColors.accent,
                   ),
                 ),
               ],

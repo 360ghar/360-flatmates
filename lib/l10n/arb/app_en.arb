@@ -179,6 +179,7 @@
     }
   },
   "contactRequestSent": "Interest sent. The owner can now chat with you.",
+  "likeRemovedToast": "Removed from your likes",
   "contactRequestWithConversation": "Interest sent. Conversation #{conversationId} is ready.",
   "@contactRequestWithConversation": {
     "placeholders": {
@@ -335,7 +336,7 @@
   "navLikesChat": "Inbox",
   "navSchedule": "Schedule",
   "navPost": "Post",
-  "navExplore": "Search",
+  "navExplore": "Explore",
   "navProfile": "Me",
   "navVisits": "Visits",
   "onboardingGetStarted": "Get Started",
@@ -1141,7 +1142,6 @@
   "matchCreateFailed": "Could not create match. Try again.",
   "couldNotLoadConversations": "Could not load conversations",
   "downloadToConnect": "Download 360 FlatMates to connect",
-  "scanToConnect": "Scan to connect",
   "findYourFlatmateShare": "Find your flatmate on 360 FlatMates!",
   "checkOutListingShare": "Check out this listing on 360 FlatMates!",
   "passwordUpdateFailed": "Failed to update password. Please try again.",
@@ -1368,6 +1368,7 @@
   "selectLocationLabel": "Select Location",
   "locationSectionTitle": "Location",
   "getDirectionsLabel": "Get Directions",
+  "openInMapsLabel": "Open in Maps",
   "propertyFallbackLabel": "Property",
   "distanceMeters": "{distance}m away",
   "@distanceMeters": {
