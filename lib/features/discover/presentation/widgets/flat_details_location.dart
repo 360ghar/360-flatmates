@@ -33,14 +33,15 @@ Future<void> _openInMaps(
     'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
   );
 
+  // Note: deliberately not gated on canLaunchUrl() — it is unreliable on
+  // Android 11+ (package visibility) and silently returns false for https
+  // URLs without a matching <queries> entry, making the map tap a no-op.
   // Try the native geo: scheme first.
   try {
-    if (await canLaunchUrl(geoUri)) {
-      await launchUrl(geoUri);
-      return;
-    }
-  } catch (e) {
-    debugPrint('FlatDetailsLocation._openInMaps geo failed: $e');
+    await launchUrl(geoUri, mode: LaunchMode.externalApplication);
+    return;
+  } catch (_) {
+    // geo: may not be available; fall through to HTTPS.
   }
 
   // Fallback: universal Google Maps HTTPS URL in the external browser/app.

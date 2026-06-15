@@ -12,7 +12,20 @@
           "package_name": "com.the360ghar.flatmates360"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "280778516706-pol7sgk3ep3hko85mgjsgf5fcqfb0p2u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.the360ghar.flatmates360",
+            "certificate_hash": "8e3acaa4866623ff75efa1923f13300333f41b29"
+          }
+        },
+        {
+          "client_id": "280778516706-c44fn3sfh81ucnburik68s6420t4hgfe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyArALNoUD3PlMOvDyx6lKIItNI-hBnSaE8"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "280778516706-c44fn3sfh81ucnburik68s6420t4hgfe.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "280778516706-tr53mmmmifblb50c4tju2rqsel0prjam.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.the360ghar.flatmates360"
+              }
+            }
+          ]
         }
       }
     }

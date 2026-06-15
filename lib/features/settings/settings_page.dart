@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -175,12 +176,14 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  void _showAboutDialog(BuildContext context) {
+  Future<void> _showAboutDialog(BuildContext context) async {
     final locale = AppLocalizations.of(context);
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!context.mounted) return;
     showAboutDialog(
       context: context,
       applicationName: locale.appName,
-      applicationVersion: '1.0.3',
+      applicationVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
       applicationIcon: const FlutterLogo(size: 32),
     );
   }

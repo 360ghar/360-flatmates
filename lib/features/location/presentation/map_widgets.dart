@@ -338,15 +338,15 @@ class GetDirectionsButton extends StatelessWidget {
 
   Future<void> _launchDirections() async {
     // Universal Google Maps directions URL — opens the native app or web.
-    // Not gated on canLaunchUrl: on Android 11+/iOS generic https URLs are
-    // frequently reported as unlaunchable, which would silently no-op.
+    // Not gated on canLaunchUrl(): unreliable on Android 11+ (package
+    // visibility), returns false for https without a <queries> entry.
     final uri = Uri.parse(
       'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude&travelmode=driving',
     );
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      debugPrint('GetDirectionsButton._launchDirections failed: $e');
+      debugPrint('GetDirectionsButton._launchDirections: $e');
     }
   }
 }

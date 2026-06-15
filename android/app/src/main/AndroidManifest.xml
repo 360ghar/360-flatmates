@@ -80,6 +80,8 @@
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="geo"/>
         </intent>
+        <!-- Lets canLaunchUrl() resolve https URLs (e.g. Google Maps) on
+             Android 11+ (API 30+) package-visibility restrictions. -->
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>

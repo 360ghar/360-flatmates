@@ -93,21 +93,18 @@
 				<string>com.the360ghar.flatmates360</string>
 			</array>
 		</dict>
-		<!-- Google Sign-In: reversed iOS OAuth client id URL scheme.
-		     Phase 0 TODO: replace the placeholder below with the value from
-		     GoogleService-Info.plist (REVERSED_CLIENT_ID), e.g.
-		     com.googleusercontent.apps.1234567890-abcdefg -->
-			<dict>
-				<key>CFBundleTypeRole</key>
-				<string>Editor</string>
-				<key>CFBundleURLName</key>
-				<string>google-signin</string>
-				<key>CFBundleURLSchemes</key>
-				<array>
-					<string>com.googleusercontent.apps.GOOGLE_IOS_CLIENT_ID_REVERSED</string>
-				</array>
-			</dict>
-		</array>
+		<!-- Google Sign-In: reversed iOS OAuth client id URL scheme -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>google-signin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.280778516706-tr53mmmmifblb50c4tju2rqsel0prjam</string>
+			</array>
+		</dict>
+	</array>
 	<!-- Schemes the app is allowed to query/launch (required by canLaunchUrl on
 	     iOS; also an App Store requirement). Powers maps/directions, WhatsApp
 	     share, and tel: call links. -->

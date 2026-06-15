@@ -1,0 +1,19 @@
+# Android release signing credentials
+# Copy this file to key.properties and fill in the real values.
+# NEVER commit key.properties to version control.
+#
+# Generate a keystore with:
+#   keytool -genkey -v \
+#     -keystore release.keystore \
+#     -alias release \
+#     -keyalg RSA \
+#     -keysize 2048 \
+#     -validity 10000
+#
+# Then move release.keystore to a safe location (outside the repo)
+# and set storeFile to its absolute path.
+
+storeFile=
+storePassword=
+keyAlias=
+keyPassword=

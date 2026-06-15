@@ -63,3 +63,8 @@ deliverables/
 
 # Windows artifacts
 nul
+
+# Android signing credentials (NEVER commit)
+/android/app/key.properties
+*.jks
+*.keystore

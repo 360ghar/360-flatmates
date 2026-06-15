@@ -207,6 +207,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				53AF4D9524F28B6D370B7C4F /* [CP] Embed Pods Frameworks */,
 				6FBCB8171DF637408E6A139A /* [CP] Copy Pods Resources */,
+				A1B2C3D4E5F6000000000001 /* Workaround objective_c.framework dSYM */,
 			);
 			buildRules = (
 			);
@@ -388,6 +389,56 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		A1B2C3D4E5F6000000000001 /* Workaround objective_c.framework dSYM */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Workaround objective_c.framework dSYM";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Workaround for missing dSYM in objective_c.framework (GTMSessionFetcher)
+# This framework ships without dSYMs, causing upload validation to fail.
+# We copy the framework binary as the DWARF file to preserve UUID information.
+if [ \"${ACTION}\" = \"archive\" ]; then
+  FRAMEWORK=\"objective_c.framework\"
+  DSYM_DIR=\"${DWARF_DSYM_FOLDER_PATH}\"
+  DSYM_PATH=\"${DSYM_DIR}/${FRAMEWORK}.dSYM\"
+  
+  # Find the framework in the build products
+  FRAMEWORK_PATH=$(find \"${BUILT_PRODUCTS_DIR}\" -name \"${FRAMEWORK}\" -type d | head -n 1)
+  
+  if [ ! -d \"${DSYM_PATH}\" ] && [ -n \"${FRAMEWORK_PATH}\" ]; then
+    mkdir -p \"${DSYM_PATH}/Contents/Resources/DWARF\"
+    printf '<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.google.objectivec</string>
+	<key>CFBundleExecutable</key>
+	<string>objective_c</string>
+</dict>
+</plist>
+' > \"${DSYM_PATH}/Contents/Info.plist\"
+    
+    # Copy the framework binary to preserve UUID
+    if [ -f \"${FRAMEWORK_PATH}/objective_c\" ]; then
+      cp \"${FRAMEWORK_PATH}/objective_c\" \"${DSYM_PATH}/Contents/Resources/DWARF/objective_c\"
+    else
+      # Fallback: try to find the binary by excluding header files and Modules
+      BINARY_NAME=$(ls \"${FRAMEWORK_PATH}\" | grep -v \".h$\" | grep -v \"Modules\" | head -n 1)
+      if [ -n \"${BINARY_NAME}\" ]; then
+        cp \"${FRAMEWORK_PATH}/${BINARY_NAME}\" \"${DSYM_PATH}/Contents/Resources/DWARF/objective_c\"
+      fi
+    fi
+  fi
+fi";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -468,7 +519,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -509,7 +560,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.the360ghar.flatmates360;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -598,7 +649,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -656,7 +707,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -699,7 +750,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.the360ghar.flatmates360;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -728,7 +779,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.the360ghar.flatmates360;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
