@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/utils/debouncer.dart';
-import '../../../../core/widgets/widgets.dart';
+import '../../../shared/presentation/components.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../bootstrap/bootstrap_controller.dart';
 import '../../../discover/application/discover_feed_controller.dart';

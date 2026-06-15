@@ -5,7 +5,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/widgets.dart';
+import 'components.dart';
 
 /// One 48px premium search bar used everywhere.
 ///

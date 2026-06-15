@@ -12,12 +12,10 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/widgets/widgets.dart';
+import '../../shared/presentation/components.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../bootstrap/bootstrap_controller.dart';
 import '../../bootstrap/catalog_helpers.dart';
-import '../../shared/presentation/flatmates_search_bar.dart';
-import '../../shared/presentation/flatmates_toast.dart';
 import '../application/location_search_provider.dart';
 
 class LocationPickerModal extends ConsumerStatefulWidget {

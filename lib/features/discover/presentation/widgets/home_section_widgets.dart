@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/widgets.dart';
+import '../../../shared/presentation/components.dart';
 import '../../../../l10n/gen/app_localizations.dart';
-import '../../../shared/presentation/flatmates_card.dart';
 
 class MarketInsightCard extends StatelessWidget {
   const MarketInsightCard({

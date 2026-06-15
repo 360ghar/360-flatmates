@@ -6,6 +6,7 @@
 /// ```
 library;
 
+export 'app_icons.dart';
 export 'flatmates_async_view.dart';
 export 'flatmates_bottom_action_bar.dart';
 export 'flatmates_bottom_sheet.dart';
