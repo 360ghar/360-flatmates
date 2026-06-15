@@ -355,16 +355,8 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
                 onAnswer: _showQnABottomSheet,
               ),
             ),
-          if (!hasSentFirstMessage)
-            ChatPreMessageArea(
-              showQnANudge: _showQnANudge,
-              onQnATap: _showQnABottomSheet,
-              icebreakers: _icebreakers,
-              onIcebreakerSelected: (prompt) {
-                _messageController.text = prompt;
-                _sendDebouncer.run(_sendMessage);
-              },
-            ),
+          if (!hasSentFirstMessage && _showQnANudge)
+            ChatQnANudgeCard(onTap: _showQnABottomSheet),
           Expanded(
             child: MessageList(
               messagesState: messagesState,
@@ -383,6 +375,16 @@ class _ChatThreadPageState extends ConsumerState<ChatThreadPage> {
               ),
             ),
           ),
+          // Suggested messages sit ABOVE the input bar so they're close to the
+          // composer. QnA nudge stays near the top (contextual match banner).
+          if (!hasSentFirstMessage)
+            ChatIcebreakerRow(
+              icebreakers: _icebreakers,
+              onSelected: (prompt) {
+                _messageController.text = prompt;
+                _sendDebouncer.run(_sendMessage);
+              },
+            ),
           ChatInputArea(
             controller: _messageController,
             onSend: _sendMessage,

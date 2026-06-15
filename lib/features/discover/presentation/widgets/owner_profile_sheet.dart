@@ -8,7 +8,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chats/chats_repository.dart';
 import '../../../shared/presentation/components.dart';
-import '../../../shared/presentation/flatmates_ui.dart';
 
 class OwnerProfileSheet extends ConsumerWidget {
   const OwnerProfileSheet({
@@ -140,10 +139,11 @@ class _OwnerProfileBody extends StatelessWidget {
 
     final hasBio = bio != null && bio.trim().isNotEmpty;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: AppSpacing.md),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: AppSpacing.md),
         FlatmatesAvatar(name: name, imageUrl: imageUrl, size: 80),
         const SizedBox(height: AppSpacing.md),
         Text(
@@ -309,7 +309,8 @@ class _OwnerProfileBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
-      ],
+        ],
+      ),
     );
   }
 

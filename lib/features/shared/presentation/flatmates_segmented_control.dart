@@ -86,8 +86,10 @@ class FlatmatesSegmentedControl<T> extends StatelessWidget {
                           vertical: AppSpacing.sm + AppSpacing.xs,
                         ),
                         child: Row(
+                          // max (default) so the row fills the segment width
+                          // and truly centers its label under the sliding pill
+                          // (which is positioned at exact segment boundaries).
                           mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             if (icon != null) ...[
                               Icon(

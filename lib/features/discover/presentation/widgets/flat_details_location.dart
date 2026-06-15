@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../location/presentation/map_widgets.dart';
 import '../../../shared/presentation/components.dart';
@@ -12,17 +13,45 @@ import '../../domain/property_listing.dart';
 
 /// Opens the property location in an external maps app (view-only, distinct
 /// from `GetDirectionsButton` which launches turn-by-turn directions).
-Future<void> _openInMaps(double latitude, double longitude) async {
-  final uri = Uri.parse(
+///
+/// Uses the `geo:` URI as the primary scheme (opens the native maps app
+/// directly on Android) and falls back to the universal Google Maps HTTPS URL.
+/// The launch is NOT gated solely on `canLaunchUrl`, because Android 11+ and
+/// iOS frequently report generic https URLs as unlaunchable due to package
+/// visibility / query-scheme restrictions, which would silently swallow the
+/// tap and make the map appear "broken".
+Future<void> _openInMaps(
+  double latitude,
+  double longitude, {
+  String? label,
+}) async {
+  final encodedLabel = label != null ? Uri.encodeComponent(label) : '';
+  final geoUri = Uri.parse(
+    'geo:$latitude,$longitude?q=$latitude,$longitude($encodedLabel)',
+  );
+  final httpsUri = Uri.parse(
     'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
   );
+
   // Note: deliberately not gated on canLaunchUrl() — it is unreliable on
   // Android 11+ (package visibility) and silently returns false for https
   // URLs without a matching <queries> entry, making the map tap a no-op.
+  // Try the native geo: scheme first.
   try {
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final launched = await launchUrl(geoUri, mode: LaunchMode.externalApplication);
+    if (launched) return;
   } catch (e) {
-    debugPrint('FlatDetailsLocation._openInMaps: $e');
+    debugPrint('FlatDetailsLocation._openInMaps: geo: launch failed, falling back to HTTPS: $e');
+  }
+
+  // Fallback: universal Google Maps HTTPS URL in the external browser/app.
+  try {
+    final launched = await launchUrl(httpsUri, mode: LaunchMode.externalApplication);
+    if (!launched) {
+      debugPrint('FlatDetailsLocation._openInMaps: launchUrl returned false for https');
+    }
+  } catch (e) {
+    debugPrint('FlatDetailsLocation._openInMaps https failed: $e');
   }
 }
 
@@ -58,7 +87,11 @@ class FlatDetailsLocation extends StatelessWidget {
               latitude: l.latitude!,
               longitude: l.longitude!,
               height: 220,
-              onTap: () => _openInMaps(l.latitude!, l.longitude!),
+              onTap: () => _openInMaps(
+                l.latitude!,
+                l.longitude!,
+                label: l.locality ?? l.city ?? 'Property',
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             GetDirectionsButton(
@@ -186,7 +219,7 @@ class FlatDetailsLocation extends StatelessWidget {
                           color: AppSemanticColors.textSecondaryFor(
                             isDark ? Brightness.dark : Brightness.light,
                           ),
-                          fontSize: 12,
+                          fontSize: AppTypography.labelMediumSize,
                         ),
                       ),
                     ],
@@ -195,7 +228,9 @@ class FlatDetailsLocation extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.screen + 100),
+          // Bottom clearance is now provided by the ListView's bottom padding
+          // in FlatDetailsPage (no magic offset here).
+          const SizedBox(height: AppSpacing.screen),
         ],
       ),
     );
@@ -266,7 +301,10 @@ class _SocietyTagChip extends StatelessWidget {
       onTap: () => onVote(tag, 'up'),
       onLongPress: () => onVote(tag, 'down'),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: selected
               ? AppSemanticColors.accent.withValues(alpha: 0.1)
@@ -296,7 +334,7 @@ class _SocietyTagChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppTypography.labelMediumSize,
                 fontWeight: FontWeight.w600,
                 color: selected
                     ? AppSemanticColors.accent
@@ -309,7 +347,7 @@ class _SocietyTagChip extends StatelessWidget {
             Text(
               netVotes.toString(),
               style: TextStyle(
-                fontSize: 11,
+                fontSize: AppTypography.labelSmallSize,
                 fontWeight: FontWeight.w700,
                 color: AppSemanticColors.textSecondaryFor(
                   isDark ? Brightness.dark : Brightness.light,
@@ -354,7 +392,7 @@ class _StatItem extends StatelessWidget {
           value,
           style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w700,
-            fontSize: 13,
+            fontSize: AppTypography.titleSmallSize,
           ),
         ),
         const SizedBox(width: 2),
@@ -364,7 +402,7 @@ class _StatItem extends StatelessWidget {
             color: AppSemanticColors.textTertiaryFor(
               isDark ? Brightness.dark : Brightness.light,
             ),
-            fontSize: 12,
+            fontSize: AppTypography.labelMediumSize,
           ),
         ),
       ],

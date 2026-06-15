@@ -105,5 +105,15 @@
 			</array>
 		</dict>
 	</array>
-</dict>
+	<!-- Schemes the app is allowed to query/launch (required by canLaunchUrl on
+	     iOS; also an App Store requirement). Powers maps/directions, WhatsApp
+	     share, and tel: call links. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>geo</string>
+		<string>whatsapp</string>
+		<string>tel</string>
+	</array>
+	</dict>
 </plist>

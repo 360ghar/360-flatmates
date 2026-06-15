@@ -361,7 +361,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                 FlatmatesSearchBar(
                   controller: _searchController,
                   hint: locale.homeSearchHint,
-                  trailingIcon: Icons.search_rounded,
+                  trailingIcon: AppIcons.search,
                 ),
                 ActiveFilterChips(filters: activeFilters),
                 BudgetFilterCard(

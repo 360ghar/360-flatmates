@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_semantic_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../shared/presentation/components.dart';
 import '../../../../l10n/gen/app_localizations.dart';
-import '../../../shared/presentation/flatmates_card.dart';
 
 class MarketInsightCard extends StatelessWidget {
   const MarketInsightCard({
@@ -236,7 +236,7 @@ class HomeSearchBar extends StatelessWidget {
         child: Row(
           children: [
             const Icon(
-              Icons.search_rounded,
+              AppIcons.search,
               color: AppSemanticColors.accent,
               size: 20,
             ),
@@ -256,7 +256,7 @@ class HomeSearchBar extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.tune_rounded,
+                AppIcons.filter,
                 color: AppSemanticColors.accent,
                 size: 16,
               ),

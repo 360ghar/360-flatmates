@@ -11,15 +11,8 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../shared/presentation/components.dart';
 import '../../../l10n/gen/app_localizations.dart';
-import '../../shared/presentation/flatmates_empty_state.dart';
-import '../../shared/presentation/flatmates_error_state.dart';
-import '../../shared/presentation/flatmates_like_button.dart';
-import '../../shared/presentation/flatmates_network_image.dart';
-import '../../shared/presentation/flatmates_price_text.dart';
-import '../../shared/presentation/flatmates_toast.dart';
-import '../../shared/presentation/flatmates_search_bar.dart';
-import '../../shared/presentation/flatmates_skeleton.dart';
 import '../discover_repository.dart';
 import '../application/discover_feed_controller.dart';
 import 'widgets/filter_sheet.dart';
@@ -111,16 +104,16 @@ class _BrowseListingsPageState extends ConsumerState<BrowseListingsPage> {
           else
             IconButton(
               key: const Key('browse_search_open'),
-              tooltip: 'Search',
+              tooltip: locale.searchCityOrAreaHint,
               onPressed: () =>
                   ref.read(_isSearchActiveProvider.notifier).state = true,
-              icon: const Icon(Icons.search_rounded),
+              icon: const Icon(AppIcons.search),
             ),
           IconButton(
             key: const Key('browse_filter_tune'),
             tooltip: locale.searchFiltersTitle,
             onPressed: () => showFiltersSheet(context),
-            icon: const Icon(Icons.tune_rounded),
+            icon: const Icon(AppIcons.filter),
           ),
           const SizedBox(width: AppSpacing.xs),
         ],

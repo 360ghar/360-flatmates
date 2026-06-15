@@ -13,14 +13,11 @@ import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_semantic_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/debouncer.dart';
+import '../shared/presentation/components.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../chats/chats_repository.dart';
 import '../location/application/location_controller.dart';
 import '../location/presentation/map_widgets.dart';
-import '../shared/presentation/flatmates_empty_state.dart';
-import '../shared/presentation/flatmates_error_state.dart';
-import '../shared/presentation/flatmates_skeleton.dart';
-import '../shared/presentation/flatmates_toast.dart';
 import 'application/map_listings_controller.dart';
 import 'discover_repository.dart';
 import 'presentation/widgets/discover_map.dart';
@@ -223,25 +220,15 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.sm),
+                              // The map page has no standalone text-search
+                              // surface — search lives inside the filter
+                              // sheet (its top field) — so we expose a single
+                              // filter affordance rather than two duplicate
+                              // buttons. Kept on the right of the location chip.
                               IconButton(
                                 onPressed: () => _showFilterSheet(context),
-                                icon: const Icon(Icons.search_rounded),
-                                style: IconButton.styleFrom(
-                                  backgroundColor:
-                                      theme.brightness == Brightness.dark
-                                      ? AppSemanticColors.darkSurfaceElevated
-                                      : AppSemanticColors.paper,
-                                  foregroundColor:
-                                      AppSemanticColors.textPrimaryFor(
-                                        theme.brightness,
-                                      ),
-                                ),
-                                tooltip: 'Search',
-                              ),
-                              IconButton(
-                                onPressed: () => _showFilterSheet(context),
-                                icon: const Icon(Icons.tune_rounded),
-                                tooltip: 'Filters',
+                                icon: const Icon(AppIcons.filter),
+                                tooltip: locale.searchFiltersTitle,
                                 style: IconButton.styleFrom(
                                   backgroundColor:
                                       theme.brightness == Brightness.dark
