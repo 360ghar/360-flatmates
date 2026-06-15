@@ -90,7 +90,12 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
                     );
                   },
                   child: ListView(
-                    padding: EdgeInsets.zero,
+                    // Section widgets each own their trailing AppSpacing.screen
+                    // gap, so we use a single bottom pad here for the action
+                    // bar clearance (no per-section divider — keeps rhythm even).
+                    padding: const EdgeInsets.only(
+                      bottom: AppSpacing.section,
+                    ),
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
                       StaggeredCardAppear(
@@ -113,17 +118,14 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
                           matchPercentage: matchPercentage,
                         ),
                       ),
-                      const _SectionDivider(),
                       StaggeredCardAppear(
                         index: 1,
                         child: FlatDetailsAbout(listing: listing),
                       ),
-                      const _SectionDivider(),
                       StaggeredCardAppear(
                         index: 2,
                         child: FlatDetailsMedia(listing: listing),
                       ),
-                      const _SectionDivider(),
                       StaggeredCardAppear(
                         index: 3,
                         child: FlatDetailsLocation(
@@ -189,10 +191,10 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     await FlatmatesBottomSheet.show<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: ShareListingCard(listing: listing),
-      ),
+      // No extra Padding wrapper: FlatmatesBottomSheet already provides
+      // horizontal padding (AppSpacing.screen) and a Flexible scroll region.
+      // A wrapper here would compound and cause overflow on narrow screens.
+      builder: (context) => ShareListingCard(listing: listing),
     );
   }
 
@@ -395,7 +397,13 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
 
   void _handleOwnerTap(PropertyListing listing) {
     final ownerId = listing.owner?.id ?? listing.ownerId;
-    if (ownerId == null) return;
+    if (ownerId == null) {
+      debugPrint(
+        'FlatDetailsPage._handleOwnerTap: no ownerId on listing '
+        '${listing.id} (owner=${listing.owner}, ownerId=${listing.ownerId})',
+      );
+      return;
+    }
 
     final currentUserId = ref
         .read(bootstrapControllerProvider)
@@ -403,39 +411,34 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
         ?.profile
         .id;
     // Hardened self-owner guard: an unresolved (null) viewer is treated as
-    // "not allowed to open" rather than silently bypassing the check.
-    if (currentUserId == null || currentUserId == ownerId) return;
+    // "not allowed to open" rather than silently bypassing the check. This
+    // also prevents the owner sheet from ever showing the viewer's own
+    // profile when tapping through their own listing.
+    if (currentUserId == null || currentUserId == ownerId) {
+      debugPrint(
+        'FlatDetailsPage._handleOwnerTap: suppressed self/null owner view '
+        '(viewer=$currentUserId, ownerId=$ownerId)',
+      );
+      return;
+    }
+
+    // Prefer the nested owner name (now populated by the backend) and fall
+    // back to the flat owner_name field, then a generic label.
+    final ownerName =
+        listing.owner?.fullName.trim().isNotEmpty == true
+        ? listing.owner!.fullName
+        : (listing.ownerName?.trim().isNotEmpty == true
+              ? listing.ownerName!
+              : 'Owner');
 
     OwnerProfileSheet.show(
       context: context,
       ownerId: ownerId,
-      listingOwnerName: listing.ownerName ?? 'Owner',
+      listingOwnerName: ownerName,
       onSendMessage: () {
         Navigator.of(context).pop();
         _handleContact(listing);
       },
-    );
-  }
-}
-
-/// Tinted hairline between top-level detail sections for visual rhythm.
-class _SectionDivider extends StatelessWidget {
-  const _SectionDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xl,
-        AppSpacing.lg,
-        AppSpacing.xl,
-        AppSpacing.lg,
-      ),
-      child: Divider(
-        height: 1,
-        thickness: 0.5,
-        color: Theme.of(context).dividerColor,
-      ),
     );
   }
 }

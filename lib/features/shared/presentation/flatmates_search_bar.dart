@@ -5,6 +5,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/widgets.dart';
 
 /// One 48px premium search bar used everywhere.
 ///
@@ -100,7 +101,7 @@ class _FlatmatesSearchBarState extends State<FlatmatesSearchBar> {
                 color: AppSemanticColors.ink3,
               ),
               prefixIcon: Icon(
-                widget.leadingIcon ?? Icons.search_rounded,
+                widget.leadingIcon ?? AppIcons.search,
                 size: 20,
                 color: _isFocused
                     ? AppSemanticColors.accent

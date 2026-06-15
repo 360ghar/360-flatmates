@@ -49,9 +49,10 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
     final theme = Theme.of(context);
     final l = widget.listing;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         // Shareable link with copy action
         Container(
           key: const Key('share_link_row'),
@@ -92,7 +93,7 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
         RepaintBoundary(
           key: _cardKey,
           child: Container(
-            width: 360,
+            width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -281,8 +282,9 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
             ),
           ],
         ),
-      ],
-    );
+          ],
+        ),
+      );
   }
 
   Future<void> _copyLink() async {
@@ -297,6 +299,17 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
   Future<void> _share() async {
     final deepLink = DeepLinkService.listingUrl(widget.listing.id);
     final locale = AppLocalizations.of(context);
+
+    // Compute a share-position origin rect from the captured card so iPadOS
+    // and iOS 26+ anchor the share popover correctly (required there,
+    // harmless elsewhere). Computed before any await so it is not subject to
+    // build-context-after-await checks.
+    final renderObj = _cardKey.currentContext?.findRenderObject();
+    Rect? shareOrigin;
+    if (renderObj is RenderBox && renderObj.hasSize) {
+      shareOrigin = renderObj.localToGlobal(Offset.zero) & renderObj.size;
+    }
+
     try {
       final boundary =
           _cardKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
@@ -305,9 +318,11 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/flatmates_share_card.png');
       await file.writeAsBytes(byteData!.buffer.asUint8List());
-      await Share.shareXFiles([
-        XFile(file.path),
-      ], text: '${locale.checkOutListingShare} $deepLink');
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: '${locale.checkOutListingShare} $deepLink',
+        sharePositionOrigin: shareOrigin,
+      );
     } catch (e) {
       debugPrint(
         'ShareListingCard._share: image capture failed, falling back to text: $e',
@@ -323,7 +338,7 @@ class _ShareListingCardState extends ConsumerState<ShareListingCard> {
       text.writeln();
       text.writeln(locale.findYourFlatmateShare);
       text.writeln(deepLink);
-      await Share.share(text.toString());
+      await Share.share(text.toString(), sharePositionOrigin: shareOrigin);
     }
   }
 

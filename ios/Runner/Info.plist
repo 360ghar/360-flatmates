@@ -97,16 +97,28 @@
 		     Phase 0 TODO: replace the placeholder below with the value from
 		     GoogleService-Info.plist (REVERSED_CLIENT_ID), e.g.
 		     com.googleusercontent.apps.1234567890-abcdefg -->
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>google-signin</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.GOOGLE_IOS_CLIENT_ID_REVERSED</string>
-			</array>
-		</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>google-signin</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.GOOGLE_IOS_CLIENT_ID_REVERSED</string>
+				</array>
+			</dict>
+		</array>
+	<!-- Schemes the app is allowed to query/launch (required by canLaunchUrl on
+	     iOS; also an App Store requirement). Powers maps/directions, WhatsApp
+	     share, and tel: call links. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlemaps</string>
+		<string>comgooglemaps</string>
+		<string>googlechromes</string>
+		<string>geo</string>
+		<string>whatsapp</string>
+		<string>tel</string>
 	</array>
-</dict>
+	</dict>
 </plist>

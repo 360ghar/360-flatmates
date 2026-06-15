@@ -11,6 +11,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../shared/presentation/flatmates_empty_state.dart';
 import '../../shared/presentation/flatmates_error_state.dart';
@@ -111,16 +112,16 @@ class _BrowseListingsPageState extends ConsumerState<BrowseListingsPage> {
           else
             IconButton(
               key: const Key('browse_search_open'),
-              tooltip: 'Search',
+              tooltip: locale.searchCityOrAreaHint,
               onPressed: () =>
                   ref.read(_isSearchActiveProvider.notifier).state = true,
-              icon: const Icon(Icons.search_rounded),
+              icon: const Icon(AppIcons.search),
             ),
           IconButton(
             key: const Key('browse_filter_tune'),
             tooltip: locale.searchFiltersTitle,
             onPressed: () => showFiltersSheet(context),
-            icon: const Icon(Icons.tune_rounded),
+            icon: const Icon(AppIcons.filter),
           ),
           const SizedBox(width: AppSpacing.xs),
         ],

@@ -12,6 +12,7 @@ import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_semantic_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/widgets.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../bootstrap/bootstrap_controller.dart';
 import '../../bootstrap/catalog_helpers.dart';
@@ -287,7 +288,7 @@ class _LocationPickerModalState extends ConsumerState<LocationPickerModal> {
                       child: FlatmatesSearchBar(
                         controller: _searchController,
                         hint: locale.locationPickerSearchHint,
-                        leadingIcon: Icons.search_rounded,
+                        leadingIcon: AppIcons.search,
                         trailingIcon: _searchController.text.isNotEmpty
                             ? Icons.clear_rounded
                             : null,

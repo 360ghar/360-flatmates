@@ -73,5 +73,26 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- URL scheme + package visibility for launching external Maps apps.
+             Required by url_launcher's canLaunchUrl on Android 11+ (API 30+),
+             otherwise geo:/https: URLs are reported as unlaunchable. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="geo"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="tel"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="whatsapp"/>
+        </intent>
+        <package android:name="com.google.android.apps.maps"/>
+        <package android:name="com.whatsapp"/>
     </queries>
 </manifest>
