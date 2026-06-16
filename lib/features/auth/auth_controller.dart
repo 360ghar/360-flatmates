@@ -54,14 +54,24 @@ class AuthController extends Notifier<AuthState> {
         .changes
         .listen(
           (token) {
+            // Only treat a null token as a real logout when there is genuinely
+            // no live session. A stale/async null can be buffered on this
+            // broadcast stream (e.g. from an unauthenticated startup request
+            // that cleared the session) and delivered AFTER a fresh login has
+            // set `authenticated` — without the currentSession guard it would
+            // clobber the just-authenticated state and bounce the user back to
+            // login. A genuine sign-out clears the Supabase session first, so
+            // currentSession is null there and the reset still proceeds.
             if (token == null &&
                 state.isLoggedIn &&
-                state.status != AuthStatus.submitting) {
+                state.status != AuthStatus.submitting &&
+                _repository.currentSession == null) {
               state = const AuthState(status: AuthStatus.unauthenticated);
             }
           },
           onError: (error) {
-            if (state.status != AuthStatus.submitting) {
+            if (state.status != AuthStatus.submitting &&
+                _repository.currentSession == null) {
               state = const AuthState(status: AuthStatus.unauthenticated);
             }
           },
