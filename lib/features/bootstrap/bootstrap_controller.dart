@@ -12,6 +12,18 @@ export 'domain/bootstrap_models.dart';
 class BootstrapController extends AsyncNotifier<BootstrapData?> {
   @override
   Future<BootstrapData?> build() async {
+    // Bootstrap data is only meaningful for an authenticated user. Fetching it
+    // while unauthenticated — which happens eagerly at app launch because the
+    // router redirect and app shell read this provider before login — issues
+    // /bootstrap + /users/me/auth-state with no token. Those calls 401, the
+    // auth interceptor clears the session, and the resulting null-token event /
+    // AuthExpiredFailure race with (and tear down) the user's first successful
+    // login, bouncing them back to the login screen. Only fetch once
+    // authenticated; the post-login transition listener in app.dart drives
+    // refresh() with a warm token. Use ref.read (not watch) so this provider
+    // is not coupled to auth-state rebuilds — refresh is triggered explicitly.
+    final isLoggedIn = ref.read(authControllerProvider).isLoggedIn;
+    if (!isLoggedIn) return null;
     return _fetchBootstrapData();
   }
 
