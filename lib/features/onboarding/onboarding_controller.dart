@@ -88,6 +88,39 @@ class OnboardingController extends Notifier<OnboardingState> {
     await _saveState();
   }
 
+  /// Returns the step that precedes [step] in the flow, or `null` when [step]
+  /// is the first interactive step (mode selection) — i.e. there is nowhere
+  /// left to go back to within onboarding.
+  static OnboardingStep? previousStep(OnboardingStep step) {
+    return switch (step) {
+      OnboardingStep.splash => null,
+      OnboardingStep.modeSelection => null,
+      OnboardingStep.locationSelection => OnboardingStep.modeSelection,
+      OnboardingStep.basicInfo => OnboardingStep.locationSelection,
+      OnboardingStep.profilePhoto => OnboardingStep.basicInfo,
+      OnboardingStep.lifestyleQuiz => OnboardingStep.profilePhoto,
+      OnboardingStep.budgetTimeline => OnboardingStep.lifestyleQuiz,
+      OnboardingStep.preferences => OnboardingStep.budgetTimeline,
+      OnboardingStep.nonNegotiables => OnboardingStep.preferences,
+    };
+  }
+
+  /// Whether the current step can navigate one step backwards within the flow.
+  bool get canGoBack => previousStep(state.step) != null;
+
+  /// Moves the flow back one step, preserving all collected draft data. No-op
+  /// when there is no earlier step (e.g. on mode selection). Returns `true`
+  /// when a step transition occurred so callers can decide whether to defer to
+  /// system back navigation (leaving onboarding entirely).
+  Future<bool> goBack() async {
+    if (state.isSubmitting) return true;
+    final prev = previousStep(state.step);
+    if (prev == null) return false;
+    state = state.copyWith(step: prev, hasError: false, failure: null);
+    await _saveState();
+    return true;
+  }
+
   Future<void> setLocation(Map<String, String?> data) async {
     state = state.copyWith(
       city: data['city'],
@@ -147,7 +180,12 @@ class OnboardingController extends Notifier<OnboardingState> {
 
   Future<void> submitNonNegotiables(List<String> nonNegotiables) async {
     if (state.isSubmitting) return;
-    state = state.copyWith(nonNegotiables: nonNegotiables, isSubmitting: true);
+    state = state.copyWith(
+      nonNegotiables: nonNegotiables,
+      isSubmitting: true,
+      hasError: false,
+      failure: null,
+    );
     await _saveState();
 
     try {
@@ -181,14 +219,18 @@ class OnboardingController extends Notifier<OnboardingState> {
       await ref.read(bootstrapControllerProvider.notifier).refresh();
       state = state.copyWith(isSubmitting: false, isComplete: true);
       await _clearSavedState();
-    } on AppFailure catch (e) {
-      state = state.copyWith(isSubmitting: false, error: e.label);
+    } on AppFailure catch (e, st) {
+      debugPrint(
+        '[OnboardingController] submitNonNegotiables failure: $e\n$st',
+      );
+      state = state.copyWith(isSubmitting: false, hasError: true, failure: e);
       await _saveState();
     } catch (e, st) {
       debugPrint('[OnboardingController] submitNonNegotiables error: $e\n$st');
       state = state.copyWith(
         isSubmitting: false,
-        error: 'Failed to complete onboarding. Please try again.',
+        hasError: true,
+        failure: const UnknownFailure(),
       );
       await _saveState();
     }

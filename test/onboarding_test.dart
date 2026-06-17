@@ -28,6 +28,125 @@ void main() {
       expect(state.step, OnboardingStep.modeSelection);
       expect(state.mode, isNull);
     });
+
+    test('previousStep maps the flow backwards and stops at modeSelection', () {
+      expect(
+        OnboardingController.previousStep(OnboardingStep.modeSelection),
+        isNull,
+      );
+      expect(OnboardingController.previousStep(OnboardingStep.splash), isNull);
+      expect(
+        OnboardingController.previousStep(OnboardingStep.basicInfo),
+        OnboardingStep.locationSelection,
+      );
+      expect(
+        OnboardingController.previousStep(OnboardingStep.nonNegotiables),
+        OnboardingStep.preferences,
+      );
+    });
+
+    test(
+      'goBack steps backwards while preserving collected draft data',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await testAppPreferences;
+        final container = ProviderContainer(
+          overrides: [appPreferencesProvider.overrideWithValue(prefs)],
+        );
+        addTearDown(container.dispose);
+
+        final controller = container.read(
+          onboardingControllerProvider.notifier,
+        );
+        await controller.setMode('co_hunter');
+        await controller.setLocation({'city': 'Delhi', 'locality': null});
+        await controller.setBasicInfo({
+          'full_name': 'Jane Doe',
+          'age': 25,
+          'profession': 'Designer',
+          'city': 'Delhi',
+        });
+
+        expect(
+          container.read(onboardingControllerProvider).step,
+          OnboardingStep.profilePhoto,
+        );
+
+        // Step back to basic info, then to location — data must survive.
+        final moved = await controller.goBack();
+        expect(moved, isTrue);
+        expect(
+          container.read(onboardingControllerProvider).step,
+          OnboardingStep.basicInfo,
+        );
+        expect(
+          container.read(onboardingControllerProvider).fullName,
+          'Jane Doe',
+        );
+
+        await controller.goBack();
+        expect(
+          container.read(onboardingControllerProvider).step,
+          OnboardingStep.locationSelection,
+        );
+        expect(container.read(onboardingControllerProvider).city, 'Delhi');
+      },
+    );
+
+    test(
+      'goBack at mode selection is a no-op and reports no transition',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await testAppPreferences;
+        final container = ProviderContainer(
+          overrides: [appPreferencesProvider.overrideWithValue(prefs)],
+        );
+        addTearDown(container.dispose);
+
+        final controller = container.read(
+          onboardingControllerProvider.notifier,
+        );
+        await controller.completeSplash();
+        expect(controller.canGoBack, isFalse);
+
+        final moved = await controller.goBack();
+        expect(moved, isFalse);
+        expect(
+          container.read(onboardingControllerProvider).step,
+          OnboardingStep.modeSelection,
+        );
+      },
+    );
+
+    test(
+      'a saved in-progress draft is restored on a fresh controller',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await testAppPreferences;
+        final container = ProviderContainer(
+          overrides: [appPreferencesProvider.overrideWithValue(prefs)],
+        );
+        addTearDown(container.dispose);
+
+        final controller = container.read(
+          onboardingControllerProvider.notifier,
+        );
+        await controller.setMode('room_poster');
+        await controller.setLocation({'city': 'Mumbai', 'locality': null});
+
+        // Simulate an app restart: a brand new container reading the same prefs.
+        final restarted = ProviderContainer(
+          overrides: [appPreferencesProvider.overrideWithValue(prefs)],
+        );
+        addTearDown(restarted.dispose);
+
+        final restored = restarted.read(onboardingControllerProvider);
+        expect(restored.step, OnboardingStep.basicInfo);
+        expect(restored.mode, 'room_poster');
+        expect(restored.city, 'Mumbai');
+        expect(restored.isHydrated, isTrue);
+      },
+    );
   });
 
   group('ModeSelectionPage', () {
@@ -66,11 +185,25 @@ void main() {
   });
 
   group('BasicInfoPage', () {
+    // BasicInfoPage now hydrates from the onboarding draft in initState, which
+    // builds OnboardingController and therefore needs AppPreferences overridden.
+    late List<Override> overrides;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      resetTestAppPreferences();
+      final prefs = await testAppPreferences;
+      overrides = [appPreferencesProvider.overrideWithValue(prefs)];
+    });
+
     testWidgets('next button is disabled when fields are empty', (
       tester,
     ) async {
       await tester.pumpWidget(
-        testableWidget(child: BasicInfoPage(onNext: (_) {})),
+        testableWidget(
+          overrides: overrides,
+          child: BasicInfoPage(onNext: (_) {}),
+        ),
       );
       await tester.pump();
 
@@ -86,7 +219,10 @@ void main() {
 
     testWidgets('next button is disabled when age is under 18', (tester) async {
       await tester.pumpWidget(
-        testableWidget(child: BasicInfoPage(onNext: (_) {})),
+        testableWidget(
+          overrides: overrides,
+          child: BasicInfoPage(onNext: (_) {}),
+        ),
       );
       await tester.pump();
 
@@ -116,7 +252,10 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        testableWidget(child: BasicInfoPage(onNext: (_) {})),
+        testableWidget(
+          overrides: overrides,
+          child: BasicInfoPage(onNext: (_) {}),
+        ),
       );
       await tester.pump();
 
@@ -147,7 +286,10 @@ void main() {
 
     testWidgets('age of exactly 18 is accepted', (tester) async {
       await tester.pumpWidget(
-        testableWidget(child: BasicInfoPage(onNext: (_) {})),
+        testableWidget(
+          overrides: overrides,
+          child: BasicInfoPage(onNext: (_) {}),
+        ),
       );
       await tester.pump();
 

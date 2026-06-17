@@ -26,6 +26,22 @@ class _PreferencesPageState extends ConsumerState<PreferencesPage> {
   String _smoking = 'no';
   String _moveInTimeline = 'flexible';
 
+  @override
+  void initState() {
+    super.initState();
+    // Restore previously-selected preferences so going back/forward or
+    // resuming a saved draft retains the user's choices.
+    final saved = ref.read(onboardingControllerProvider).preferences;
+    if (saved.isEmpty) return;
+    _preferredGender =
+        saved['gender_preference']?.toString() ?? _preferredGender;
+    _allowedFlatmates =
+        saved['allowed_flatmates']?.toString() ?? _allowedFlatmates;
+    _foodHabits = saved['food_habits']?.toString() ?? _foodHabits;
+    _pets = saved['pets']?.toString() ?? _pets;
+    _smoking = saved['smoking']?.toString() ?? _smoking;
+  }
+
   /// Resolve pill options from a catalog key, falling back to hardcoded values.
   List<_PillOption> _catalogPills(
     String catalogKey,

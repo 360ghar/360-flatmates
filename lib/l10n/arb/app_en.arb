@@ -1552,5 +1552,8 @@
   },
   "meetPotentialFlatmates": "Meet potential flatmates",
   "lifestyleSectionTitle": "Lifestyle",
-  "dealBreakersSectionTitle": "Deal-breakers"
+  "dealBreakersSectionTitle": "Deal-breakers",
+  "onboardingProgressTitle": "Profile setup",
+  "onboardingBudgetRangeError": "Minimum budget must be less than maximum",
+  "onboardingSubmitError": "Couldn't complete onboarding. Please try again."
 }

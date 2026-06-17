@@ -3,6 +3,7 @@ import 'package:flatmates_app/core/theme/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/errors/l10n_bridge.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../shared/presentation/components.dart';
 import 'budget_timeline_page.dart';
@@ -59,21 +60,34 @@ class OnboardingPage extends ConsumerWidget {
       );
     }
 
-    if (state.error != null) {
+    if (state.hasError) {
+      final message =
+          state.failure?.userMessage(locale.toUserMessageL10n()) ??
+          locale.onboardingSubmitError;
       return FlatmatesScreen(
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(state.error!, textAlign: TextAlign.center),
-              const SizedBox(height: AppSpacing.lg),
-              FlatmatesButton(
-                label: locale.commonRetry,
-                onPressed: () =>
-                    controller.submitNonNegotiables(state.nonNegotiables),
-                fullWidth: true,
-              ),
-            ],
+          child: Padding(
+            padding: AppSpacing.horizontalScreen,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: AppSemanticColors.error,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(message, textAlign: TextAlign.center),
+                const SizedBox(height: AppSpacing.lg),
+                FlatmatesButton(
+                  key: const Key('onboarding_submit_retry'),
+                  label: locale.commonRetry,
+                  onPressed: () =>
+                      controller.submitNonNegotiables(state.nonNegotiables),
+                  fullWidth: true,
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -90,6 +104,7 @@ class OnboardingPage extends ConsumerWidget {
       ),
       OnboardingStep.locationSelection => LocationSelectionPage(
         onLocationSelected: controller.setLocation,
+        onBack: () => controller.goBack(),
       ),
       OnboardingStep.basicInfo => BasicInfoPage(
         onNext: controller.setBasicInfo,
@@ -113,62 +128,72 @@ class OnboardingPage extends ConsumerWidget {
       ),
     };
 
-    return FlatmatesScreen(
-      body: Column(
-        children: [
-          // Progress indicator
-          if (state.step != OnboardingStep.splash)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xl,
-                AppSpacing.lg,
-                AppSpacing.xl,
-                0,
+    return PopScope(
+      // Intercept system back so it steps backwards through the flow instead
+      // of popping the whole onboarding route. When there is no earlier step
+      // (mode selection) we allow the pop to fall through.
+      canPop: !controller.canGoBack,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        controller.goBack();
+      },
+      child: FlatmatesScreen(
+        body: Column(
+          children: [
+            // Progress indicator
+            if (state.step != OnboardingStep.splash)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xl,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                  0,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          locale.onboardingProgressTitle,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${state.completionPercentage.toInt()}%',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: AppSemanticColors.accent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: progress),
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                      builder: (context, animatedValue, child) {
+                        return LinearProgressIndicator(
+                          value: animatedValue,
+                          backgroundColor: AppSemanticColors.disabledSurfaceFor(
+                            theme.brightness,
+                          ),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppSemanticColors.accent,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Profile Setup',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '${state.completionPercentage.toInt()}%',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: AppSemanticColors.accent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0, end: progress),
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeOut,
-                    builder: (context, animatedValue, child) {
-                      return LinearProgressIndicator(
-                        value: animatedValue,
-                        backgroundColor: AppSemanticColors.disabledSurfaceFor(
-                          theme.brightness,
-                        ),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppSemanticColors.accent,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
-              ),
-            ),
-          // Step content
-          Expanded(child: stepWidget),
-        ],
+            // Step content
+            Expanded(child: stepWidget),
+          ],
+        ),
       ),
     );
   }

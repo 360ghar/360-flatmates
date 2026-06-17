@@ -21,6 +21,13 @@ class NonNegotiablesPage extends ConsumerStatefulWidget {
 class _NonNegotiablesPageState extends ConsumerState<NonNegotiablesPage> {
   final _selected = <String>{};
 
+  @override
+  void initState() {
+    super.initState();
+    // Restore previously-chosen non-negotiables on back/forward or resume.
+    _selected.addAll(ref.read(onboardingControllerProvider).nonNegotiables);
+  }
+
   /// Hardcoded fallback options used when the backend catalog is unavailable.
   static const _fallbackOptions = [
     _NonNegOption(key: 'food_veg_only', icon: Icons.restaurant_outlined),

@@ -35,7 +35,8 @@ mixin _$OnboardingState {
   bool get isSubmitting => throw _privateConstructorUsedError;
   bool get isComplete => throw _privateConstructorUsedError;
   bool get isHydrated => throw _privateConstructorUsedError;
-  String? get error => throw _privateConstructorUsedError;
+  bool get hasError => throw _privateConstructorUsedError;
+  AppFailure? get failure => throw _privateConstructorUsedError;
 
   /// Create a copy of OnboardingState
   /// with the given fields replaced by the non-null parameter values.
@@ -69,7 +70,8 @@ abstract class $OnboardingStateCopyWith<$Res> {
     bool isSubmitting,
     bool isComplete,
     bool isHydrated,
-    String? error,
+    bool hasError,
+    AppFailure? failure,
   });
 }
 
@@ -105,7 +107,8 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
     Object? isSubmitting = null,
     Object? isComplete = null,
     Object? isHydrated = null,
-    Object? error = freezed,
+    Object? hasError = null,
+    Object? failure = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -177,10 +180,14 @@ class _$OnboardingStateCopyWithImpl<$Res, $Val extends OnboardingState>
                 ? _value.isHydrated
                 : isHydrated // ignore: cast_nullable_to_non_nullable
                       as bool,
-            error: freezed == error
-                ? _value.error
-                : error // ignore: cast_nullable_to_non_nullable
-                      as String?,
+            hasError: null == hasError
+                ? _value.hasError
+                : hasError // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            failure: freezed == failure
+                ? _value.failure
+                : failure // ignore: cast_nullable_to_non_nullable
+                      as AppFailure?,
           )
           as $Val,
     );
@@ -214,7 +221,8 @@ abstract class _$$OnboardingStateImplCopyWith<$Res>
     bool isSubmitting,
     bool isComplete,
     bool isHydrated,
-    String? error,
+    bool hasError,
+    AppFailure? failure,
   });
 }
 
@@ -249,7 +257,8 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
     Object? isSubmitting = null,
     Object? isComplete = null,
     Object? isHydrated = null,
-    Object? error = freezed,
+    Object? hasError = null,
+    Object? failure = freezed,
   }) {
     return _then(
       _$OnboardingStateImpl(
@@ -321,10 +330,14 @@ class __$$OnboardingStateImplCopyWithImpl<$Res>
             ? _value.isHydrated
             : isHydrated // ignore: cast_nullable_to_non_nullable
                   as bool,
-        error: freezed == error
-            ? _value.error
-            : error // ignore: cast_nullable_to_non_nullable
-                  as String?,
+        hasError: null == hasError
+            ? _value.hasError
+            : hasError // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        failure: freezed == failure
+            ? _value.failure
+            : failure // ignore: cast_nullable_to_non_nullable
+                  as AppFailure?,
       ),
     );
   }
@@ -351,7 +364,8 @@ class _$OnboardingStateImpl extends _OnboardingState {
     this.isSubmitting = false,
     this.isComplete = false,
     this.isHydrated = false,
-    this.error,
+    this.hasError = false,
+    this.failure,
   }) : _photoUrls = photoUrls,
        _lifestyleAnswers = lifestyleAnswers,
        _preferences = preferences,
@@ -425,11 +439,14 @@ class _$OnboardingStateImpl extends _OnboardingState {
   @JsonKey()
   final bool isHydrated;
   @override
-  final String? error;
+  @JsonKey()
+  final bool hasError;
+  @override
+  final AppFailure? failure;
 
   @override
   String toString() {
-    return 'OnboardingState(step: $step, mode: $mode, fullName: $fullName, age: $age, profession: $profession, city: $city, locality: $locality, photoUrls: $photoUrls, lifestyleAnswers: $lifestyleAnswers, budgetMin: $budgetMin, budgetMax: $budgetMax, moveInTimeline: $moveInTimeline, preferences: $preferences, nonNegotiables: $nonNegotiables, isSubmitting: $isSubmitting, isComplete: $isComplete, isHydrated: $isHydrated, error: $error)';
+    return 'OnboardingState(step: $step, mode: $mode, fullName: $fullName, age: $age, profession: $profession, city: $city, locality: $locality, photoUrls: $photoUrls, lifestyleAnswers: $lifestyleAnswers, budgetMin: $budgetMin, budgetMax: $budgetMax, moveInTimeline: $moveInTimeline, preferences: $preferences, nonNegotiables: $nonNegotiables, isSubmitting: $isSubmitting, isComplete: $isComplete, isHydrated: $isHydrated, hasError: $hasError, failure: $failure)';
   }
 
   @override
@@ -475,11 +492,13 @@ class _$OnboardingStateImpl extends _OnboardingState {
                 other.isComplete == isComplete) &&
             (identical(other.isHydrated, isHydrated) ||
                 other.isHydrated == isHydrated) &&
-            (identical(other.error, error) || other.error == error));
+            (identical(other.hasError, hasError) ||
+                other.hasError == hasError) &&
+            (identical(other.failure, failure) || other.failure == failure));
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     step,
     mode,
@@ -498,8 +517,9 @@ class _$OnboardingStateImpl extends _OnboardingState {
     isSubmitting,
     isComplete,
     isHydrated,
-    error,
-  );
+    hasError,
+    failure,
+  ]);
 
   /// Create a copy of OnboardingState
   /// with the given fields replaced by the non-null parameter values.
@@ -532,7 +552,8 @@ abstract class _OnboardingState extends OnboardingState {
     final bool isSubmitting,
     final bool isComplete,
     final bool isHydrated,
-    final String? error,
+    final bool hasError,
+    final AppFailure? failure,
   }) = _$OnboardingStateImpl;
   const _OnboardingState._() : super._();
 
@@ -571,7 +592,9 @@ abstract class _OnboardingState extends OnboardingState {
   @override
   bool get isHydrated;
   @override
-  String? get error;
+  bool get hasError;
+  @override
+  AppFailure? get failure;
 
   /// Create a copy of OnboardingState
   /// with the given fields replaced by the non-null parameter values.

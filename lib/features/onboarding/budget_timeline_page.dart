@@ -24,6 +24,27 @@ class _BudgetTimelinePageState extends ConsumerState<BudgetTimelinePage> {
   String _moveInTimeline = 'flexible';
   String? _budgetError;
 
+  @override
+  void initState() {
+    super.initState();
+    // Restore any previously-entered values so going back/forward or resuming
+    // a saved draft does not silently reset the user's budget and timeline.
+    final saved = ref.read(onboardingControllerProvider);
+    if (saved.budgetMin != null) {
+      _budgetMin = saved.budgetMin!.clamp(5000, 100000);
+    }
+    if (saved.budgetMax != null) {
+      _budgetMax = saved.budgetMax!.clamp(5000, 100000);
+    }
+    if (saved.moveInTimeline != null && saved.moveInTimeline!.isNotEmpty) {
+      _moveInTimeline = saved.moveInTimeline!;
+    }
+    if (_budgetMin >= _budgetMax) {
+      _budgetMin = 5000;
+      _budgetMax = 25000;
+    }
+  }
+
   /// Hardcoded fallback timeline options used when the backend catalog is unavailable.
   static const _fallbackTimelineOptions = [
     _TimelineOption(key: 'immediate', icon: Icons.flash_on_rounded),
@@ -131,8 +152,7 @@ class _BudgetTimelinePageState extends ConsumerState<BudgetTimelinePage> {
                         _budgetMin = values.start;
                         _budgetMax = values.end;
                         if (_budgetMin >= _budgetMax) {
-                          _budgetError =
-                              'Minimum budget must be less than maximum';
+                          _budgetError = locale.onboardingBudgetRangeError;
                         } else {
                           _budgetError = null;
                         }

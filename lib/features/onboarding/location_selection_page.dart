@@ -15,9 +15,17 @@ import '../bootstrap/catalog_helpers.dart';
 import '../shared/presentation/components.dart';
 
 class LocationSelectionPage extends ConsumerStatefulWidget {
-  const LocationSelectionPage({required this.onLocationSelected, super.key});
+  const LocationSelectionPage({
+    required this.onLocationSelected,
+    super.key,
+    this.onBack,
+  });
 
   final void Function(Map<String, String?> data) onLocationSelected;
+
+  /// Steps back to the previous onboarding step. Falls back to the system pop
+  /// when null.
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<LocationSelectionPage> createState() =>
@@ -218,12 +226,17 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
 
     return Scaffold(
       body: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+        minimum: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.lg,
+          AppSpacing.screen,
+          0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             IconButton(
-              onPressed: () => context.pop(),
+              onPressed: widget.onBack ?? () => context.pop(),
               icon: const Icon(Icons.arrow_back),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -277,7 +290,7 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
               const SizedBox(height: 8),
               ...searchState.suggestions.map(
                 (suggestion) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: LocationSuggestionRow(
                     suggestion: suggestion,
                     onTap: _selectingPlace
@@ -323,7 +336,10 @@ class _LocationSelectionPageState extends ConsumerState<LocationSelectionPage> {
                     ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 28, top: 12),
+              padding: const EdgeInsets.only(
+                bottom: AppSpacing.section,
+                top: AppSpacing.md,
+              ),
               child: FlatmatesButton(
                 label: locale.modeContinue,
                 fullWidth: true,

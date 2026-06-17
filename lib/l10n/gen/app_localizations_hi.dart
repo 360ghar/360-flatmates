@@ -3322,4 +3322,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dealBreakersSectionTitle => 'डील-ब्रेकर्स';
+
+  @override
+  String get onboardingProgressTitle => 'प्रोफ़ाइल सेटअप';
+
+  @override
+  String get onboardingBudgetRangeError =>
+      'न्यूनतम बजट अधिकतम से कम होना चाहिए';
+
+  @override
+  String get onboardingSubmitError =>
+      'ऑनबोर्डिंग पूरी नहीं हो सकी। कृपया पुनः प्रयास करें।';
 }

@@ -3308,4 +3308,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dealBreakersSectionTitle => 'Deal-breakers';
+
+  @override
+  String get onboardingProgressTitle => 'Profile setup';
+
+  @override
+  String get onboardingBudgetRangeError =>
+      'Minimum budget must be less than maximum';
+
+  @override
+  String get onboardingSubmitError =>
+      'Couldn\'t complete onboarding. Please try again.';
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_spacing.dart';
@@ -11,9 +10,17 @@ import '../bootstrap/catalog_helpers.dart';
 import '../shared/presentation/components.dart';
 
 class ModeSelectionPage extends ConsumerStatefulWidget {
-  const ModeSelectionPage({required this.onModeSelected, super.key});
+  const ModeSelectionPage({
+    required this.onModeSelected,
+    super.key,
+    this.onBack,
+  });
 
   final void Function(String mode) onModeSelected;
+
+  /// Optional back handler. Mode selection is the first interactive step, so
+  /// this is normally null and no back affordance is shown.
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<ModeSelectionPage> createState() => _ModeSelectionPageState();
@@ -53,19 +60,26 @@ class _ModeSelectionPageState extends ConsumerState<ModeSelectionPage> {
 
     return Scaffold(
       body: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+        minimum: const EdgeInsets.fromLTRB(
+          AppSpacing.screen,
+          AppSpacing.lg,
+          AppSpacing.screen,
+          0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Back arrow ---
-            IconButton(
-              onPressed: () => context.pop(),
-              icon: const Icon(Icons.arrow_back),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              tooltip: 'Back',
-            ),
-            const SizedBox(height: AppSpacing.md),
+            // --- Back arrow (only when a back handler is provided) ---
+            if (widget.onBack != null) ...[
+              IconButton(
+                onPressed: widget.onBack,
+                icon: const Icon(Icons.arrow_back),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: locale.backCta,
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
             // --- Progress indicator using shared component ---
             const FlatmatesStepProgress.dots(
               currentStep: 0,
@@ -96,7 +110,7 @@ class _ModeSelectionPageState extends ConsumerState<ModeSelectionPage> {
                   children: [
                     ...modes.map((mode) {
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                         child: _ModeCard(
                           key: Key('mode_${mode.id}'),
                           icon: _iconForMode(mode.id),
@@ -115,7 +129,9 @@ class _ModeSelectionPageState extends ConsumerState<ModeSelectionPage> {
             const SizedBox(height: AppSpacing.lg),
             // --- CTA ---
             Padding(
-              padding: const EdgeInsets.only(bottom: 32),
+              padding: const EdgeInsets.only(
+                bottom: AppSpacing.screen + AppSpacing.sm,
+              ),
               child: FlatmatesButton(
                 key: const Key('mode_continue'),
                 label: locale.modeContinue,

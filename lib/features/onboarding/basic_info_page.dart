@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../shared/presentation/components.dart';
+import 'onboarding_controller.dart';
 
 class BasicInfoPage extends ConsumerStatefulWidget {
   const BasicInfoPage({
@@ -32,8 +33,14 @@ class _BasicInfoPageState extends ConsumerState<BasicInfoPage> {
   @override
   void initState() {
     super.initState();
-    _cityController.text = widget.initialCity ?? '';
-    _localityController.text = widget.initialLocality ?? '';
+    // Restore from the saved draft so going back/forward or resuming keeps
+    // the user's name, age and profession instead of clearing them.
+    final saved = ref.read(onboardingControllerProvider);
+    _nameController.text = saved.fullName ?? '';
+    _ageController.text = saved.age?.toString() ?? '';
+    _professionController.text = saved.profession ?? '';
+    _cityController.text = widget.initialCity ?? saved.city ?? '';
+    _localityController.text = widget.initialLocality ?? saved.locality ?? '';
   }
 
   @override

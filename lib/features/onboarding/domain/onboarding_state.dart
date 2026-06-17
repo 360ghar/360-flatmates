@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/errors/app_failure.dart';
+
 part 'onboarding_state.freezed.dart';
 
 enum OnboardingStep {
@@ -36,7 +38,8 @@ class OnboardingState with _$OnboardingState {
     @Default(false) bool isSubmitting,
     @Default(false) bool isComplete,
     @Default(false) bool isHydrated,
-    String? error,
+    @Default(false) bool hasError,
+    AppFailure? failure,
   }) = _OnboardingState;
 
   double get completionPercentage {
@@ -48,9 +51,10 @@ class OnboardingState with _$OnboardingState {
     if (age != null && age! >= 18) completed++;
     if (city != null && city!.isNotEmpty) completed++;
     if (photoUrls.isNotEmpty) completed++;
-    if (lifestyleAnswers.isNotEmpty && lifestyleAnswers.length >= 8) {
-      completed++;
-    }
+    // The quiz page only advances once every question is answered, and the
+    // question count is catalog-driven (not always 8), so credit lifestyle as
+    // soon as any answers exist rather than hard-coding a count.
+    if (lifestyleAnswers.isNotEmpty) completed++;
     if (budgetMin != null && budgetMax != null) completed++;
     if (moveInTimeline != null && moveInTimeline!.isNotEmpty) completed++;
     if (preferences.isNotEmpty) completed++;
