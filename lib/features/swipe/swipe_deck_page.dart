@@ -17,9 +17,9 @@ import 'application/profile_compatibility.dart';
 import 'application/profile_view_tracker.dart';
 import 'application/swipe_deck_controller.dart';
 import 'presentation/match_celebration_route.dart';
+import 'presentation/widgets/swipe_action_bar.dart';
 import 'presentation/widgets/swipe_card_stack.dart';
 import 'presentation/widgets/swipe_deck_header.dart';
-import 'presentation/widgets/swipe_undo_button.dart';
 import 'presentation/widgets/swipe_empty_state.dart';
 import 'swipe_repository.dart';
 
@@ -57,12 +57,9 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
 
   int _flyOffDirectionX = 0;
 
-  // Undo state
+  // Undo state — retains the most recently swiped profile so it can be
+  // restored to the front of the deck via the action bar.
   SwipeProfile? _lastSwipedProfile;
-  // ignore: unused_field
-  String? _lastSwipedAction;
-  bool _showUndo = false;
-  Timer? _undoTimer;
 
   static const Duration _snapBackDuration = Duration(milliseconds: 300);
   static const Duration _flyOffDuration = Duration(milliseconds: 200);
@@ -104,7 +101,6 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
 
   @override
   void dispose() {
-    _undoTimer?.cancel();
     _profileViewTracker.clear();
     _flyOffController.dispose();
     _snapBackController.dispose();
@@ -167,6 +163,22 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
     _flyOffController.forward(from: 0);
   }
 
+  /// Programmatically swipes the top card in [directionX] (+1 like, -1 pass).
+  /// Drives the same fly-off pipeline as a gesture so button taps animate and
+  /// hit the backend identically. Ignored while another swipe is in flight.
+  void _triggerButtonSwipe(int directionX) {
+    if (_isAnimating || _isDragging) return;
+    _snapBackController.stop();
+    _flyOffDirectionX = directionX;
+    // Seed a small offset so rotation/overlay/haptics read the intended
+    // direction even though the gesture never moved the card.
+    final screenWidth = MediaQuery.of(context).size.width;
+    _flyOffStartOffset = Offset(directionX * screenWidth * 0.25, 0);
+    _isAnimating = true;
+    setState(() => _dragOffset = _flyOffStartOffset);
+    _flyOffController.forward(from: 0);
+  }
+
   void _onFlyOffTick() {
     final t = _flyOffAnimation.value;
     final screenSize = MediaQuery.of(context).size;
@@ -206,7 +218,6 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
     final item = visible[_currentIndex];
     // Save for potential undo
     _lastSwipedProfile = item;
-    _lastSwipedAction = action;
     unawaited(HapticFeedback.mediumImpact());
     SwipeResult? swipeResult;
     try {
@@ -237,17 +248,6 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
     // The entrance animation hides the card swap.
     ref.read(swipeDeckControllerProvider.notifier).markSwiped(item.id);
 
-    // Show undo button for 3 seconds
-    _undoTimer?.cancel();
-    if (mounted) {
-      setState(() => _showUndo = true);
-      _undoTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() => _showUndo = false);
-        }
-      });
-    }
-
     final isLikeAction = action == 'like';
     final didMatch = swipeResult.didMatch;
     if (isLikeAction) {
@@ -260,7 +260,7 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
 
     if (isLikeAction && didMatch) {
       _showMatchCelebration(
-        peerName: item.fullName ?? 'Flatmate',
+        peerName: item.fullName ?? locale.matchPeerFallbackName,
         peerImageUrl: item.profileImageUrl,
         conversationId: swipeResult.conversationId,
       );
@@ -314,18 +314,22 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
   }
 
   void _undoLastSwipe() {
+    if (_isAnimating || _isDragging) return;
     final last = _lastSwipedProfile;
     if (last == null) return;
-    _undoTimer?.cancel();
-    setState(() => _showUndo = false);
+    unawaited(HapticFeedback.selectionClick());
     ref.read(swipeDeckControllerProvider.notifier).undoSwipe(last);
-    _lastSwipedProfile = null;
-    _lastSwipedAction = null;
+    // Reset tracking so the restored card re-registers a view sample.
+    _trackedProfileId = null;
+    setState(() => _lastSwipedProfile = null);
   }
 
   void _refreshProfiles() {
     _compatibilityCache.clear();
-    setState(() => _currentIndex = 0);
+    setState(() {
+      _currentIndex = 0;
+      _lastSwipedProfile = null;
+    });
     ref.read(swipeDeckControllerProvider.notifier).refresh();
   }
 
@@ -357,12 +361,9 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
     ref.listen(discoverFiltersProvider, (previous, next) {
       if (previous == next) return;
       _compatibilityCache.clear();
-      _undoTimer?.cancel();
-      _lastSwipedProfile = null;
-      _lastSwipedAction = null;
       setState(() {
         _currentIndex = 0;
-        _showUndo = false;
+        _lastSwipedProfile = null;
       });
     });
 
@@ -372,12 +373,19 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
     );
     final locale = AppLocalizations.of(context);
 
+    // The deck removes swiped profiles from the list rather than advancing an
+    // index, so an empty list after the user has swiped means "end of deck"
+    // rather than "no profiles ever loaded".
+    final hasSwiped = ref.read(swipeDeckControllerProvider.notifier).hasSwiped;
+
     return profiles.when(
       data: (items) {
         if (items.isEmpty) {
           return _scaffoldWithHeader(
             SwipeEmptyState(
-              reason: SwipeEmptyReason.noProfiles,
+              reason: hasSwiped
+                  ? SwipeEmptyReason.endOfDeck
+                  : SwipeEmptyReason.noProfiles,
               onRefresh: _refreshProfiles,
             ),
           );
@@ -388,7 +396,9 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
         if (visible.isEmpty) {
           return _scaffoldWithHeader(
             SwipeEmptyState(
-              reason: SwipeEmptyReason.allFiltered,
+              reason: hasSwiped
+                  ? SwipeEmptyReason.endOfDeck
+                  : SwipeEmptyReason.allFiltered,
               onRefresh: _refreshProfiles,
             ),
           );
@@ -434,32 +444,30 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
           Column(
             children: [
               Expanded(
-                child: Stack(
-                  children: [
-                    SwipeCardStack(
-                      item: item,
-                      compatibility: compatibility,
-                      nextItem: nextItem,
-                      nextCompatibility: nextCompatibility,
-                      thirdItem: thirdItem,
-                      thirdCompatibility: thirdCompatibility,
-                      dragOffset: _dragOffset,
-                      dragProgress: progress,
-                      currentRotation: rotation,
-                      cardScaleAnimation: _cardScaleAnimation,
-                      isDragging: _isDragging,
-                      onHorizontalDragStart: _onHorizontalDragStart,
-                      onHorizontalDragUpdate: _onHorizontalDragUpdate,
-                      onHorizontalDragEnd: _onHorizontalDragEnd,
-                    ),
-                    if (_showUndo)
-                      Positioned(
-                        top: AppSpacing.md,
-                        right: AppSpacing.xl,
-                        child: SwipeUndoButton(onPressed: _undoLastSwipe),
-                      ),
-                  ],
+                child: SwipeCardStack(
+                  item: item,
+                  compatibility: compatibility,
+                  nextItem: nextItem,
+                  nextCompatibility: nextCompatibility,
+                  thirdItem: thirdItem,
+                  thirdCompatibility: thirdCompatibility,
+                  dragOffset: _dragOffset,
+                  dragProgress: progress,
+                  currentRotation: rotation,
+                  cardScaleAnimation: _cardScaleAnimation,
+                  isDragging: _isDragging,
+                  onHorizontalDragStart: _onHorizontalDragStart,
+                  onHorizontalDragUpdate: _onHorizontalDragUpdate,
+                  onHorizontalDragEnd: _onHorizontalDragEnd,
                 ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SwipeActionBar(
+                onSkip: () => _triggerButtonSwipe(-1),
+                onLike: () => _triggerButtonSwipe(1),
+                onUndo: _undoLastSwipe,
+                canUndo: _lastSwipedProfile != null,
+                enabled: !_isAnimating && !_isDragging,
               ),
               const SizedBox(height: AppSpacing.lg),
             ],

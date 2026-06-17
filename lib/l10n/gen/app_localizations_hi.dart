@@ -3322,4 +3322,19 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dealBreakersSectionTitle => 'डील-ब्रेकर्स';
+
+  @override
+  String get swipeLikeAction => 'पसंद';
+
+  @override
+  String get swipeSkipAction => 'छोड़ें';
+
+  @override
+  String get swipeUndoAction => 'पूर्ववत करें';
+
+  @override
+  String get matchPeerFallbackName => 'फ्लैटमेट';
+
+  @override
+  String get matchSelfFallbackName => 'आप';
 }

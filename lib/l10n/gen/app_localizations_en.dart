@@ -3308,4 +3308,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dealBreakersSectionTitle => 'Deal-breakers';
+
+  @override
+  String get swipeLikeAction => 'Like';
+
+  @override
+  String get swipeSkipAction => 'Skip';
+
+  @override
+  String get swipeUndoAction => 'Undo';
+
+  @override
+  String get matchPeerFallbackName => 'Flatmate';
+
+  @override
+  String get matchSelfFallbackName => 'You';
 }

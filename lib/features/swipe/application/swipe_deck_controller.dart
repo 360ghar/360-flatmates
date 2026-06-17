@@ -9,6 +9,10 @@ import '../swipe_repository.dart';
 class SwipeDeckController extends Notifier<AsyncValue<List<SwipeProfile>>> {
   final Set<int> _swipedUserIds = {};
 
+  /// Whether the user has swiped at least one profile in the current deck.
+  /// Lets the UI distinguish "end of deck" from "no profiles ever loaded".
+  bool get hasSwiped => _swipedUserIds.isNotEmpty;
+
   @override
   AsyncValue<List<SwipeProfile>> build() {
     // Reload the deck whenever shared discover filters (location, radius,

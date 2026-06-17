@@ -16,9 +16,10 @@ extension _SwipeDeckActions on _SwipeDeckPageState {
         .read(bootstrapControllerProvider)
         .valueOrNull
         ?.profile;
+    final locale = AppLocalizations.of(context);
     pushMatchCelebration(
       context,
-      userName: userProfile?.fullName ?? 'You',
+      userName: userProfile?.fullName ?? locale.matchSelfFallbackName,
       userImageUrl: userProfile?.profileImageUrl,
       peerName: peerName,
       peerImageUrl: peerImageUrl,

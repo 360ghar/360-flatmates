@@ -6205,6 +6205,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deal-breakers'**
   String get dealBreakersSectionTitle;
+
+  /// No description provided for @swipeLikeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Like'**
+  String get swipeLikeAction;
+
+  /// No description provided for @swipeSkipAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get swipeSkipAction;
+
+  /// No description provided for @swipeUndoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get swipeUndoAction;
+
+  /// No description provided for @matchPeerFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'Flatmate'**
+  String get matchPeerFallbackName;
+
+  /// No description provided for @matchSelfFallbackName.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get matchSelfFallbackName;
 }
 
 class _AppLocalizationsDelegate
