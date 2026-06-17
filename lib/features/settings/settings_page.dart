@@ -71,7 +71,7 @@ class SettingsPage extends ConsumerWidget {
                       ),
                       FlatmatesMenuItem(
                         key: const Key('preferences_menu_item'),
-                        icon: Icons.tune,
+                        icon: AppIcons.filter,
                         label: locale.preferencesLabel,
                         onTap: () => _showPreferences(context, ref),
                       ),

@@ -462,7 +462,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
           FlatmatesButton(
             key: const Key('search_show_results_button'),
             label: locale.showResultsCta,
-            icon: Icons.filter_list_rounded,
+            icon: AppIcons.filter,
             fullWidth: true,
             onPressed: _applyFilters,
           ),

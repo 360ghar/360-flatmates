@@ -973,6 +973,7 @@ _MenuIconPalette _menuIconPalette(
     mid = AppSemanticColors.greenMid;
   } else if (icon == Icons.settings_outlined ||
       icon == Icons.tune ||
+      icon == Icons.tune_rounded ||
       icon == Icons.lock_outline ||
       icon == Icons.privacy_tip_outlined) {
     soft = AppSemanticColors.purpleSoft;
