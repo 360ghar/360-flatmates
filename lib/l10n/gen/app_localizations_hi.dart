@@ -3325,6 +3325,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
 <<<<<<< HEAD
+<<<<<<< HEAD
   String get likeListingTooltip => 'अपनी पसंद में जोड़ें';
 
   @override
@@ -3344,4 +3345,17 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get authMethodPhone => 'फ़ोन';
 >>>>>>> audit/auth
+=======
+  String get visitRescheduled => 'नया समय सुझाया गया';
+
+  @override
+  String get visitTimeInPast => 'कृपया भविष्य का कोई समय चुनें।';
+
+  @override
+  String get visitStatusPast => 'बीते हुए';
+
+  @override
+  String get visitScheduleNoConversation =>
+      'हम यह बातचीत लोड नहीं कर सके। कृपया चैट से दोबारा प्रयास करें।';
+>>>>>>> audit/visits
 }

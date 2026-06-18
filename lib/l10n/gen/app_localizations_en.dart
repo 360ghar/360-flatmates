@@ -3311,6 +3311,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
 <<<<<<< HEAD
+<<<<<<< HEAD
   String get likeListingTooltip => 'Add to your likes';
 
   @override
@@ -3330,4 +3331,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authMethodPhone => 'phone';
 >>>>>>> audit/auth
+=======
+  String get visitRescheduled => 'New time suggested';
+
+  @override
+  String get visitTimeInPast => 'Please pick a time in the future.';
+
+  @override
+  String get visitStatusPast => 'Past';
+
+  @override
+  String get visitScheduleNoConversation =>
+      'We couldn\'t load this conversation. Please try again from chat.';
+>>>>>>> audit/visits
 }

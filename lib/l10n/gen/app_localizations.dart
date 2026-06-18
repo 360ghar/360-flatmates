@@ -6207,6 +6207,7 @@ abstract class AppLocalizations {
   String get dealBreakersSectionTitle;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /// No description provided for @likeListingTooltip.
   ///
   /// In en, this message translates to:
@@ -6249,6 +6250,31 @@ abstract class AppLocalizations {
   /// **'phone'**
   String get authMethodPhone;
 >>>>>>> audit/auth
+=======
+  /// No description provided for @visitRescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'New time suggested'**
+  String get visitRescheduled;
+
+  /// No description provided for @visitTimeInPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Please pick a time in the future.'**
+  String get visitTimeInPast;
+
+  /// No description provided for @visitStatusPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get visitStatusPast;
+
+  /// No description provided for @visitScheduleNoConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load this conversation. Please try again from chat.'**
+  String get visitScheduleNoConversation;
+>>>>>>> audit/visits
 }
 
 class _AppLocalizationsDelegate
