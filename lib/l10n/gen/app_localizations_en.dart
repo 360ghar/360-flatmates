@@ -3310,8 +3310,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dealBreakersSectionTitle => 'Deal-breakers';
 
   @override
+<<<<<<< HEAD
   String get likeListingTooltip => 'Add to your likes';
 
   @override
   String get unlikeListingTooltip => 'Remove from your likes';
+=======
+  String get togglePasswordVisibility => 'Toggle password visibility';
+
+  @override
+  String get authMethodGoogle => 'Google';
+
+  @override
+  String get authMethodApple => 'Apple';
+
+  @override
+  String get authMethodEmail => 'email';
+
+  @override
+  String get authMethodPhone => 'phone';
+>>>>>>> audit/auth
 }
