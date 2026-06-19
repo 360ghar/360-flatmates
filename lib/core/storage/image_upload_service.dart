@@ -179,18 +179,6 @@ Future<MediaBatchDeleteResult> deleteMediaBatch(List<String> mediaIds) async {
     );
   }
 
-  /// Result envelope for a batch-delete operation. `deleted` contains the
-/// ids the backend removed successfully; `failed` contains the ids the
-/// backend refused (e.g. media still in use by a published listing).
-class MediaBatchDeleteResult {
-  const MediaBatchDeleteResult({required this.deleted, required this.failed});
-
-  final List<String> deleted;
-  final List<String> failed;
-
-  bool get hasFailures => failed.isNotEmpty;
-}
-
 /// Upload a file through the backend API which routes to Cloudinary.
   Future<UploadResult> _upload(
     File file, {
@@ -262,6 +250,18 @@ class VideoValidationResult {
   final bool tooShort;
 
   bool get isValid => !tooLarge && !tooLong && !tooShort;
+}
+
+/// Result envelope for a batch-delete operation. `deleted` contains the
+/// ids the backend removed successfully; `failed` contains the ids the
+/// backend refused (e.g. media still in use by a published listing).
+class MediaBatchDeleteResult {
+  const MediaBatchDeleteResult({required this.deleted, required this.failed});
+
+  final List<String> deleted;
+  final List<String> failed;
+
+  bool get hasFailures => failed.isNotEmpty;
 }
 
 final imageUploadServiceProvider = Provider<ImageUploadService>(
