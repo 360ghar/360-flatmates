@@ -21,28 +21,31 @@ class RazorpayOrderResponseDto {
     required this.orderId,
     required this.amount,
     required this.currency,
-    this.receipt,
-    this.status,
-    this.checkoutUrl,
+    required this.bookingId,
+    this.keyId,
+    this.notes = const <String, String>{},
     this.raw = const <String, dynamic>{},
   });
 
   final String orderId;
   final num amount;
   final String currency;
-  final String? receipt;
-  final String? status;
-  final String? checkoutUrl;
+  final int bookingId;
+  final String? keyId;
+  final Map<String, String> notes;
   final Map<String, dynamic> raw;
 
   factory RazorpayOrderResponseDto.fromJson(Map<String, dynamic> json) {
+    final rawNotes = json['notes'];
     return RazorpayOrderResponseDto(
       orderId: json['order_id']?.toString() ?? '',
       amount: (json['amount'] as num?) ?? 0,
       currency: json['currency'] as String? ?? 'INR',
-      receipt: json['receipt'] as String?,
-      status: json['status'] as String?,
-      checkoutUrl: json['checkout_url'] as String?,
+      bookingId: (json['booking_id'] as num?)?.toInt() ?? 0,
+      keyId: json['key_id'] as String?,
+      notes: rawNotes is Map
+          ? Map<String, String>.from(rawNotes)
+          : const <String, String>{},
       raw: Map<String, dynamic>.from(json),
     );
   }
@@ -51,9 +54,9 @@ class RazorpayOrderResponseDto {
         'order_id': orderId,
         'amount': amount,
         'currency': currency,
-        if (receipt != null) 'receipt': receipt,
-        if (status != null) 'status': status,
-        if (checkoutUrl != null) 'checkout_url': checkoutUrl,
+        'booking_id': bookingId,
+        if (keyId != null) 'key_id': keyId,
+        'notes': notes,
       };
 }
 

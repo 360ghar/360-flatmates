@@ -9,11 +9,10 @@ class BlogPostDto {
     required this.id,
     required this.slug,
     required this.title,
-    required this.body,
+    required this.content,
     required this.status,
     this.excerpt,
     this.coverImageUrl,
-    this.authorName,
     this.metaTitle,
     this.metaDescription,
     this.focusKeyword,
@@ -22,6 +21,8 @@ class BlogPostDto {
     this.readingTimeMinutes,
     this.wordCount,
     this.publishedAt,
+    this.scheduledAt,
+    this.previewToken,
     this.createdAt,
     this.updatedAt,
     this.sources = const [],
@@ -34,11 +35,10 @@ class BlogPostDto {
   final int id;
   final String slug;
   final String title;
-  final String body;
+  final String content;
   final BlogPostStatusDto status;
   final String? excerpt;
   final String? coverImageUrl;
-  final String? authorName;
   final String? metaTitle;
   final String? metaDescription;
   final String? focusKeyword;
@@ -47,6 +47,8 @@ class BlogPostDto {
   final int? readingTimeMinutes;
   final int? wordCount;
   final DateTime? publishedAt;
+  final DateTime? scheduledAt;
+  final String? previewToken;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final List<String> sources;
@@ -80,11 +82,10 @@ class BlogPostDto {
       id: (json['id'] as num?)?.toInt() ?? 0,
       slug: json['slug'] as String? ?? '',
       title: json['title'] as String? ?? '',
-      body: json['body'] as String? ?? '',
+      content: (json['content'] ?? json['body'] ?? '') as String,
       status: BlogPostStatusDto.fromWire(json['status'] as String?),
       excerpt: json['excerpt'] as String?,
       coverImageUrl: json['cover_image_url'] as String?,
-      authorName: json['author_name'] as String?,
       metaTitle: json['meta_title'] as String?,
       metaDescription: json['meta_description'] as String?,
       focusKeyword: json['focus_keyword'] as String?,
@@ -93,6 +94,8 @@ class BlogPostDto {
       readingTimeMinutes: (json['reading_time_minutes'] as num?)?.toInt(),
       wordCount: (json['word_count'] as num?)?.toInt(),
       publishedAt: DateTime.tryParse(json['published_at']?.toString() ?? ''),
+      scheduledAt: DateTime.tryParse(json['scheduled_at']?.toString() ?? ''),
+      previewToken: json['preview_token'] as String?,
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? ''),
       updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? ''),
       sources: sources,
@@ -117,11 +120,10 @@ class BlogPostDto {
         'id': id,
         'slug': slug,
         'title': title,
-        'body': body,
+        'content': content,
         'status': status.wire,
         if (excerpt != null) 'excerpt': excerpt,
         if (coverImageUrl != null) 'cover_image_url': coverImageUrl,
-        if (authorName != null) 'author_name': authorName,
         if (metaTitle != null) 'meta_title': metaTitle,
         if (metaDescription != null) 'meta_description': metaDescription,
         if (focusKeyword != null) 'focus_keyword': focusKeyword,
@@ -131,6 +133,8 @@ class BlogPostDto {
           'reading_time_minutes': readingTimeMinutes,
         if (wordCount != null) 'word_count': wordCount,
         if (publishedAt != null) 'published_at': publishedAt!.toIso8601String(),
+        if (scheduledAt != null)
+          'scheduled_at': scheduledAt!.toIso8601String(),
         if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
         if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
         'sources': sources,
