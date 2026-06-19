@@ -8,7 +8,7 @@ The listings feature enables room posters to create, edit, publish, and manage p
 
 ## Directory Layout
 
-```
+```text
 lib/features/listings/
 ├── create_listing_page.dart           # 8-step listing wizard
 ├── listing_under_review_page.dart     # Post-submission review status

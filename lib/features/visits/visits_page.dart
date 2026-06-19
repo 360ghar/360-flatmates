@@ -22,7 +22,9 @@ import 'widgets/visit_card.dart';
 /// Visit ids that currently have an action (confirm/cancel/reschedule)
 /// in flight. Used to disable the card's action chips and prevent
 /// double-submission of the same mutation.
-final _pendingVisitActionsProvider = StateProvider<Set<int>>((ref) => const {});
+final _pendingVisitActionsProvider = StateProvider.autoDispose<Set<int>>(
+  (ref) => <int>{},
+);
 
 class VisitsPage extends ConsumerStatefulWidget {
   const VisitsPage({super.key});
@@ -33,17 +35,19 @@ class VisitsPage extends ConsumerStatefulWidget {
 
 class _VisitsPageState extends ConsumerState<VisitsPage> {
   @override
-  void initState() {
-    super.initState();
-    // Prime the cursor controller so the first paint already has data.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(visitsListControllerProvider.notifier).load();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<CursorListState<VisitItem>>>(
+      visitsListControllerProvider,
+      (previous, next) {
+        if (next.isLoading && (previous == null || !previous.isLoading)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            ref.read(visitsListControllerProvider.notifier).load();
+          });
+        }
+      },
+    );
+
     final visitsState = ref.watch(visitsListControllerProvider);
     final pending = ref.watch(_pendingVisitActionsProvider);
     final locale = AppLocalizations.of(context);
@@ -149,7 +153,9 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                 ],
                 if (state.hasMore)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                    ),
                     child: Center(
                       child: state.isLoadingMore
                           ? const SizedBox(
@@ -252,13 +258,19 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
 
     final now = DateTime.now();
     final scheduledLocal = item.scheduledDate.toLocal();
+    final firstDate = DateUtils.dateOnly(now);
+    final lastDate = firstDate.add(const Duration(days: 90));
+    var initialDate = scheduledLocal.isAfter(now)
+        ? DateUtils.dateOnly(scheduledLocal)
+        : firstDate.add(const Duration(days: 1));
+    if (initialDate.isBefore(firstDate)) initialDate = firstDate;
+    if (initialDate.isAfter(lastDate)) initialDate = lastDate;
+
     final date = await showDatePicker(
       context: context,
-      firstDate: DateUtils.dateOnly(now),
-      lastDate: now.add(const Duration(days: 90)),
-      initialDate: scheduledLocal.isAfter(now)
-          ? scheduledLocal
-          : now.add(const Duration(days: 1)),
+      firstDate: firstDate,
+      lastDate: lastDate,
+      initialDate: initialDate,
     );
     if (date == null || !mounted) return;
 

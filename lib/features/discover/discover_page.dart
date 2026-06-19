@@ -89,11 +89,13 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     }
   }
 
-  /// Toggles the like for [item] via the controller's optimistic path (the
-  /// heart flips instantly and rolls back on failure) instead of issuing a
-  /// raw like + full feed refetch. `conversationsProvider` invalidation is
-  /// handled inside the controller; the success toast is shown here for both
-  /// the newly-liked and newly-unliked cases.
+  /// Toggles the like for [item].
+  ///
+  /// The optimistic UI update, network call, and `conversationsProvider`
+  /// invalidation are handled by [DiscoverFeedController.toggleLike]. This
+  /// method only shows the success or error toast: it displays the
+  /// "contact request sent" toast for a new like (with conversation id if
+  /// one was created) and the "like removed" toast for an unlike.
   Future<void> _handleLike(PropertyListing item) async {
     final locale = AppLocalizations.of(context);
     final wasLiked = item.liked ?? false;

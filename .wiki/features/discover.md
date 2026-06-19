@@ -6,7 +6,7 @@ The home feed feature. Displays a paginated list of property listings as horizon
 
 ## Directory layout
 
-```
+```text
 lib/features/discover/
   discover_page.dart            # Home feed page with greeting, search, cards
   discover_repository.dart      # API calls for listings, likes, visits, society tags

@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 class FlatmatesOtpInput extends StatefulWidget {
   const FlatmatesOtpInput({
     required this.onCompleted,
+    this.onChanged,
     this.digitCount = 6,
     this.keyPrefix = 'otp',
     super.key,
@@ -17,6 +18,9 @@ class FlatmatesOtpInput extends StatefulWidget {
   final int digitCount;
   final String keyPrefix;
   final void Function(String otp) onCompleted;
+
+  /// Called every time the OTP text changes, including deletions.
+  final void Function(String otp)? onChanged;
 
   @override
   FlatmatesOtpInputState createState() => FlatmatesOtpInputState();
@@ -75,6 +79,7 @@ class FlatmatesOtpInputState extends State<FlatmatesOtpInput> {
       } else if (digits.length < widget.digitCount && digits.isNotEmpty) {
         _focusNodes[digits.length].requestFocus();
       }
+      widget.onChanged?.call(digits);
       return;
     }
 
@@ -91,6 +96,7 @@ class FlatmatesOtpInputState extends State<FlatmatesOtpInput> {
       _focusNodes[widget.digitCount - 1].unfocus();
       widget.onCompleted(otp);
     }
+    widget.onChanged?.call(otp);
   }
 
   void _onDigitDeleted(int index) {
@@ -98,6 +104,7 @@ class FlatmatesOtpInputState extends State<FlatmatesOtpInput> {
       _controllers[index - 1].clear();
       _focusNodes[index - 1].requestFocus();
     }
+    widget.onChanged?.call(otp);
   }
 
   void fillOtp(String otp) {

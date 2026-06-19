@@ -131,7 +131,25 @@ class EditProfileOptions {
     ]);
   }
 
+  static const _nonNegotiablesCatalogKey = 'flatmates_non_negotiables';
+
   List<NonNegotiableOption> nonNegotiableOptions() {
+    final catalogOpts = bootstrap?.catalogOptions(_nonNegotiablesCatalogKey);
+    if (catalogOpts != null && catalogOpts.isNotEmpty) {
+      return catalogOpts
+          .map(
+            (opt) => NonNegotiableOption(
+              opt.id,
+              opt.label,
+              _iconForNonNegotiable(opt.id),
+            ),
+          )
+          .toList();
+    }
+    return _fallbackNonNegotiableOptions();
+  }
+
+  List<NonNegotiableOption> _fallbackNonNegotiableOptions() {
     return [
       NonNegotiableOption(
         'food_veg_only',
@@ -176,5 +194,21 @@ class EditProfileOptions {
         Icons.cleaning_services,
       ),
     ];
+  }
+
+  IconData _iconForNonNegotiable(String id) {
+    return switch (id) {
+      'food_veg_only' => Icons.restaurant,
+      'food_vegan_only' => Icons.eco,
+      'no_smoking' => Icons.smoke_free,
+      'no_drinking' => Icons.no_drinks,
+      'no_overnight_guests' => Icons.nightlight,
+      'no_pets' => Icons.pets,
+      'gender_female_only' => Icons.female,
+      'gender_male_only' => Icons.male,
+      'no_parties' => Icons.do_not_disturb,
+      'min_tidy' => Icons.cleaning_services,
+      _ => Icons.block,
+    };
   }
 }

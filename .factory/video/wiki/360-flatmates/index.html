@@ -87,7 +87,7 @@
 <div data-composition-id="main" data-width="1280" data-height="720" data-start="0" style="width:1280px;height:720px;overflow:hidden;background:var(--canvas);position:relative;">
 
 <div class="hdr">
-  <div class="logo">36 <span>FLATMATES</span></div>
+  <div class="logo">360 <span>FLATMATES</span></div>
   <div class="counter" id="sceneCounter">01 / 11</div>
 </div>
 <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
@@ -127,7 +127,7 @@
     </div>
   </div>
   <div style="display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;">
-    <div class="chip chip-accent">Flutter 3.35</div>
+    <div class="chip chip-accent">Flutter 3.41.9</div>
     <div class="chip chip-accent">Riverpod</div>
     <div class="chip chip-accent">GoRouter</div>
     <div class="chip chip-accent">Supabase</div>
@@ -191,7 +191,7 @@
     <div class="card" style="flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center;">
       <div class="mono" style="font-size: 11px; color: var(--accent); margin-bottom: 6px;">main.dart</div>
       <div style="font-size: 13px; font-weight: 600;">ProviderScope</div>
-      <div class="body-sm" style="font-size: 11px;">3 overrides injected</div>
+      <div class="body-sm" style="font-size: 11px;">5 overrides injected</div>
     </div>
     <div class="diag-arrow">→</div>
     <div class="card" style="flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center;">
@@ -318,7 +318,7 @@
 <!-- SCENE 7: Feature Modules Grid -->
 <div class="scene" id="s7" style="padding-top: 68px;">
   <div class="eyebrow" style="margin-bottom: 16px;">FEATURE-FIRST STRUCTURE</div>
-  <h2 style="margin-bottom: 20px;">14 feature modules under lib/features/</h2>
+  <h2 style="margin-bottom: 20px;">15 feature modules under lib/features/</h2>
   <div class="grid4" style="gap: 10px;">
     <div class="card" style="padding: 14px;">
       <div style="font-size: 12px; font-weight: 600; color: var(--accent);">discover</div>
@@ -574,10 +574,10 @@
 <div class="scene" id="s11" style="justify-content: center; align-items: center; text-align: center;">
   <div class="eyebrow" style="margin-bottom: 24px;">360 FLATMATES</div>
   <h1 style="font-size: 46px; max-width: 700px;">Flutter + Riverpod + Supabase</h1>
-  <div class="body" style="text-align: center; margin-top: 16px; max-width: 560px;">14 feature modules, 18 shared widgets, realtime chat, compatibility scoring, and a warm-editorial design system.</div>
+  <div class="body" style="text-align: center; margin-top: 16px; max-width: 560px;">15 feature modules, 18 shared widgets, realtime chat, compatibility scoring, and a warm-editorial design system.</div>
   <div style="display: flex; gap: 8px; margin-top: 28px; flex-wrap: wrap; justify-content: center;">
     <div class="chip chip-accent">com.the360ghar.flatmates</div>
-    <div class="chip chip-surface">Flutter 3.35</div>
+    <div class="chip chip-surface">Flutter 3.41.9</div>
     <div class="chip chip-surface">Riverpod</div>
     <div class="chip chip-surface">Supabase</div>
     <div class="chip chip-surface">FastAPI</div>
@@ -613,6 +613,10 @@
       }
     }
     if (!active) active = _scenes[_scenes.length - 1];
+    // Progress must update on every frame, even when the scene hasn't
+    // changed, otherwise the bar only moves when scenes transition.
+    var fill = document.getElementById("progressFill");
+    if (fill) fill.style.width = ((time / 143) * 100) + "%";
     if (active === _activeScene) return;
     _activeScene = active;
     var idx = _scenes.indexOf(active);
@@ -624,8 +628,6 @@
     }
     var counter = document.getElementById("sceneCounter");
     if (counter) counter.textContent = (idx < 9 ? "0" : "") + (idx + 1) + " / " + _scenes.length;
-    var fill = document.getElementById("progressFill");
-    if (fill) fill.style.width = ((time / 143) * 100) + "%";
   }
 
   // Register as a timeline-like object with duration() method

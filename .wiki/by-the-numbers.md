@@ -13,11 +13,11 @@ Codebase statistics for 360 FlatMates as of June 2026.
 | **ARB localization files** | 2 (EN + HI) |
 | **ARB lines** | 3,258 |
 | **Generated files** (`.freezed.dart`, `.g.dart`) | 7 |
-| **Total commits** | 54 |
+| **Total commits** | 74 |
 | **First commit** | 2026-04-24 |
-| **Latest commit** | 2026-06-18 |
+| **Latest commit** | 2026-06-19 |
 | **App version** | 1.0.4+10 |
-| **Flutter SDK** | >=3.35.0 |
+| **Flutter SDK** | 3.41.9 |
 | **Dart SDK** | ^3.9.0 |
 
 ## Lines of code by area

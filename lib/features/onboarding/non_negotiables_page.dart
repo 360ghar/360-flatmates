@@ -24,8 +24,11 @@ class _NonNegotiablesPageState extends ConsumerState<NonNegotiablesPage> {
   @override
   void initState() {
     super.initState();
-    // Restore previously-chosen non-negotiables on back/forward or resume.
-    _selected.addAll(ref.read(onboardingControllerProvider).nonNegotiables);
+    // Restore previously-chosen non-negotiables on back/forward or resume,
+    // capping at the same 3-item limit enforced by the UI.
+    _selected.addAll(
+      ref.read(onboardingControllerProvider).nonNegotiables.take(3),
+    );
   }
 
   /// Hardcoded fallback options used when the backend catalog is unavailable.

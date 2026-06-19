@@ -6,7 +6,7 @@ Manages all authentication flows for the app: phone OTP, email OTP, password log
 
 ## Directory layout
 
-```
+```text
 lib/features/auth/
   auth_controller.dart          # Riverpod Notifier managing AuthState
   password_reset_controller.dart # Password reset OTP + set-password flow

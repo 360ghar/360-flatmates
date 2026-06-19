@@ -99,7 +99,7 @@ Use meaningful `Key` values on interactive widgets so Maestro can reliably targe
 IconButton(
   key: const ValueKey('nav_home_tab'),
   icon: const Icon(Icons.home_outlined),
-  tooltip: 'Home',
+  tooltip: AppLocalizations.of(context).homeTooltip,
 )
 ```
 

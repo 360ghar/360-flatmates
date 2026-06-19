@@ -106,11 +106,12 @@ class _OtpPageState extends ConsumerState<OtpPage>
   Future<void> _resendOtp() async {
     if (!canResend) return;
     final notifier = ref.read(authControllerProvider.notifier);
-    // Mirror the original send: an unverified/unknown identifier is a signup,
-    // and some GoTrue versions reject a login-only OTP (shouldCreateUser=false)
-    // for such accounts. Resending with the wrong flag would fail the resend.
+    // Default resend to login mode unless the identifier is explicitly
+    // unverified. A null/unknown verified state should not opt into signup,
+    // which could fail on GoTrue versions that reject create-user for existing
+    // identifiers.
     final isSignup =
-        ref.read(authControllerProvider).identifierVerified != true;
+        ref.read(authControllerProvider).identifierVerified == false;
     if (_isEmail) {
       await notifier.sendEmailOtp(_email, isSignup: isSignup);
     } else {

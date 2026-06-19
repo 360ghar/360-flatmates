@@ -24,9 +24,14 @@ final _isListeningProvider = StateProvider.autoDispose<bool>((ref) => false);
 final _passwordTextProvider = StateProvider.autoDispose<String>((ref) => '');
 final _confirmTextProvider = StateProvider.autoDispose<String>((ref) => '');
 
-/// True once all 6 OTP digits are entered (driven by the OTP input's
-/// onCompleted), so the submit button reflects OTP readiness too.
-final _otpCompleteProvider = StateProvider.autoDispose<bool>((ref) => false);
+/// Tracks the current OTP text so the submit button can react to every
+/// keystroke (and deletion) without relying on a one-shot onCompleted.
+final _otpTextProvider = StateProvider.autoDispose<String>((ref) => '');
+
+/// True once all 6 OTP digits are entered.
+final _otpCompleteProvider = Provider.autoDispose<bool>(
+  (ref) => ref.watch(_otpTextProvider).length == 6,
+);
 
 class ResetPasswordPage extends ConsumerStatefulWidget {
   const ResetPasswordPage({super.key});
@@ -83,9 +88,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
       // Fill the OTP boxes but do NOT auto-submit. The sms_autofill package
       // can fire with a stale/cached code from a previous SMS detection.
       _otpKey.currentState?.silentFillOtp(code!);
-      // silentFillOtp deliberately skips onCompleted; mark complete here so
-      // the (manually triggered) submit button enables after autofill.
-      if (mounted) ref.read(_otpCompleteProvider.notifier).state = true;
+      // silentFillOtp deliberately skips onCompleted; mirror the filled code
+      // into the text provider so OTP readiness updates after autofill.
+      if (mounted) ref.read(_otpTextProvider.notifier).state = code!;
     }
   }
 
@@ -104,6 +109,8 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
 
   Future<void> _resendOtp() async {
     if (!canResend) return;
+    _otpKey.currentState?.silentFillOtp('');
+    ref.read(_otpTextProvider.notifier).state = '';
     await ref
         .read(passwordResetControllerProvider.notifier)
         .sendOtp(_identifier);
@@ -198,8 +205,9 @@ class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage>
             FlatmatesOtpInput(
               key: _otpKey,
               keyPrefix: 'reset_otp',
-              onCompleted: (_) =>
-                  ref.read(_otpCompleteProvider.notifier).state = true,
+              onChanged: (otp) =>
+                  ref.read(_otpTextProvider.notifier).state = otp,
+              onCompleted: (_) {},
             ),
             const SizedBox(height: AppSpacing.screen),
 

@@ -5186,6 +5186,12 @@ abstract class AppLocalizations {
   /// **'Session expired. Please sign in again.'**
   String get errorAuthExpired;
 
+  /// No description provided for @errorAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Please try again.'**
+  String get errorAuth;
+
   /// No description provided for @errorServer.
   ///
   /// In en, this message translates to:

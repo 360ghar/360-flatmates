@@ -2740,6 +2740,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorAuthExpired => 'Session expired. Please sign in again.';
 
   @override
+  String get errorAuth => 'Authentication failed. Please try again.';
+
+  @override
   String get errorServer => 'Server error. Please try again later.';
 
   @override

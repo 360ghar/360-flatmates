@@ -116,6 +116,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     decoration: InputDecoration(
                       labelText: locale.passwordLabel,
                       suffixIcon: IconButton(
+                        key: const Key('login_password_visibility_toggle'),
                         icon: Icon(
                           ref.watch(_obscurePasswordProvider)
                               ? Icons.visibility_off_outlined

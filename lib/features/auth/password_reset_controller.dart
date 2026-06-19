@@ -149,7 +149,11 @@ class PasswordResetController extends Notifier<PasswordResetState> {
       if (e.statusCode == '429' || e.code == 'too_many_requests') {
         return RateLimitFailure(underlyingError: e, stackTrace: st);
       }
-      return ValidationFailure(underlyingError: e, stackTrace: st);
+      return AuthFailure(
+        serverMessage: e.message,
+        underlyingError: e,
+        stackTrace: st,
+      );
     }
     return UnknownFailure(underlyingError: e, stackTrace: st);
   }

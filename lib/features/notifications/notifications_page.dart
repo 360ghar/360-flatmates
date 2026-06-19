@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -95,8 +95,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         child: Column(
           children: [
             Expanded(
-              child: FlatmatesAsyncView<
-                  CursorListState<NotificationModel>>(
+              child: FlatmatesAsyncView<CursorListState<NotificationModel>>(
                 value: notificationsState,
                 loading: const FlatmatesSkeleton.notificationList(),
                 isEmpty: (state) => state.items.isEmpty,
@@ -120,8 +119,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                       padding: const EdgeInsets.symmetric(
                         vertical: AppSpacing.md,
                       ),
-                      itemCount:
-                          state.items.length + (state.hasMore ? 1 : 0),
+                      itemCount: state.items.length + (state.hasMore ? 1 : 0),
                       itemBuilder: (context, index) {
                         if (index >= state.items.length) {
                           return Padding(

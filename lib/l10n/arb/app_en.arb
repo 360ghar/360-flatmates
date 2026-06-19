@@ -1247,6 +1247,7 @@
   "clearAllFilters": "Clear all",
   "errorNetwork": "No internet connection. Please check your network and try again.",
   "errorAuthExpired": "Session expired. Please sign in again.",
+  "errorAuth": "Authentication failed. Please try again.",
   "errorServer": "Server error. Please try again later.",
   "errorPermission": "You do not have permission to perform this action.",
   "errorNotFound": "The requested resource was not found.",

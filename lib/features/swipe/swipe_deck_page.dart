@@ -25,6 +25,18 @@ import 'swipe_repository.dart';
 
 part 'swipe_deck_actions.dart';
 
+/// Whether the user has swiped at least one profile in the current deck.
+///
+/// Exposes [SwipeDeckController.hasSwiped] as a reactive provider so the page
+/// can `ref.watch` it instead of reading the notifier inside `build`.
+///
+/// The watch on [swipeDeckControllerProvider] (the state) ensures this provider
+/// rebuilds whenever the deck mutates, keeping the derived boolean in sync.
+final swipeDeckHasSwipedProvider = Provider<bool>((ref) {
+  ref.watch(swipeDeckControllerProvider);
+  return ref.read(swipeDeckControllerProvider.notifier).hasSwiped;
+});
+
 class SwipeDeckPage extends ConsumerStatefulWidget {
   const SwipeDeckPage({super.key});
 
@@ -377,7 +389,7 @@ class _SwipeDeckPageState extends ConsumerState<SwipeDeckPage>
     // The deck removes swiped profiles from the list rather than advancing an
     // index, so an empty list after the user has swiped means "end of deck"
     // rather than "no profiles ever loaded".
-    final hasSwiped = ref.read(swipeDeckControllerProvider.notifier).hasSwiped;
+    final hasSwiped = ref.watch(swipeDeckHasSwipedProvider);
 
     if (deckState.isLoading && profiles.isEmpty) {
       return const Scaffold(body: Center(child: FlatmatesSkeleton.card()));

@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
 
       - name: Clone wiki
         run: |
@@ -127,5 +129,9 @@ jobs:
           git config user.email github-actions@github.com
 
           git add .
-          git commit -m "Sync wiki from .wiki/" || exit 0
-          git push
+          if git diff --cached --quiet; then
+            echo "No wiki changes to sync"
+          else
+            git commit -m "Sync wiki from .wiki/"
+            git push
+          fi

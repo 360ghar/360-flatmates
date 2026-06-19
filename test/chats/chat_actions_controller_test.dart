@@ -38,9 +38,12 @@ void main() {
 
       await container.read(chatActionsControllerProvider).blockUser(44);
 
-      // Invalidation makes the next read re-fetch from the backend.
+      // Invalidation makes the next read re-fetch from the backend, and the
+      // shared cursor controller is reloaded eagerly so chats/likes tabs do
+      // not stay stuck in loading. That eager reload is one extra GET, then
+      // the legacy provider re-read below adds another.
       await container.read(conversationsProvider.future);
-      expect(adapter.count('GET', FlatmatesEndpoints.conversations), 2);
+      expect(adapter.count('GET', FlatmatesEndpoints.conversations), 3);
       // And the block itself was POSTed.
       expect(adapter.count('POST', FlatmatesEndpoints.blocks), 1);
     });
@@ -54,7 +57,7 @@ void main() {
           .unmatchConversation(7, 44);
 
       await container.read(conversationsProvider.future);
-      expect(adapter.count('GET', FlatmatesEndpoints.conversations), 2);
+      expect(adapter.count('GET', FlatmatesEndpoints.conversations), 3);
       expect(adapter.count('POST', FlatmatesEndpoints.blocks), 1);
     });
   });

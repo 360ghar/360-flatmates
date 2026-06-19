@@ -55,27 +55,34 @@ class VisitsRepository {
   /// the next page. The backend wraps all list endpoints in
   /// `{ items, next_cursor, has_more, limit }`.
   Future<({List<VisitItem> items, String? nextCursor, bool hasMore})>
-      fetchVisitsPage({String? cursor, int limit = 20}) async {
+  fetchVisitsPage({String? cursor, int limit = 20}) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
     }
-    final response = await _ref.read(apiClientProvider).get(
-          FlatmatesEndpoints.visits,
-          queryParameters: queryParameters,
-        );
+    final response = await _ref
+        .read(apiClientProvider)
+        .get(FlatmatesEndpoints.visits, queryParameters: queryParameters);
     final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
-    return parsePagedEnvelope(
-      data,
-      VisitItem.fromJson,
-      label: 'visits',
-    );
+    return parsePagedEnvelope(data, VisitItem.fromJson, label: 'visits');
   }
 
-  /// Backwards-compatible helper that returns the full first page as a list.
+  /// Backwards-compatible helper that returns the full list by paginating
+  /// through every available cursor.
   Future<List<VisitItem>> fetchVisits() async {
-    final page = await fetchVisitsPage();
-    return page.items;
+    final items = <VisitItem>[];
+    String? cursor;
+    while (true) {
+      final page = await fetchVisitsPage(cursor: cursor);
+      items.addAll(page.items);
+      if (!page.hasMore ||
+          page.nextCursor == null ||
+          page.nextCursor!.isEmpty) {
+        break;
+      }
+      cursor = page.nextCursor;
+    }
+    return items;
   }
 
   Future<int> scheduleFlatmateVisit({

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../chats_repository.dart';
@@ -43,11 +45,7 @@ abstract class CursorListController<T>
       _nextCursor = page.nextCursor;
       _hasMore = page.hasMore;
       state = AsyncValue.data(
-        CursorListState<T>(
-          items: page.items,
-          hasMore: page.hasMore,
-          isLoadingMore: false,
-        ),
+        CursorListState<T>(items: page.items, hasMore: page.hasMore),
       );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -79,15 +77,11 @@ abstract class CursorListController<T>
     } catch (e, st) {
       // Preserve the existing items so a transient error on a load-more
       // request doesn't blow away the list the user is browsing.
-      state = AsyncValue.data(
-        current.copyWith(isLoadingMore: false, error: e),
-      );
+      state = AsyncValue.data(current.copyWith(isLoadingMore: false, error: e));
       // Also surface to listeners that read .error directly.
       state = AsyncValue.error(e, st);
       // Restore the items + error on top so the UI keeps the list.
-      state = AsyncValue.data(
-        current.copyWith(isLoadingMore: false, error: e),
-      );
+      state = AsyncValue.data(current.copyWith(isLoadingMore: false, error: e));
     } finally {
       _loadInFlight = false;
     }
@@ -108,7 +102,9 @@ abstract class CursorListController<T>
     if (current == null) return;
     state = AsyncValue.data(
       current.copyWith(
-        items: current.items.where((existing) => !_matches(existing, item)).toList(),
+        items: current.items
+            .where((existing) => !_matches(existing, item))
+            .toList(),
       ),
     );
   }
@@ -162,60 +158,66 @@ class CursorListState<T> {
 class ConversationsListController
     extends CursorListController<ConversationSummaryModel> {
   @override
-  Future<({List<ConversationSummaryModel> items, String? nextCursor, bool hasMore})>
-      fetchPage({String? cursor}) async {
+  Future<
+    ({List<ConversationSummaryModel> items, String? nextCursor, bool hasMore})
+  >
+  fetchPage({String? cursor}) async {
     return ref
         .read(chatsRepositoryProvider)
         .fetchConversationsPage(cursor: cursor);
   }
 }
 
-class IncomingLikesController
-    extends CursorListController<IncomingLikeModel> {
+class IncomingLikesController extends CursorListController<IncomingLikeModel> {
   @override
   Future<({List<IncomingLikeModel> items, String? nextCursor, bool hasMore})>
-      fetchPage({String? cursor}) async {
+  fetchPage({String? cursor}) async {
     return ref
         .read(chatsRepositoryProvider)
         .fetchIncomingLikesPage(cursor: cursor);
   }
 }
 
-class OutgoingLikesController
-    extends CursorListController<IncomingLikeModel> {
+class OutgoingLikesController extends CursorListController<IncomingLikeModel> {
   @override
   Future<({List<IncomingLikeModel> items, String? nextCursor, bool hasMore})>
-      fetchPage({String? cursor}) async {
+  fetchPage({String? cursor}) async {
     return ref
         .read(chatsRepositoryProvider)
         .fetchOutgoingLikesPage(cursor: cursor);
   }
 }
 
-final conversationsListControllerProvider = NotifierProvider<
-    ConversationsListController, AsyncValue<CursorListState<ConversationSummaryModel>>>(
-  ConversationsListController.new,
-);
+final conversationsListControllerProvider =
+    NotifierProvider<
+      ConversationsListController,
+      AsyncValue<CursorListState<ConversationSummaryModel>>
+    >(ConversationsListController.new);
 
-final incomingLikesListControllerProvider = NotifierProvider<
-    IncomingLikesController, AsyncValue<CursorListState<IncomingLikeModel>>>(
-  IncomingLikesController.new,
-);
+final incomingLikesListControllerProvider =
+    NotifierProvider<
+      IncomingLikesController,
+      AsyncValue<CursorListState<IncomingLikeModel>>
+    >(IncomingLikesController.new);
 
-final outgoingLikesListControllerProvider = NotifierProvider<
-    OutgoingLikesController, AsyncValue<CursorListState<IncomingLikeModel>>>(
-  OutgoingLikesController.new,
-);
+final outgoingLikesListControllerProvider =
+    NotifierProvider<
+      OutgoingLikesController,
+      AsyncValue<CursorListState<IncomingLikeModel>>
+    >(OutgoingLikesController.new);
 
 /// After a block/unmatch, the conversation list + like tabs must drop the
 /// affected entries without a full reload. This helper invalidates the
-/// shared cursor controllers so the next tab activation triggers a fresh
-/// first-page fetch while preserving optimistic removal.
+/// shared cursor controllers and immediately reloads them so the tabs do
+/// not stay stuck in [AsyncLoading].
 ///
 /// Accepts a Riverpod [Ref] so it can be called from controllers (where
 /// only `ref` is available, not `WidgetRef`).
-void invalidateChatListControllers(Ref ref) {
+Future<void> invalidateChatListControllers(Ref ref) async {
   ref.invalidate(conversationsListControllerProvider);
   ref.invalidate(incomingLikesListControllerProvider);
   ref.invalidate(outgoingLikesListControllerProvider);
+  await ref.read(conversationsListControllerProvider.notifier).load();
+  await ref.read(incomingLikesListControllerProvider.notifier).load();
+  await ref.read(outgoingLikesListControllerProvider.notifier).load();
 }

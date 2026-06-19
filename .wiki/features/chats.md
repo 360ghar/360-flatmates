@@ -6,7 +6,7 @@ The messaging and social feature. Provides a conversations list with Likes/Chats
 
 ## Directory layout
 
-```
+```text
 lib/features/chats/
   conversations_page.dart       # Conversations list with segmented Likes/Chats/Liked tabs
   chat_thread_page.dart         # Individual chat thread with message bubbles

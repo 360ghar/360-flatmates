@@ -6,7 +6,7 @@ A Tinder-style card deck for browsing flatmate profiles. Users swipe right to li
 
 ## Directory layout
 
-```
+```text
 lib/features/swipe/
   swipe_deck_page.dart              # Main deck page with gesture handling + animations
   swipe_deck_actions.dart           # Part file for rotation/progress calculations
@@ -58,7 +58,7 @@ flowchart TD
 
 ### Gesture handling
 
-The deck uses raw `Listener` + `onHorizontalDrag*` callbacks (not `GestureDetector`) to avoid gesture arena conflicts with child widgets:
+The deck uses a `GestureDetector` with `onHorizontalDrag*` callbacks (not a raw `Listener`) to avoid gesture arena conflicts with child widgets:
 
 1. **Drag start**: captures initial offset.
 2. **Drag update**: accumulates horizontal offset.

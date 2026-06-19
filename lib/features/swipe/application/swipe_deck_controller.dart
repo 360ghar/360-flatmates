@@ -127,8 +127,10 @@ class SwipeDeckController extends Notifier<SwipeDeckState> {
           .fetchSwipeProfilesPage(filters: filters, cursor: cursor);
       final existingIds = state.profiles.map((p) => p.id).toSet();
       final newProfiles = page.items
-          .where((p) =>
-              !_swipedUserIds.contains(p.id) && !existingIds.contains(p.id))
+          .where(
+            (p) =>
+                !_swipedUserIds.contains(p.id) && !existingIds.contains(p.id),
+          )
           .toList();
       state = state.copyWith(
         profiles: [...state.profiles, ...newProfiles],
@@ -138,8 +140,11 @@ class SwipeDeckController extends Notifier<SwipeDeckState> {
         isLoadingMore: false,
       );
     } catch (e, st) {
-      log('[SwipeDeck] ERROR loading more profiles: $e',
-          error: e, stackTrace: st);
+      log(
+        '[SwipeDeck] ERROR loading more profiles: $e',
+        error: e,
+        stackTrace: st,
+      );
       state = state.copyWith(isLoadingMore: false, error: e);
     } finally {
       _loadInFlight = false;

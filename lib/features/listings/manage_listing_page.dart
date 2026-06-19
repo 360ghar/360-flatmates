@@ -9,7 +9,6 @@ import '../../core/errors/app_failure.dart';
 import '../../core/errors/l10n_bridge.dart';
 import '../../core/theme/theme.dart';
 import '../../l10n/gen/app_localizations.dart';
-import '../chats/application/cursor_list_controller.dart';
 import '../discover/domain/property_listing.dart';
 import '../shared/presentation/components.dart';
 import 'domain/listing_status.dart';

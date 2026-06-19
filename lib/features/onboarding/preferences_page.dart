@@ -32,6 +32,8 @@ class _PreferencesPageState extends ConsumerState<PreferencesPage> {
     // Restore previously-selected preferences so going back/forward or
     // resuming a saved draft retains the user's choices.
     final saved = ref.read(onboardingControllerProvider).preferences;
+    final savedTimeline = ref.read(onboardingControllerProvider).moveInTimeline;
+    _moveInTimeline = savedTimeline ?? _moveInTimeline;
     if (saved.isEmpty) return;
     _preferredGender =
         saved['gender_preference']?.toString() ?? _preferredGender;

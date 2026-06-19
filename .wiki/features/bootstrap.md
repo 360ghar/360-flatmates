@@ -6,7 +6,7 @@ Loads the initial data the app needs after authentication: the user's flatmates 
 
 ## Directory layout
 
-```
+```text
 lib/features/bootstrap/
   bootstrap_controller.dart     # AsyncNotifier fetching /bootstrap + /auth-state
   catalog_helpers.dart          # Utilities for extracting catalog data

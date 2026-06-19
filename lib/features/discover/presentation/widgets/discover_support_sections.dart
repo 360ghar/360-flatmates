@@ -492,69 +492,68 @@ class MeetFlatmatesSection extends ConsumerWidget {
             color: AppSemanticColors.textPrimaryFor(theme.brightness),
           ),
         ),
-            const SizedBox(height: AppSpacing.sm),
-            SizedBox(
-              height: 96,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: displayProfiles.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.xs),
-                itemBuilder: (context, index) {
-                  final profile = displayProfiles[index];
-                  final name = profile.fullName?.split(' ').first ?? 'Flatmate';
-                  final imageUrl =
-                      profile.profileImageUrl ??
-                      (profile.imageUrls.isNotEmpty
-                          ? profile.imageUrls.first
-                          : null);
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          height: 96,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: displayProfiles.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
+            itemBuilder: (context, index) {
+              final profile = displayProfiles[index];
+              final name = profile.fullName?.split(' ').first ?? 'Flatmate';
+              final imageUrl =
+                  profile.profileImageUrl ??
+                  (profile.imageUrls.isNotEmpty
+                      ? profile.imageUrls.first
+                      : null);
 
-                  return SizedBox(
-                    width: 68,
-                    child: FlatmatesCard(
-                      onTap: () => FlatmateProfileSheet.show(
-                        context: context,
-                        userId: profile.id,
-                        nameFallback: profile.fullName,
+              return SizedBox(
+                width: 68,
+                child: FlatmatesCard(
+                  onTap: () => FlatmateProfileSheet.show(
+                    context: context,
+                    userId: profile.id,
+                    nameFallback: profile.fullName,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 2.0,
+                    vertical: 4.0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FlatmatesAvatar(
+                        name: profile.fullName ?? name,
+                        imageUrl: imageUrl,
+                        size: 54,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2.0,
-                        vertical: 4.0,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          FlatmatesAvatar(
-                            name: profile.fullName ?? name,
-                            imageUrl: imageUrl,
-                            size: 54,
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(10),
+                      const SizedBox(height: 4),
+                      Text(
+                        name,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 10.0,
+                          fontWeight: FontWeight.w700,
+                          color: AppSemanticColors.textPrimaryFor(
+                            theme.brightness,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            name,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontSize: 10.0,
-                              fontWeight: FontWeight.w700,
-                              color: AppSemanticColors.textPrimaryFor(
-                                theme.brightness,
-                              ),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

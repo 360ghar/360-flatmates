@@ -254,7 +254,7 @@ class _NoopDiscoverRepository implements DiscoverRepository {
 
 class _NoopListingsRepository implements ListingsRepository {
   @override
-  Future<List<PropertyListing>> fetchMyListings() async =>
+  Future<List<PropertyListing>> fetchMyListings({int limit = 20}) async =>
       const <PropertyListing>[];
 
   @override

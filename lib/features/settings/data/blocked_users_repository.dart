@@ -16,7 +16,7 @@ class BlockedUsersRepository {
   /// The backend wraps all list endpoints in
   /// `{ items, next_cursor, has_more, limit }`.
   Future<({List<BlockedUser> items, String? nextCursor, bool hasMore})>
-      getBlockedUsersPage({String? cursor, int limit = 20}) async {
+  getBlockedUsersPage({String? cursor, int limit = 20}) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
@@ -33,10 +33,17 @@ class BlockedUsersRepository {
     );
   }
 
-  /// Backwards-compatible helper returning the first page as a list.
+  /// Aggregates every page of blocked users into a single list.
   Future<List<BlockedUser>> getBlockedUsers() async {
-    final page = await getBlockedUsersPage();
-    return page.items;
+    final all = <BlockedUser>[];
+    String? cursor;
+    do {
+      final page = await getBlockedUsersPage(cursor: cursor);
+      all.addAll(page.items);
+      cursor = page.nextCursor;
+      if (page.items.isEmpty) break;
+    } while (cursor != null && cursor.isNotEmpty);
+    return all;
   }
 
   Future<void> unblockUser(int blockedUserId) async {

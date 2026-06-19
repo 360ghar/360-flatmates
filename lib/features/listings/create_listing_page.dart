@@ -4,20 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/errors/app_failure.dart' hide UploadFailure;
+import '../../core/errors/app_failure.dart';
 import '../../core/errors/l10n_bridge.dart';
-import '../../core/storage/image_upload_service.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../bootstrap/bootstrap_controller.dart';
 import '../bootstrap/catalog_helpers.dart';
-import '../discover/application/discover_feed_controller.dart';
-import '../discover/discover_repository.dart';
 import '../shared/presentation/components.dart';
-import 'listings_repository.dart';
+import 'application/create_listing_controller.dart';
 import 'presentation/widgets/listing_form_data.dart';
 import 'presentation/widgets/listing_step_header.dart';
 import 'presentation/widgets/listing_step_view.dart';
+
+// Local UI state for the create/edit listing page. Reset on entry so transient
+// state does not leak across page instances.
+final _createListingStepProvider = StateProvider<int>((ref) => 0);
+final _createListingSubmittingProvider = StateProvider<bool>((ref) => false);
+final _createListingPhotosUploadingProvider = StateProvider<bool>(
+  (ref) => false,
+);
+final _createListingLoadingExistingProvider = StateProvider<bool>(
+  (ref) => false,
+);
+final _createListingDirtyProvider = StateProvider<bool>((ref) => false);
+final _createListingValidationProvider = StateProvider<ListingStepValidation>(
+  (ref) => kNoListingValidation,
+);
 
 class CreateListingPage extends ConsumerStatefulWidget {
   const CreateListingPage({this.listingId, super.key});
@@ -29,12 +41,6 @@ class CreateListingPage extends ConsumerStatefulWidget {
 }
 
 class _CreateListingPageState extends ConsumerState<CreateListingPage> {
-  int _step = 0;
-  bool _submitting = false;
-  bool _photosUploading = false;
-  bool _dirty = false;
-  bool _loadingExisting = false;
-  ListingStepValidation _validation = kNoListingValidation;
   final _societyController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
@@ -71,20 +77,31 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
   @override
   void initState() {
     super.initState();
+    _resetProviders();
     if (widget.listingId != null) {
-      _loadingExisting = true;
+      ref.read(_createListingLoadingExistingProvider.notifier).state = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadListingForEdit(widget.listingId!);
       });
     }
   }
 
+  void _resetProviders() {
+    ref.read(_createListingStepProvider.notifier).state = 0;
+    ref.read(_createListingSubmittingProvider.notifier).state = false;
+    ref.read(_createListingPhotosUploadingProvider.notifier).state = false;
+    ref.read(_createListingLoadingExistingProvider.notifier).state = false;
+    ref.read(_createListingDirtyProvider.notifier).state = false;
+    ref.read(_createListingValidationProvider.notifier).state =
+        kNoListingValidation;
+  }
+
   Future<void> _loadListingForEdit(int listingId) async {
     final locale = AppLocalizations.of(context);
     try {
       final listing = await ref
-          .read(discoverRepositoryProvider)
-          .fetchListing(listingId);
+          .read(createListingControllerProvider)
+          .loadListingForEdit(listingId);
       if (!mounted) return;
       final scalars = populateListingControllers(
         listing: listing,
@@ -113,14 +130,14 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
         _flatConfig = scalars.flatConfig;
         _videoTourUrl = scalars.videoTourUrl;
         _availableFrom = scalars.availableFrom;
-        _loadingExisting = false;
       });
+      ref.read(_createListingLoadingExistingProvider.notifier).state = false;
     } catch (e) {
       debugPrint(
         'CreateListingPage._loadListingForEdit failed for listing $listingId: $e',
       );
       if (!mounted) return;
-      setState(() => _loadingExisting = false);
+      ref.read(_createListingLoadingExistingProvider.notifier).state = false;
       FlatmatesToast.error(context, locale.couldNotLoadListings);
     }
   }
@@ -167,26 +184,23 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
   }
 
   Future<void> _pickRoomPhotos() async {
-    if (_photosUploading) return; // prevent concurrent upload sessions
+    if (ref.read(_createListingPhotosUploadingProvider)) return;
     final locale = AppLocalizations.of(context);
+    final controller = ref.read(createListingControllerProvider);
     try {
-      final service = ref.read(imageUploadServiceProvider);
-      final files = await service.pickImages(limit: 10 - _roomPhotoUrls.length);
+      final files = await controller.pickRoomPhotos(
+        limit: 10 - _roomPhotoUrls.length,
+      );
       if (files.isEmpty) return;
-      setState(() => _photosUploading = true);
+      if (!mounted) return;
+      ref.read(_createListingPhotosUploadingProvider.notifier).state = true;
       for (final file in files) {
-        final result = await service.uploadListingPhoto(file);
+        final url = await controller.uploadRoomPhoto(file);
         if (!mounted) return;
-        if (result is UploadSuccess) {
-          setState(() {
-            _roomPhotoUrls.add(result.url);
-            _validation = kNoListingValidation;
-            _dirty = true;
-          });
-        } else if (result is UploadFailure) {
-          FlatmatesToast.error(context, result.reason);
-          break;
-        }
+        setState(() => _roomPhotoUrls.add(url));
+        ref.read(_createListingValidationProvider.notifier).state =
+            kNoListingValidation;
+        ref.read(_createListingDirtyProvider.notifier).state = true;
       }
     } catch (e) {
       debugPrint('CreateListingPage._pickRoomPhotos failed: $e');
@@ -196,26 +210,24 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
           : locale.listingSubmitFailed;
       FlatmatesToast.error(context, msg);
     } finally {
-      if (mounted) setState(() => _photosUploading = false);
+      if (mounted) {
+        ref.read(_createListingPhotosUploadingProvider.notifier).state = false;
+      }
     }
   }
 
   Future<void> _submit() async {
-    if (_submitting) return; // guard against double-submit
+    if (ref.read(_createListingSubmittingProvider)) return;
     final locale = AppLocalizations.of(context);
-    setState(() => _submitting = true);
     final editingId = widget.listingId;
+    ref.read(_createListingSubmittingProvider.notifier).state = true;
     try {
       final request = _formData.toRequest();
-      final repo = ref.read(listingsRepositoryProvider);
-      final listingId = editingId != null
-          ? await repo.updateListing(editingId, request)
-          : await repo.createListing(request);
-      unawaited(ref.read(discoverFeedControllerProvider.notifier).refresh());
-      ref.invalidate(myListingsProvider);
-      await ref.read(bootstrapControllerProvider.notifier).refresh();
+      final listingId = await ref
+          .read(createListingControllerProvider)
+          .submit(request: request, editingId: editingId);
       if (!mounted) return;
-      _dirty = false;
+      ref.read(_createListingDirtyProvider.notifier).state = false;
       FlatmatesToast.success(
         context,
         editingId != null
@@ -235,13 +247,17 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
           : locale.listingSubmitFailed;
       FlatmatesToast.error(context, msg);
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) {
+        ref.read(_createListingSubmittingProvider.notifier).state = false;
+      }
     }
   }
 
-  /// Confirms discarding unsaved entries when the user backs out mid-flow.
   Future<bool> _confirmDiscard() async {
-    if (!_dirty || _submitting) return true;
+    if (!ref.read(_createListingDirtyProvider) ||
+        ref.read(_createListingSubmittingProvider)) {
+      return true;
+    }
     final locale = AppLocalizations.of(context);
     final discard = await showDialog<bool>(
       context: context,
@@ -264,7 +280,8 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
   }
 
   void _clearValidationFlags() {
-    _validation = kNoListingValidation;
+    ref.read(_createListingValidationProvider.notifier).state =
+        kNoListingValidation;
   }
 
   Future<void> _handleBack() async {
@@ -277,17 +294,23 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context);
-    final summary = _formData.stepSummary(locale, _step, _catalogLabel);
-    final canAdvance = _formData.canProceed(_step) && !_photosUploading;
+    final step = ref.watch(_createListingStepProvider);
+    final submitting = ref.watch(_createListingSubmittingProvider);
+    final photosUploading = ref.watch(_createListingPhotosUploadingProvider);
+    final loadingExisting = ref.watch(_createListingLoadingExistingProvider);
+    final validation = ref.watch(_createListingValidationProvider);
+
+    final summary = _formData.stepSummary(locale, step, _catalogLabel);
+    final canAdvance = _formData.canProceed(step) && !photosUploading;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        _handleBack();
+        unawaited(_handleBack());
       },
       child: Scaffold(
-        appBar: FlatmatesHeader.logo(onBack: _handleBack),
+        appBar: FlatmatesHeader.logo(onBack: () => unawaited(_handleBack())),
         body: SafeArea(
           child: Stack(
             children: [
@@ -295,12 +318,11 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                 children: [
                   ListingStepHeader(
                     locale: locale,
-                    step: _step,
+                    step: step,
                     totalSteps: totalSteps,
                     summary: summary,
                   ),
                   const SizedBox(height: AppSpacing.lg),
-
                   Expanded(
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(
@@ -311,16 +333,16 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                       ),
                       children: [
                         ListingStepView(
-                          step: _step,
+                          step: step,
                           data: _formData,
                           catalog: _catalog,
                           catalogLabel: _catalogLabel,
-                          showRentValidation: _validation.rent,
-                          showDepositValidation: _validation.deposit,
-                          showMaintenanceValidation: _validation.maintenance,
-                          showCostValidation: _validation.cost,
-                          showElectricityValidation: _validation.electricity,
-                          showPhotosValidation: _validation.photos,
+                          showRentValidation: validation.rent,
+                          showDepositValidation: validation.deposit,
+                          showMaintenanceValidation: validation.maintenance,
+                          showCostValidation: validation.cost,
+                          showElectricityValidation: validation.electricity,
+                          showPhotosValidation: validation.photos,
                           callbacks: _stepCallbacks,
                         ),
                       ],
@@ -328,7 +350,7 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
                   ),
                 ],
               ),
-              if (_loadingExisting)
+              if (loadingExisting)
                 const Positioned.fill(
                   child: ColoredBox(
                     color: Colors.black12,
@@ -339,101 +361,81 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
           ),
         ),
         bottomNavigationBar: FlatmatesBottomActionBar(
-          primaryButtonKey: _step < totalSteps - 1
+          primaryButtonKey: step < totalSteps - 1
               ? const Key('listing_next_button')
               : const Key('listing_publish_button'),
-          secondaryButtonKey: _step > 0
+          secondaryButtonKey: step > 0
               ? const Key('listing_back_button')
               : null,
-          label: _submitting
+          label: submitting
               ? locale.postingInProgress
-              : (_step < totalSteps - 1
+              : (step < totalSteps - 1
                     ? locale.onboardingNext
                     : locale.publishListingCta),
-          onPressed: _submitting
+          onPressed: submitting
               ? null
-              : (_step < totalSteps - 1
+              : (step < totalSteps - 1
                     ? (canAdvance
                           ? () {
-                              _showInlineValidation();
-                              setState(() {
-                                _step++;
-                                _clearValidationFlags();
-                              });
+                              _showInlineValidation(step);
+                              ref
+                                      .read(_createListingStepProvider.notifier)
+                                      .state =
+                                  step + 1;
+                              _clearValidationFlags();
                             }
                           : () {
-                              _showInlineValidation();
-                              setState(() {});
+                              _showInlineValidation(step);
                             })
                     : _submit),
-          icon: _step < totalSteps - 1
+          icon: step < totalSteps - 1
               ? Icons.arrow_forward_rounded
               : Icons.upload_rounded,
-          secondaryLabel: _step > 0 ? locale.backCta : null,
-          secondaryOnPressed: _step > 0
-              ? () => setState(() {
-                  _step--;
+          secondaryLabel: step > 0 ? locale.backCta : null,
+          secondaryOnPressed: step > 0
+              ? () {
+                  ref.read(_createListingStepProvider.notifier).state =
+                      step - 1;
                   _clearValidationFlags();
-                })
+                }
               : null,
-          secondaryIcon: _step > 0 ? Icons.arrow_back_rounded : null,
+          secondaryIcon: step > 0 ? Icons.arrow_back_rounded : null,
         ),
       ),
     );
   }
 
-  void _showInlineValidation() {
-    _validation = computeStepValidation(_formData, _step);
+  void _showInlineValidation(int step) {
+    ref.read(_createListingValidationProvider.notifier).state =
+        computeStepValidation(_formData, step);
   }
 
   ListingStepCallbacks get _stepCallbacks => ListingStepCallbacks(
     onFieldChanged: _onFieldChanged,
-    onSocietyTypeChanged: (v) => setState(() {
-      _societyType = v;
-      _dirty = true;
-    }),
+    onSocietyTypeChanged: (v) => _updateString(() => _societyType = v),
     onSocietyAmenityToggled: _toggleSet(_societyAmenities),
     onVibeToggled: _toggleSet(_societyVibeTags),
-    onRoomTypeChanged: (v) => setState(() {
-      _roomType = v;
-      _dirty = true;
-    }),
+    onRoomTypeChanged: (v) => _updateString(() => _roomType = v),
     onFurnishingToggled: _toggleSet(_roomFurnishing),
     onFeatureToggled: _toggleSet(_roomFeatures),
     onPickPhotos: _pickRoomPhotos,
-    onRemovePhoto: (i) => setState(() {
-      _roomPhotoUrls.removeAt(i);
-      _dirty = true;
-    }),
-    onVideoTourUrlChanged: (u) => setState(() {
-      _videoTourUrl = u;
-      _dirty = true;
-    }),
+    onRemovePhoto: (i) => _updateList(() => _roomPhotoUrls.removeAt(i)),
+    onVideoTourUrlChanged: (u) => _updateString(() => _videoTourUrl = u),
     onVideoUploadingChanged: (v) => setState(() => _videoUploading = v),
-    onFlatConfigChanged: (v) => setState(() {
-      _flatConfig = v;
-      _dirty = true;
-    }),
+    onFlatConfigChanged: (v) => _updateString(() => _flatConfig = v),
     onFlatAmenityToggled: _toggleSet(_flatAmenities),
-    onElectricityChanged: (v) => setState(() {
-      _electricityIncluded = v;
-      _dirty = true;
-    }),
-    onGenderChanged: (v) => setState(() {
-      _genderPreference = v;
-      _dirty = true;
-    }),
-    onAgeRangeChanged: (min, max) => setState(() {
+    onElectricityChanged: (v) => _updateString(() => _electricityIncluded = v),
+    onGenderChanged: (v) => _updateString(() => _genderPreference = v),
+    onAgeRangeChanged: (min, max) => _updateState(() {
       _ageMin = min;
       _ageMax = max;
-      _dirty = true;
     }),
     onNonNegotiableToggled: _toggleSet(_nonNegotiables),
-    onAvailableFromChanged: (d) => setState(() {
-      _availableFrom = d;
-      _dirty = true;
-    }),
-    onGoToStep: (s) => setState(() => _step = s),
+    onAvailableFromChanged: (d) => _updateNullable(() => _availableFrom = d),
+    onGoToStep: (s) {
+      ref.read(_createListingStepProvider.notifier).state = s;
+      _clearValidationFlags();
+    },
   );
 
   ListingFormData get _formData => ListingFormData(
@@ -470,13 +472,23 @@ class _CreateListingPageState extends ConsumerState<CreateListingPage> {
     availableFrom: _availableFrom,
   );
 
-  /// Marks the form dirty when a text field changes (drives the back guard).
-  void _onFieldChanged() => setState(() => _dirty = true);
+  void _onFieldChanged() {
+    ref.read(_createListingDirtyProvider.notifier).state = true;
+  }
 
-  /// Helper to create a toggle callback for a `Set`.
+  void _updateString(void Function() setter) => _updateState(setter);
+
+  void _updateNullable(void Function() setter) => _updateState(setter);
+
+  void _updateList(void Function() setter) => _updateState(setter);
+
+  void _updateState(void Function() setter) {
+    setState(setter);
+    ref.read(_createListingDirtyProvider.notifier).state = true;
+  }
+
   void Function(String, bool) _toggleSet(Set<String> set) =>
-      (key, selected) => setState(() {
+      (key, selected) => _updateState(() {
         selected ? set.add(key) : set.remove(key);
-        _dirty = true;
       });
 }

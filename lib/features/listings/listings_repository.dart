@@ -117,13 +117,19 @@ class ListingsRepository {
 
   /// Updates an existing listing in place (PUT) so editing never creates a
   /// duplicate. Returns the listing id on success.
+  ///
+  /// The PUT body omits server-managed `listing_preferences` and strips null
+  /// fields so the edit only touches editable values.
   Future<int?> updateListing(
     int listingId,
     ListingCreateRequest request,
   ) async {
+    final body = Map<String, dynamic>.from(request.toJson())
+      ..remove('listing_preferences')
+      ..removeWhere((_, value) => value == null);
     final response = await _ref
         .watch(apiClientProvider)
-        .put(FlatmatesEndpoints.property(listingId), data: request.toJson());
+        .put(FlatmatesEndpoints.property(listingId), data: body);
     final rawData = response.data;
     final data = Map<String, dynamic>.from(rawData is Map ? rawData : const {});
     return (data['id'] as num?)?.toInt() ?? listingId;
@@ -134,15 +140,14 @@ class ListingsRepository {
   /// The backend wraps all list endpoints in
   /// `{ items, next_cursor, has_more, limit }`.
   Future<({List<PropertyListing> items, String? nextCursor, bool hasMore})>
-      fetchMyListingsPage({String? cursor, int limit = 20}) async {
+  fetchMyListingsPage({String? cursor, int limit = 20}) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
     }
-    final response = await _ref.watch(apiClientProvider).get(
-          FlatmatesEndpoints.myProperties,
-          queryParameters: queryParameters,
-        );
+    final response = await _ref
+        .watch(apiClientProvider)
+        .get(FlatmatesEndpoints.myProperties, queryParameters: queryParameters);
     final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
     final page = parsePagedEnvelope(
       data,
@@ -155,13 +160,28 @@ class ListingsRepository {
           return type == null || type == 'flatmate' || type == 'pg';
         })
         .toList(growable: false);
-    return (items: filtered, nextCursor: page.nextCursor, hasMore: page.hasMore);
+    return (
+      items: filtered,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+    );
   }
 
-  /// Backwards-compatible helper returning the first page as a list.
-  Future<List<PropertyListing>> fetchMyListings() async {
-    final page = await fetchMyListingsPage();
-    return page.items;
+  /// Backwards-compatible helper aggregating all pages into a single list.
+  Future<List<PropertyListing>> fetchMyListings({int limit = 20}) async {
+    final allItems = <PropertyListing>[];
+    String? cursor;
+    while (true) {
+      final page = await fetchMyListingsPage(cursor: cursor, limit: limit);
+      allItems.addAll(page.items);
+      if (!page.hasMore ||
+          page.nextCursor == null ||
+          page.nextCursor!.isEmpty) {
+        break;
+      }
+      cursor = page.nextCursor;
+    }
+    return allItems;
   }
 
   Future<void> togglePause(int listingId, {required bool paused}) async {

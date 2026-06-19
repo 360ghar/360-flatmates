@@ -8,15 +8,15 @@ class NotificationsListController
     extends CursorListController<NotificationModel> {
   @override
   Future<({List<NotificationModel> items, String? nextCursor, bool hasMore})>
-      fetchPage({String? cursor}) async {
+  fetchPage({String? cursor}) async {
     return ref
         .read(notificationsRepositoryProvider)
         .fetchNotificationsPage(cursor: cursor);
   }
 }
 
-final notificationsListControllerProvider = NotifierProvider<
-    NotificationsListController,
-    AsyncValue<CursorListState<NotificationModel>>>(
-  NotificationsListController.new,
-);
+final notificationsListControllerProvider =
+    NotifierProvider<
+      NotificationsListController,
+      AsyncValue<CursorListState<NotificationModel>>
+    >(NotificationsListController.new);

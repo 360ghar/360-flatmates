@@ -51,6 +51,25 @@ final class AuthExpiredFailure extends AppFailure {
       serverMessage ?? l10n.errorAuthExpired;
 }
 
+/// Authentication-specific failure from the identity provider (e.g. Supabase
+/// AuthException). Distinct from [ValidationFailure] because the root cause is
+/// not necessarily invalid user input.
+final class AuthFailure extends AppFailure {
+  const AuthFailure({
+    this.serverMessage,
+    super.underlyingError,
+    super.stackTrace,
+  });
+
+  final String? serverMessage;
+
+  @override
+  String get label => 'auth';
+
+  @override
+  String userMessage(UserMessageL10n l10n) => serverMessage ?? l10n.errorAuth;
+}
+
 /// Server returned 5xx or unexpected error.
 final class ServerFailure extends AppFailure {
   const ServerFailure({
@@ -206,6 +225,7 @@ class UserMessageL10n {
   const UserMessageL10n({
     required this.errorNetwork,
     required this.errorAuthExpired,
+    required this.errorAuth,
     required this.errorServer,
     required this.errorPermission,
     required this.errorNotFound,
@@ -220,6 +240,7 @@ class UserMessageL10n {
 
   final String errorNetwork;
   final String errorAuthExpired;
+  final String errorAuth;
   final String errorServer;
   final String errorPermission;
   final String errorNotFound;

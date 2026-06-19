@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,19 +16,33 @@ import 'presentation/widgets/edit_profile_sections.dart';
 import 'profile_repository.dart';
 
 // Local UI state via StateProviders (convention: no setState in ConsumerState).
-final _modeProvider = StateProvider<String>((ref) => 'open_to_both');
-final _workStyleProvider = StateProvider<String>((ref) => 'hybrid');
-final _moveInTimelineProvider = StateProvider<String>((ref) => 'flexible');
-final _sleepScheduleProvider = StateProvider<String?>((ref) => null);
-final _cleanlinessProvider = StateProvider<String?>((ref) => null);
-final _foodHabitsProvider = StateProvider<String?>((ref) => null);
-final _smokingDrinkingProvider = StateProvider<String?>((ref) => null);
-final _guestsPolicyProvider = StateProvider<String?>((ref) => null);
-final _nonNegotiablesProvider = StateProvider<List<String>>((ref) => const []);
-final _photoUrlsProvider = StateProvider<List<String>>((ref) => const []);
-final _savingProvider = StateProvider<bool>((ref) => false);
-final _photoUploadingProvider = StateProvider<bool>((ref) => false);
-final _dirtyProvider = StateProvider<bool>((ref) => false);
+// These are .autoDispose so each edit session starts with fresh defaults and
+// seeded backend values never leak across visits.
+final _modeProvider = StateProvider.autoDispose<String>(
+  (ref) => 'open_to_both',
+);
+final _workStyleProvider = StateProvider.autoDispose<String>((ref) => 'hybrid');
+final _moveInTimelineProvider = StateProvider.autoDispose<String>(
+  (ref) => 'flexible',
+);
+final _sleepScheduleProvider = StateProvider.autoDispose<String?>(
+  (ref) => null,
+);
+final _cleanlinessProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _foodHabitsProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _smokingDrinkingProvider = StateProvider.autoDispose<String?>(
+  (ref) => null,
+);
+final _guestsPolicyProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _nonNegotiablesProvider = StateProvider.autoDispose<List<String>>(
+  (ref) => const [],
+);
+final _photoUrlsProvider = StateProvider.autoDispose<List<String>>(
+  (ref) => const [],
+);
+final _savingProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _photoUploadingProvider = StateProvider.autoDispose<bool>((ref) => false);
+final _dirtyProvider = StateProvider.autoDispose<bool>((ref) => false);
 
 class EditProfilePage extends ConsumerStatefulWidget {
   const EditProfilePage({super.key});
@@ -253,7 +269,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       canPop: !dirty,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        _handlePop();
+        unawaited(_handlePop());
       },
       child: Scaffold(
         // Route the in-app back button through the unsaved-changes guard. The

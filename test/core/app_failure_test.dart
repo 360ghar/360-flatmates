@@ -8,6 +8,7 @@ void main() {
     l10n = const UserMessageL10n(
       errorNetwork: 'Network error',
       errorAuthExpired: 'Session expired',
+      errorAuth: 'Auth error',
       errorServer: 'Server error',
       errorPermission: 'No permission',
       errorNotFound: 'Not found',

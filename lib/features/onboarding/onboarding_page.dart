@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flatmates_app/core/theme/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,7 +106,7 @@ class OnboardingPage extends ConsumerWidget {
       ),
       OnboardingStep.locationSelection => LocationSelectionPage(
         onLocationSelected: controller.setLocation,
-        onBack: () => controller.goBack(),
+        onBack: () => unawaited(controller.goBack()),
       ),
       OnboardingStep.basicInfo => BasicInfoPage(
         onNext: controller.setBasicInfo,
@@ -135,7 +137,7 @@ class OnboardingPage extends ConsumerWidget {
       canPop: !controller.canGoBack,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        controller.goBack();
+        unawaited(controller.goBack());
       },
       child: FlatmatesScreen(
         body: Column(
@@ -172,8 +174,8 @@ class OnboardingPage extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     TweenAnimationBuilder<double>(
                       tween: Tween<double>(begin: 0, end: progress),
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOut,
+                      duration: AppMotion.pageTransition,
+                      curve: AppMotion.easeOutCubic,
                       builder: (context, animatedValue, child) {
                         return LinearProgressIndicator(
                           value: animatedValue,

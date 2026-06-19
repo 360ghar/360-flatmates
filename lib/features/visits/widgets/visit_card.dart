@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
+import 'package:flatmates_app/core/theme/theme.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../../shared/presentation/flatmates_card.dart';
 import '../../shared/presentation/flatmates_trust_badge.dart';
@@ -47,7 +46,7 @@ class VisitCard extends StatelessWidget {
     return FlatmatesCard(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,16 +54,16 @@ class VisitCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: AppTypography.displaySize,
+                height: AppTypography.displaySize,
                 decoration: BoxDecoration(
                   color: AppSemanticColors.accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.sheet),
                 ),
                 child: const Icon(
                   Icons.event_available_outlined,
                   color: AppSemanticColors.accent,
-                  size: 16,
+                  size: AppSpacing.lg,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -83,14 +82,14 @@ class VisitCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 1),
+                    const SizedBox(height: AppSpacing.xs / 4),
                     Text(
                       DateFormat(
                         'd MMM, h:mm a',
                         locale.localeName,
                       ).format(item.scheduledDate.toLocal()),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
+                        fontSize: AppTypography.labelSmallSize,
                         color: AppSemanticColors.textTertiaryFor(
                           theme.brightness,
                         ),
@@ -113,33 +112,33 @@ class VisitCard extends StatelessWidget {
                 item.visitContext == 'flatmate_meet'
                     ? Icons.people_outline
                     : Icons.meeting_room_outlined,
-                size: 12,
+                size: AppTypography.labelMediumSize,
                 color: AppSemanticColors.textTertiaryFor(theme.brightness),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 item.visitContext == 'flatmate_meet'
                     ? locale.flatmateMeetLabel
                     : locale.propertyTourLabel,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 11,
+                  fontSize: AppTypography.labelSmallSize,
                   color: AppSemanticColors.textTertiaryFor(theme.brightness),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Icon(
                 Icons.calendar_month_outlined,
-                size: 12,
+                size: AppTypography.labelMediumSize,
                 color: AppSemanticColors.textTertiaryFor(theme.brightness),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 DateFormat(
                   'EEEE',
                   locale.localeName,
                 ).format(item.scheduledDate.toLocal()),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 11,
+                  fontSize: AppTypography.labelSmallSize,
                   color: AppSemanticColors.textTertiaryFor(theme.brightness),
                 ),
               ),
@@ -229,19 +228,19 @@ class _CompactActionChip extends StatelessWidget {
         child: GestureDetector(
           onTap: inactive ? null : onTap,
           child: Container(
-            height: 30,
+            height: AppSpacing.lg + AppSpacing.md,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: filled ? effectiveAccent : null,
               border: filled
                   ? null
                   : Border.all(color: effectiveAccent.withValues(alpha: 0.5)),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppRadius.sheet),
             ),
             child: busy
                 ? SizedBox(
-                    width: 14,
-                    height: 14,
+                    width: AppTypography.h4Size,
+                    height: AppTypography.h4Size,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(foreground),
@@ -250,8 +249,8 @@ class _CompactActionChip extends StatelessWidget {
                 : Text(
                     label,
                     style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                      fontSize: AppTypography.labelSmallSize,
+                      fontWeight: AppTypography.labelLargeWeight,
                       color: foreground,
                     ),
                     overflow: TextOverflow.ellipsis,

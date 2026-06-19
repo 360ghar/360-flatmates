@@ -8,6 +8,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../chats/chats_repository.dart';
 import '../shared/presentation/components.dart';
+import 'application/visits_list_controller.dart';
 import 'visits_repository.dart';
 
 final _selectedDateProvider = StateProvider<DateTime>(
@@ -104,6 +105,7 @@ class _ScheduleVisitPageState extends ConsumerState<ScheduleVisitPage> {
             timeSlotLabel: timeSlotLabel,
           );
       visitCreated = true;
+      ref.invalidate(visitsListControllerProvider);
       ref.invalidate(visitsProvider);
       ref.invalidate(messagesProvider(conversation.id));
       if (!mounted) return;
@@ -259,9 +261,12 @@ class _ScheduleVisitPageState extends ConsumerState<ScheduleVisitPage> {
                         );
                         // Clamp the stored date into [firstDate, lastDate];
                         // CalendarDatePicker asserts initialDate is in range.
-                        var initial = ref.read(_selectedDateProvider);
-                        if (initial.isBefore(firstDate)) initial = firstDate;
-                        if (initial.isAfter(lastDate)) initial = lastDate;
+                        final selectedDate = ref.watch(_selectedDateProvider);
+                        final initial = selectedDate.isBefore(firstDate)
+                            ? firstDate
+                            : selectedDate.isAfter(lastDate)
+                            ? lastDate
+                            : selectedDate;
                         return CalendarDatePicker(
                           initialDate: initial,
                           firstDate: firstDate,

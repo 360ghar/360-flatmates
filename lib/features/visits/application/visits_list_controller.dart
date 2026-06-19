@@ -7,14 +7,13 @@ import '../visits_repository.dart';
 class VisitsListController extends CursorListController<VisitItem> {
   @override
   Future<({List<VisitItem> items, String? nextCursor, bool hasMore})>
-      fetchPage({String? cursor}) async {
-    return ref
-        .read(visitsRepositoryProvider)
-        .fetchVisitsPage(cursor: cursor);
+  fetchPage({String? cursor}) async {
+    return ref.read(visitsRepositoryProvider).fetchVisitsPage(cursor: cursor);
   }
 }
 
-final visitsListControllerProvider = NotifierProvider<
-    VisitsListController, AsyncValue<CursorListState<VisitItem>>>(
-  VisitsListController.new,
-);
+final visitsListControllerProvider =
+    NotifierProvider<
+      VisitsListController,
+      AsyncValue<CursorListState<VisitItem>>
+    >(VisitsListController.new);

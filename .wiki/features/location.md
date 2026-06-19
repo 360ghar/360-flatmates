@@ -40,7 +40,7 @@ lib/features/location_search/
 1. **GPS** -- checks if location services are enabled, requests permission, calls `Geolocator.getCurrentPosition()` with low accuracy
 2. **Reverse geocoding** -- converts coordinates to a human-readable address via `placemarkFromCoordinates()`
 3. **IP fallback** -- if GPS fails (service disabled, permission denied, timeout), falls back to `ipapi.co/json/` for approximate location
-4. **Error handling** -- each failure mode shows an appropriate snackbar with action buttons (open settings, grant permission)
+4. **Error handling** -- failures are captured in `LocationState.error`; the UI layer (`LocationPickerModal._useCurrentLocation()`) translates those failures into snackbars and permission action buttons (open settings, grant permission)
 
 ### Location Search
 

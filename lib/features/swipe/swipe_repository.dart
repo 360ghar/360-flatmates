@@ -174,7 +174,7 @@ class SwipeRepository {
   /// The backend wraps all list endpoints in
   /// `{ items, next_cursor, has_more, limit }`.
   Future<({List<SwipeProfile> items, String? nextCursor, bool hasMore})>
-      fetchSwipeProfilesPage({
+  fetchSwipeProfilesPage({
     DiscoverFilters? filters,
     String? cursor,
     int limit = 20,
@@ -411,7 +411,9 @@ class SwipeRepository {
   /// shared [ApiClient] -> [ErrorPresenter] pipeline.
   Future<void> batchRemoveSwipes(List<int> propertyIds) async {
     if (propertyIds.isEmpty) return;
-    await _ref.read(apiClientProvider).post(
+    await _ref
+        .read(apiClientProvider)
+        .post(
           FlatmatesEndpoints.swipesBatchRemove,
           data: {'property_ids': propertyIds},
         );

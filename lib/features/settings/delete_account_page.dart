@@ -30,11 +30,8 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     super.initState();
     // Reset the page-scoped flags so stale state from a prior visit (e.g. a
     // confirmed-but-cancelled attempt) never leaks into a fresh visit.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(_confirmedProvider.notifier).state = false;
-      ref.read(_deletingProvider.notifier).state = false;
-    });
+    ref.read(_confirmedProvider.notifier).state = false;
+    ref.read(_deletingProvider.notifier).state = false;
   }
 
   @override

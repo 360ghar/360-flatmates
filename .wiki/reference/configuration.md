@@ -2,7 +2,7 @@
 
 ## Environment variables
 
-The app loads configuration from a `.env` file (via `flutter_dotenv`) with fallback to `--dart-define` flags. If required variables are missing, the app shows a configuration error screen.
+The app loads configuration from `--dart-define` flags first, falling back to a `.env` file loaded by `flutter_dotenv`. If required variables are missing, the app shows a configuration error screen.
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|

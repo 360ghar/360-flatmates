@@ -154,9 +154,8 @@ class BlockedUsersPage extends ConsumerWidget {
         loading: () => const FlatmatesSkeleton.list(),
         error: (error, _) => FlatmatesErrorState(
           message: locale.couldNotLoadBlockedUsers,
-          onRetry: () => ref
-              .read(blockedUsersListControllerProvider.notifier)
-              .refresh(),
+          onRetry: () =>
+              ref.read(blockedUsersListControllerProvider.notifier).refresh(),
         ),
       ),
     );

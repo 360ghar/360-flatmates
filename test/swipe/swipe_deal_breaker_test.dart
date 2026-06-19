@@ -44,13 +44,12 @@ Future<void> _primeBootstrap(ProviderContainer container) async {
   await container.read(bootstrapControllerProvider.future);
 }
 
-String _profilesBody(List<Map<String, dynamic>> profiles) =>
-    jsonEncode({
-      'items': profiles,
-      'next_cursor': null,
-      'has_more': false,
-      'limit': 20,
-    });
+String _profilesBody(List<Map<String, dynamic>> profiles) => jsonEncode({
+  'items': profiles,
+  'next_cursor': null,
+  'has_more': false,
+  'limit': 20,
+});
 
 void main() {
   group('SwipeRepository deal-breaker filtering', () {

@@ -146,7 +146,8 @@ class DiscoverRepository {
   /// Fetches one page of listings. [rawCount] is the number of items the
   /// server returned BEFORE client-side filtering — pagination (cursor,
   /// hasMore) must be driven by the backend cursor, not by [items].length.
-  Future<({List<PropertyListing> items, int rawCount, String? nextCursor})> fetchListingsPage({
+  Future<({List<PropertyListing> items, int rawCount, String? nextCursor})>
+  fetchListingsPage({
     String? cursor,
     int limit = 20,
     FlatmatesProfileModel? currentUser,
@@ -245,7 +246,11 @@ class DiscoverRepository {
       );
     }
 
-    return (items: moveInFiltered, rawCount: listings.length, nextCursor: nextCursor);
+    return (
+      items: moveInFiltered,
+      rawCount: listings.length,
+      nextCursor: nextCursor,
+    );
   }
 
   Future<PropertyListing> fetchListing(int propertyId) async {

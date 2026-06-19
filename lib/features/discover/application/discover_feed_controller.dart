@@ -206,7 +206,6 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
       }
       state = state.copyWith(
         listings: page.items,
-        setNextCursorNull: true,
         nextCursor: page.nextCursor,
         isRefreshing: false,
         hasMore: page.nextCursor != null,
@@ -325,6 +324,7 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
   }
 
   void _setFilters(DiscoverFilters filters) {
+    _filterVersion++;
     state = state.copyWith(filters: filters);
     ref.read(discoverFiltersProvider.notifier).state = filters.isEmpty
         ? null

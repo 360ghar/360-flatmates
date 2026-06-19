@@ -6,7 +6,7 @@ The standard branch-to-merge cycle for 360 FlatMates.
 
 Use descriptive branch names from the repo root:
 
-```
+```text
 feature/<short-description>
 fix/<short-description>
 refactor/<short-description>

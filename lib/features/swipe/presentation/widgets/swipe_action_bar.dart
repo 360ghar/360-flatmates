@@ -117,7 +117,7 @@ class _SwipeActionButtonState extends State<_SwipeActionButton> {
         enabled: !disabled,
         label: widget.semanticLabel,
         child: Listener(
-          onPointerDown: (_) => _setScale(0.92),
+          onPointerDown: (_) => _setScale(0.97),
           onPointerUp: (_) => _setScale(1.0),
           onPointerCancel: (_) => _setScale(1.0),
           child: GestureDetector(

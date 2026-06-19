@@ -12,6 +12,7 @@ extension AppLocalizationsX on AppLocalizations {
   UserMessageL10n toUserMessageL10n() => UserMessageL10n(
     errorNetwork: errorNetwork,
     errorAuthExpired: errorAuthExpired,
+    errorAuth: errorAuth,
     errorServer: errorServer,
     errorPermission: errorPermission,
     errorNotFound: errorNotFound,
@@ -49,6 +50,7 @@ String resolveAuthError(String? errorMessage, AppLocalizations l10n) {
   return switch (key) {
     'network' => l10n.errorNetwork,
     'auth_expired' => l10n.errorAuthExpired,
+    'auth' => l10n.errorAuth,
     'permission' => l10n.errorPermission,
     'not_found' => l10n.errorNotFound,
     'validation' => l10n.errorValidation,

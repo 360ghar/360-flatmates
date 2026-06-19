@@ -24,16 +24,16 @@ class ChatsRepository {
   /// backend wraps all list endpoints in
   /// `{ items, next_cursor, has_more, limit }`.
   Future<
-      ({
-        List<ConversationSummaryModel> items,
-        String? nextCursor,
-        bool hasMore,
-      })> fetchConversationsPage({String? cursor, int limit = 20}) async {
+    ({List<ConversationSummaryModel> items, String? nextCursor, bool hasMore})
+  >
+  fetchConversationsPage({String? cursor, int limit = 20}) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
     }
-    final response = await _ref.read(apiClientProvider).get(
+    final response = await _ref
+        .read(apiClientProvider)
+        .get(
           FlatmatesEndpoints.conversations,
           queryParameters: queryParameters,
         );
@@ -52,17 +52,15 @@ class ChatsRepository {
   }
 
   /// Fetches a single page of incoming likes using cursor pagination.
-  Future<
-      ({
-        List<IncomingLikeModel> items,
-        String? nextCursor,
-        bool hasMore,
-      })> fetchIncomingLikesPage({String? cursor, int limit = 20}) async {
+  Future<({List<IncomingLikeModel> items, String? nextCursor, bool hasMore})>
+  fetchIncomingLikesPage({String? cursor, int limit = 20}) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
     }
-    final response = await _ref.read(apiClientProvider).get(
+    final response = await _ref
+        .read(apiClientProvider)
+        .get(
           FlatmatesEndpoints.incomingLikes,
           queryParameters: queryParameters,
         );
@@ -81,17 +79,15 @@ class ChatsRepository {
   }
 
   /// Fetches a single page of outgoing likes using cursor pagination.
-  Future<
-      ({
-        List<IncomingLikeModel> items,
-        String? nextCursor,
-        bool hasMore,
-      })> fetchOutgoingLikesPage({String? cursor, int limit = 20}) async {
+  Future<({List<IncomingLikeModel> items, String? nextCursor, bool hasMore})>
+  fetchOutgoingLikesPage({String? cursor, int limit = 20}) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
     }
-    final response = await _ref.read(apiClientProvider).get(
+    final response = await _ref
+        .read(apiClientProvider)
+        .get(
           FlatmatesEndpoints.outgoingLikes,
           queryParameters: queryParameters,
         );
@@ -153,7 +149,9 @@ class ChatsRepository {
     if (cursor != null && cursor.isNotEmpty) {
       queryParameters['cursor'] = cursor;
     }
-    final response = await _ref.read(apiClientProvider).get(
+    final response = await _ref
+        .read(apiClientProvider)
+        .get(
           FlatmatesEndpoints.conversationMessages(conversationId),
           queryParameters: queryParameters,
         );

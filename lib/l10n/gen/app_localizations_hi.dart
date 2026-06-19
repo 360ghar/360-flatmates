@@ -2756,6 +2756,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get errorAuthExpired => 'सत्र समाप्त हो गया। कृपया पुनः साइन इन करें।';
 
   @override
+  String get errorAuth => 'प्रमाणीकरण विफल। कृपया पुनः प्रयास करें।';
+
+  @override
   String get errorServer => 'सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें।';
 
   @override

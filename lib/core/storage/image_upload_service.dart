@@ -122,14 +122,14 @@ class ImageUploadService {
   }
 
   /// `POST /upload/media/batch-delete` — removes multiple uploaded media
-/// assets in one round-trip. The backend returns
-/// `{ deleted: string[], failed: string[] }` so callers can surface a
-/// granular failure (e.g. "media X is still attached to a listing") to
-/// the user instead of an all-or-nothing error.
-///
-/// Throws via the shared [ApiClient] -> [ErrorPresenter] pipeline on
-/// network errors.
-Future<MediaBatchDeleteResult> deleteMediaBatch(List<String> mediaIds) async {
+  /// assets in one round-trip. The backend returns
+  /// `{ deleted: string[], failed: string[] }` so callers can surface a
+  /// granular failure (e.g. "media X is still attached to a listing") to
+  /// the user instead of an all-or-nothing error.
+  ///
+  /// Throws via the shared [ApiClient] -> [ErrorPresenter] pipeline on
+  /// network errors.
+  Future<MediaBatchDeleteResult> deleteMediaBatch(List<String> mediaIds) async {
     if (mediaIds.isEmpty) {
       return const MediaBatchDeleteResult(deleted: [], failed: []);
     }
@@ -144,13 +144,11 @@ Future<MediaBatchDeleteResult> deleteMediaBatch(List<String> mediaIds) async {
       );
     }
     final map = Map<String, dynamic>.from(data);
-    final deleted = (map['deleted'] as List?)
-            ?.map((item) => item.toString())
-            .toList() ??
+    final deleted =
+        (map['deleted'] as List?)?.map((item) => item.toString()).toList() ??
         const <String>[];
-    final failed = (map['failed'] as List?)
-            ?.map((item) => item.toString())
-            .toList() ??
+    final failed =
+        (map['failed'] as List?)?.map((item) => item.toString()).toList() ??
         const <String>[];
     return MediaBatchDeleteResult(deleted: deleted, failed: failed);
   }
@@ -179,7 +177,7 @@ Future<MediaBatchDeleteResult> deleteMediaBatch(List<String> mediaIds) async {
     );
   }
 
-/// Upload a file through the backend API which routes to Cloudinary.
+  /// Upload a file through the backend API which routes to Cloudinary.
   Future<UploadResult> _upload(
     File file, {
     required String folder,

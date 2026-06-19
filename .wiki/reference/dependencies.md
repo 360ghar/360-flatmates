@@ -1,6 +1,6 @@
 # Dependencies
 
-All Flutter/Dart package dependencies for 360 FlatMates, with pinned versions from `pubspec.yaml`.
+All Flutter/Dart package dependencies for 360 FlatMates, with version ranges from `pubspec.yaml`.
 
 ## Runtime dependencies
 

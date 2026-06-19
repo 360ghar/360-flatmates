@@ -149,12 +149,9 @@ class NotificationSettingsPage extends ConsumerWidget {
   /// confirmation toast so the user gets feedback for the action.
   Future<void> _setAll(BuildContext context, WidgetRef ref, bool value) async {
     final locale = AppLocalizations.of(context);
-    final notifier = ref.read(settingsControllerProvider.notifier);
-    await notifier.updateNotifNewMessages(value);
-    await notifier.updateNotifVisitReminders(value);
-    await notifier.updateNotifNewMatches(value);
-    await notifier.updateNotifListingUpdates(value);
-    await notifier.updateNotifPromotions(value);
+    await ref
+        .read(settingsControllerProvider.notifier)
+        .updateAllNotificationSettings(value);
     if (!context.mounted) return;
     FlatmatesToast.success(
       context,

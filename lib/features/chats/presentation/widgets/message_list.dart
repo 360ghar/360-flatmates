@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_motion.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../shared/presentation/flatmates_empty_state.dart';
@@ -92,7 +93,7 @@ class _MessageListState extends ConsumerState<MessageList>
     // a different thread must be re-pinned to the bottom so the user lands on
     // the newest message instead of inheriting the previous thread's offset.
     final conversationChanged =
-        widget.conversation?.id != oldWidget.conversation?.id;
+        widget.conversationId != oldWidget.conversationId;
     if (conversationChanged) {
       _lastMessageCount = count;
       _scrollToBottom(animated: false);
@@ -101,10 +102,9 @@ class _MessageListState extends ConsumerState<MessageList>
       // reading position so the viewport does not jump. Newest arrivals
       // (live, optimistic, refetch) still pin to the bottom — detected by
       // checking if a NEW message arrived (last item id changed).
-      final oldWidgetLastId =
-          oldWidget.messagesState.messages.isEmpty
-              ? null
-              : oldWidget.messagesState.messages.last.id;
+      final oldWidgetLastId = oldWidget.messagesState.messages.isEmpty
+          ? null
+          : oldWidget.messagesState.messages.last.id;
       final currentLastId = widget.messagesState.messages.isEmpty
           ? null
           : widget.messagesState.messages.last.id;
@@ -119,10 +119,9 @@ class _MessageListState extends ConsumerState<MessageList>
             ? null
             : oldWidget.messagesState.messages.first.id;
         if (previousFirstId != null) {
-          final newIndex =
-              widget.messagesState.messages.indexWhere(
-                (m) => m.id == previousFirstId,
-              );
+          final newIndex = widget.messagesState.messages.indexWhere(
+            (m) => m.id == previousFirstId,
+          );
           // The inserted messages must come strictly before the previously
           // first item; if not, the merge re-ordered things and a bottom
           // anchor is safer.
@@ -130,9 +129,7 @@ class _MessageListState extends ConsumerState<MessageList>
             final delta = newIndex * _estimatedBubbleHeight;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!_scrollController.hasClients) return;
-              _scrollController.jumpTo(
-                _scrollController.offset + delta,
-              );
+              _scrollController.jumpTo(_scrollController.offset + delta);
             });
           }
         }
@@ -142,17 +139,35 @@ class _MessageListState extends ConsumerState<MessageList>
   }
 
   void _scrollToBottom({required bool animated}) {
+    _scheduleScrollToBottom(animated: animated, attempts: 3);
+  }
+
+  void _scheduleScrollToBottom({
+    required bool animated,
+    required int attempts,
+  }) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
       final target = _scrollController.position.maxScrollExtent;
       if (animated) {
         _scrollController.animateTo(
           target,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
+          duration: AppMotion.pageTransition,
+          curve: AppMotion.easeOutCubic,
         );
       } else {
         _scrollController.jumpTo(target);
+      }
+      // ListView.builder can underestimate maxScrollExtent until all items
+      // are laid out; retry in the next frame if the extent grows.
+      if (attempts > 1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_scrollController.hasClients) return;
+          final newTarget = _scrollController.position.maxScrollExtent;
+          if (newTarget > target) {
+            _scheduleScrollToBottom(animated: animated, attempts: attempts - 1);
+          }
+        });
       }
     });
   }

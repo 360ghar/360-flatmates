@@ -150,6 +150,7 @@ class _SplashPageState extends ConsumerState<SplashPage>
                               UserMessageL10n(
                                 errorNetwork: locale.errorNetwork,
                                 errorAuthExpired: locale.errorAuthExpired,
+                                errorAuth: locale.errorAuth,
                                 errorServer: locale.errorServer,
                                 errorPermission: locale.errorPermission,
                                 errorNotFound: locale.errorNotFound,

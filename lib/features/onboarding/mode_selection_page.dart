@@ -72,6 +72,7 @@ class _ModeSelectionPageState extends ConsumerState<ModeSelectionPage> {
             // --- Back arrow (only when a back handler is provided) ---
             if (widget.onBack != null) ...[
               IconButton(
+                key: const Key('mode_selection_back'),
                 onPressed: widget.onBack,
                 icon: const Icon(Icons.arrow_back),
                 padding: EdgeInsets.zero,

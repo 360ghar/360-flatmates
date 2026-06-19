@@ -20,7 +20,7 @@ void main() {
   /// Builds a JSON page of `count` listings with sequential ids starting at
   /// `startId`. All listings are available so no client-side move-in/deal
   /// breaker filtering trims them.
-  String pageBody(int count, {int startId = 1, String? nextCursor = null}) {
+  String pageBody(int count, {int startId = 1, String? nextCursor}) {
     final items = List.generate(count, (i) {
       final id = startId + i;
       return {
@@ -104,7 +104,7 @@ void main() {
       final adapter = _ScriptedAdapter(
         onProperties: (options) {
           propertyCursors.add(options.queryParameters['cursor'] as String?);
-          return pageBody(3, nextCursor: null); // first page ends the stream
+          return pageBody(3); // first page ends the stream
         },
       );
       final container = makeContainer(adapter);
@@ -210,7 +210,7 @@ class _ScriptedAdapter implements HttpClientAdapter {
       if (body == null) return _json('{"detail":"boom"}', 500);
       return _json(body, 200);
     }
-    return _json('{}', 200);
+    throw StateError('Unexpected request path: ${options.path}');
   }
 
   ResponseBody _json(String body, int status) => ResponseBody.fromString(

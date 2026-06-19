@@ -126,8 +126,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final conversations =
-        ref.watch(conversationsListControllerProvider);
+    final conversations = ref.watch(conversationsListControllerProvider);
     final incomingLikes = ref.watch(incomingLikesListControllerProvider);
     final outgoingLikes = ref.watch(outgoingLikesListControllerProvider);
     final tab =

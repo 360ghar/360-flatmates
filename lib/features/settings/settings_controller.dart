@@ -118,6 +118,23 @@ class SettingsController extends Notifier<SettingsState> {
     await _prefs.setBool(PrefKeys.notifPromotions, value);
     state = state.copyWith(notifPromotions: value);
   }
+
+  Future<void> updateAllNotificationSettings(bool value) async {
+    await Future.wait([
+      _prefs.setBool(PrefKeys.notifNewMessages, value),
+      _prefs.setBool(PrefKeys.notifVisitReminders, value),
+      _prefs.setBool(PrefKeys.notifNewMatches, value),
+      _prefs.setBool(PrefKeys.notifListingUpdates, value),
+      _prefs.setBool(PrefKeys.notifPromotions, value),
+    ]);
+    state = state.copyWith(
+      notifNewMessages: value,
+      notifVisitReminders: value,
+      notifNewMatches: value,
+      notifListingUpdates: value,
+      notifPromotions: value,
+    );
+  }
 }
 
 final settingsControllerProvider =

@@ -15,7 +15,7 @@ This section documents the cross-cutting infrastructure that powers 360 FlatMate
 
 ## Directory layout
 
-```
+```text
 lib/core/
   analytics/          Firebase Analytics + Crashlytics service
   app_config/         Version check, force/optional update flows

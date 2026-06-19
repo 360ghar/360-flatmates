@@ -31,7 +31,7 @@ It evaluates 6 dimensions, computes a weighted percentage, and returns the top 3
 | **Work Style** | `work_style` | 0.10 | `wfh`, `office`, `hybrid` | Same=100, wfh+office=40, hybrid+other=70 |
 
 **Weighted calculation:**
-```
+```text
 percentage = (sum of dimension.score * dimension.weight) / (sum of weights) * 100
 ```
 

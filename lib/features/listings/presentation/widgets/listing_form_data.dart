@@ -29,12 +29,12 @@ const ListingStepValidation kNoListingValidation = (
 ListingStepValidation computeStepValidation(ListingFormData data, int step) {
   bool invalidNumber(String v) => v.isNotEmpty && double.tryParse(v) == null;
   if (step == 3) {
-    return (kNoListingValidation).copyWithPhotos(data.roomPhotoUrls.isEmpty);
+    return (kNoListingValidation).copyWithPhotos(data.roomPhotoUrls.length < 2);
   }
   if (step != 5) return kNoListingValidation;
   final estText = data.electricityEstController.text.trim();
   return (
-    rent: data.rent.isEmpty,
+    rent: data.rent.isEmpty || double.tryParse(data.rent) == null,
     deposit: invalidNumber(data.deposit),
     maintenance: invalidNumber(data.maintenance),
     cost:

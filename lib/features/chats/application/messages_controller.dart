@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -124,6 +126,9 @@ class MessagesController extends FamilyNotifier<MessagesState, int> {
       (previous, next) => _onStreamUpdate(next),
     );
     final initial = ref.read(messagesStreamProvider(conversationId));
+    // Seed the oldest-message cursor from the initial page so the first
+    // loadOlder() paginates backward instead of re-downloading page 1.
+    unawaited(_seedOldestCursor(conversationId));
     return MessagesState(
       messages: initial.valueOrNull ?? const [],
       isLoading: initial.isLoading && !initial.hasValue,
@@ -145,6 +150,39 @@ class MessagesController extends FamilyNotifier<MessagesState, int> {
     }
   }
 
+  bool _seedingCursor = false;
+
+  /// Fetches the first page of messages to seed [MessagesState.oldestCursor]
+  /// so the first [loadOlder] call actually paginates backward. No-op if the
+  /// cursor is already seeded or a seed is in flight.
+  Future<void> _seedOldestCursor(int conversationId) async {
+    if (_seedingCursor || state.oldestCursor != null) return;
+    _seedingCursor = true;
+    try {
+      final response = await ref
+          .read(chatsRepositoryProvider)
+          .fetchMessages(conversationId);
+      state = state.copyWith(
+        messages: mergeMessages(state.messages, response.messages),
+        pendingMessages: pruneConfirmedPending(
+          response.messages,
+          state.pendingMessages,
+        ),
+        hasMoreOlder: response.hasMore,
+        oldestCursor: response.nextCursor,
+        isLoading: false,
+        clearError: true,
+      );
+    } catch (e) {
+      debugPrint(
+        'MessagesController._seedOldestCursor failed for conversation '
+        '$conversationId: $e',
+      );
+    } finally {
+      _seedingCursor = false;
+    }
+  }
+
   /// Loads older messages using cursor pagination. Concatenates the older
   /// page in front of the current messages so the user can scroll back
   /// through history. A no-op when a load is already in flight or the
@@ -152,12 +190,15 @@ class MessagesController extends FamilyNotifier<MessagesState, int> {
   Future<void> loadOlder() async {
     final conversationId = arg;
     if (state.isLoadingOlder || !state.hasMoreOlder) return;
+    if (state.oldestCursor == null) {
+      await _seedOldestCursor(conversationId);
+      if (state.isLoadingOlder || !state.hasMoreOlder) return;
+    }
     state = state.copyWith(isLoadingOlder: true, clearError: true);
     try {
-      final response = await ref.read(chatsRepositoryProvider).fetchMessages(
-            conversationId,
-            cursor: state.oldestCursor,
-          );
+      final response = await ref
+          .read(chatsRepositoryProvider)
+          .fetchMessages(conversationId, cursor: state.oldestCursor);
       // Newer realtime arrivals may have appeared during the request; merge
       // by id so we never drop or duplicate a message.
       final merged = mergeMessages(response.messages, state.messages);
