@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/endpoints.dart';
 import '../../core/providers.dart';
-import '../../core/utils/safe_json_list.dart';
+import '../../core/utils/paged_envelope.dart';
 
 class NotificationModel {
   const NotificationModel({
@@ -47,15 +47,31 @@ class NotificationsRepository {
 
   final Ref _ref;
 
-  Future<List<NotificationModel>> fetchNotifications() async {
-    final response = await _ref
-        .read(apiClientProvider)
-        .get(FlatmatesEndpoints.notifications);
-    return safeJsonList(
-      response.data as List?,
+  /// Fetches a single page of the user's notifications using cursor pagination.
+  /// The backend wraps all list endpoints in
+  /// `{ items, next_cursor, has_more, limit }`.
+  Future<({List<NotificationModel> items, String? nextCursor, bool hasMore})>
+      fetchNotificationsPage({String? cursor, int limit = 20}) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
+    }
+    final response = await _ref.read(apiClientProvider).get(
+          FlatmatesEndpoints.notifications,
+          queryParameters: queryParameters,
+        );
+    final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
+    return parsePagedEnvelope(
+      data,
       NotificationModel.fromJson,
       label: 'notifications',
     );
+  }
+
+  /// Backwards-compatible helper that returns the first page as a list.
+  Future<List<NotificationModel>> fetchNotifications() async {
+    final page = await fetchNotificationsPage();
+    return page.items;
   }
 
   Future<void> markAsRead(String notificationId) async {

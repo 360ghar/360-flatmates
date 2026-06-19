@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config/endpoints.dart';
 import '../../core/errors/app_failure.dart';
 import '../../core/providers.dart';
-import '../../core/utils/safe_json_list.dart';
+import '../../core/utils/paged_envelope.dart';
 import '../bootstrap/bootstrap_controller.dart';
 import '../discover/application/move_in_filter.dart';
 import '../discover/discover_repository.dart';
@@ -169,8 +169,15 @@ class SwipeRepository {
 
   final Ref _ref;
 
-  Future<List<SwipeProfile>> fetchSwipeProfiles({
+  /// Fetches a single page of swipe profiles using cursor pagination.
+  ///
+  /// The backend wraps all list endpoints in
+  /// `{ items, next_cursor, has_more, limit }`.
+  Future<({List<SwipeProfile> items, String? nextCursor, bool hasMore})>
+      fetchSwipeProfilesPage({
     DiscoverFilters? filters,
+    String? cursor,
+    int limit = 20,
   }) async {
     try {
       final bootstrap = _ref.read(bootstrapControllerProvider).valueOrNull;
@@ -179,7 +186,10 @@ class SwipeRepository {
         userProfile?.preferences,
       );
 
-      final queryParams = <String, dynamic>{};
+      final queryParams = <String, dynamic>{'limit': limit};
+      if (cursor != null && cursor.isNotEmpty) {
+        queryParams['cursor'] = cursor;
+      }
       if (userNonNegotiables.isNotEmpty) {
         queryParams['non_negotiables'] = userNonNegotiables.join(',');
       }
@@ -207,48 +217,42 @@ class SwipeRepository {
             queryParameters: queryParams,
           );
       final responseData = response.data;
-      // Handle both bare array and wrapped object response formats.
-      // Use `is List` / `is Map` runtime checks so an unexpected wrapper
-      // shape (e.g. `{"data": {...}}`) surfaces as an empty list instead
-      // of throwing a TypeError from a blind `as List?` cast.
-      List<dynamic> rows;
-      if (responseData is List) {
-        rows = responseData;
-      } else if (responseData is Map) {
-        final data = responseData.map(
+      // Backend now wraps every list endpoint in
+      // `{ items, next_cursor, has_more, limit }`. Older fallback keys
+      // (`profiles`, `data`, `results`) are intentionally no longer supported
+      // because the migration to cursor envelopes is final.
+      final Map<String, dynamic> data;
+      if (responseData is Map) {
+        data = responseData.map(
           (key, value) => MapEntry(key.toString(), value),
         );
-        final candidates = [data['data'], data['profiles'], data['results']];
-        rows =
-            candidates.firstWhere(
-                  (e) => e is List,
-                  orElse: () => const <dynamic>[],
-                )
-                as List<dynamic>;
       } else {
-        rows = const [];
+        data = const <String, dynamic>{};
       }
-      log(
-        '[SwipeRepo] Response status: ${response.statusCode}, '
-        'rows: ${rows.length}',
-      );
-      final profiles = safeJsonList(
-        rows,
+      final page = parsePagedEnvelope(
+        data,
         SwipeProfile.fromJson,
         label: 'swipeProfiles',
       );
-
-      final moveInFiltered = profiles
+      final moveInFiltered = page.items
           .where(
             (profile) =>
                 _profileMatchesMoveIn(profile, filters?.moveInTimeline),
           )
           .toList();
-
-      return _applyDealBreakerFilter(
+      log(
+        '[SwipeRepo] Response status: ${response.statusCode}, '
+        'rows: ${moveInFiltered.length}, hasMore: ${page.hasMore}',
+      );
+      final filtered = _applyDealBreakerFilter(
         moveInFiltered,
         userNonNegotiables,
         userProfile,
+      );
+      return (
+        items: filtered,
+        nextCursor: page.nextCursor,
+        hasMore: page.hasMore,
       );
     } on AppFailure {
       // Already typed — let the controller map it to AsyncError.
@@ -259,6 +263,14 @@ class SwipeRepository {
       // and the error UI can render a typed, localized message.
       throw UnknownFailure(underlyingError: e, stackTrace: st);
     }
+  }
+
+  /// Backwards-compatible helper returning the first page as a list.
+  Future<List<SwipeProfile>> fetchSwipeProfiles({
+    DiscoverFilters? filters,
+  }) async {
+    final page = await fetchSwipeProfilesPage(filters: filters);
+    return page.items;
   }
 
   bool _profileMatchesMoveIn(SwipeProfile profile, String? moveInTimeline) {

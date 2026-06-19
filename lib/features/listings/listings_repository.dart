@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/endpoints.dart';
 import '../../core/providers.dart';
-import '../../core/utils/safe_json_list.dart';
+import '../../core/utils/paged_envelope.dart';
 import '../discover/data/property_listing_dto.dart';
 import '../discover/discover_repository.dart';
 
@@ -129,18 +129,39 @@ class ListingsRepository {
     return (data['id'] as num?)?.toInt() ?? listingId;
   }
 
-  Future<List<PropertyListing>> fetchMyListings() async {
-    final response = await _ref
-        .watch(apiClientProvider)
-        .get(FlatmatesEndpoints.myProperties);
-    final rawData = response.data;
-    final rows = rawData is List ? rawData : const <dynamic>[];
-    return safeJsonList(rows, PropertyListingDto.fromJson, label: 'myListings')
+  /// Fetches a single page of the user's listings using cursor pagination.
+  ///
+  /// The backend wraps all list endpoints in
+  /// `{ items, next_cursor, has_more, limit }`.
+  Future<({List<PropertyListing> items, String? nextCursor, bool hasMore})>
+      fetchMyListingsPage({String? cursor, int limit = 20}) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
+    }
+    final response = await _ref.watch(apiClientProvider).get(
+          FlatmatesEndpoints.myProperties,
+          queryParameters: queryParameters,
+        );
+    final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
+    final page = parsePagedEnvelope(
+      data,
+      PropertyListingDto.fromJson,
+      label: 'myListings',
+    );
+    final filtered = page.items
         .where((listing) {
           final type = listing.propertyType;
           return type == null || type == 'flatmate' || type == 'pg';
         })
         .toList(growable: false);
+    return (items: filtered, nextCursor: page.nextCursor, hasMore: page.hasMore);
+  }
+
+  /// Backwards-compatible helper returning the first page as a list.
+  Future<List<PropertyListing>> fetchMyListings() async {
+    final page = await fetchMyListingsPage();
+    return page.items;
   }
 
   Future<void> togglePause(int listingId, {required bool paused}) async {

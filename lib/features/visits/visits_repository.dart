@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/config/endpoints.dart';
 import '../../core/providers.dart';
-import '../../core/utils/safe_json_list.dart';
+import '../../core/utils/paged_envelope.dart';
 import '../chats/chats_repository.dart';
 
 class VisitItem {
@@ -49,16 +49,33 @@ class VisitsRepository {
 
   final Ref _ref;
 
-  Future<List<VisitItem>> fetchVisits() async {
-    final response = await _ref
-        .read(apiClientProvider)
-        .get(FlatmatesEndpoints.visits);
+  /// Fetches a single page of the user's visits using cursor pagination.
+  ///
+  /// Returns the parsed items plus the cursor metadata callers need to fetch
+  /// the next page. The backend wraps all list endpoints in
+  /// `{ items, next_cursor, has_more, limit }`.
+  Future<({List<VisitItem> items, String? nextCursor, bool hasMore})>
+      fetchVisitsPage({String? cursor, int limit = 20}) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
+    }
+    final response = await _ref.read(apiClientProvider).get(
+          FlatmatesEndpoints.visits,
+          queryParameters: queryParameters,
+        );
     final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
-    return safeJsonList(
-      data['visits'] as List?,
+    return parsePagedEnvelope(
+      data,
       VisitItem.fromJson,
       label: 'visits',
     );
+  }
+
+  /// Backwards-compatible helper that returns the full first page as a list.
+  Future<List<VisitItem>> fetchVisits() async {
+    final page = await fetchVisitsPage();
+    return page.items;
   }
 
   Future<int> scheduleFlatmateVisit({
