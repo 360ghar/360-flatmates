@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../chats/chats_repository.dart';
 import '../visits_repository.dart';
+import 'visits_list_controller.dart';
 
 /// Application-layer controller for visit mutations (confirm / cancel /
 /// reschedule). Keeps business logic + provider invalidation out of the
@@ -31,6 +32,7 @@ class VisitsActionsController {
   /// Refreshes the visits list and, when known, the originating conversation
   /// thread so a visit-status change is reflected in chat too.
   void _invalidateRelated(VisitItem item) {
+    _ref.invalidate(visitsListControllerProvider);
     _ref.invalidate(visitsProvider);
     final conversationId = item.conversationId;
     if (conversationId != null) {

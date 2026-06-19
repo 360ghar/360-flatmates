@@ -6,6 +6,7 @@ import '../../core/errors/app_failure.dart';
 import '../../core/errors/l10n_bridge.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
+import '../chats/application/cursor_list_controller.dart';
 import '../shared/presentation/flatmates_async_view.dart';
 import '../shared/presentation/flatmates_empty_state.dart';
 import '../shared/presentation/flatmates_header.dart';
@@ -14,6 +15,7 @@ import '../shared/presentation/flatmates_toast.dart';
 import '../shared/presentation/flatmates_trust_badge.dart';
 import '../shared/presentation/flatmates_ui.dart';
 import 'application/visits_actions_controller.dart';
+import 'application/visits_list_controller.dart';
 import 'visits_repository.dart';
 import 'widgets/visit_card.dart';
 
@@ -31,26 +33,39 @@ class VisitsPage extends ConsumerStatefulWidget {
 
 class _VisitsPageState extends ConsumerState<VisitsPage> {
   @override
+  void initState() {
+    super.initState();
+    // Prime the cursor controller so the first paint already has data.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(visitsListControllerProvider.notifier).load();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final visits = ref.watch(visitsProvider);
+    final visitsState = ref.watch(visitsListControllerProvider);
     final pending = ref.watch(_pendingVisitActionsProvider);
     final locale = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: FlatmatesHeader.backTitle(title: locale.scheduleTitle),
-      body: FlatmatesAsyncView<List<VisitItem>>(
-        value: visits,
+      body: FlatmatesAsyncView<CursorListState<VisitItem>>(
+        value: visitsState,
         loading: const FlatmatesSkeleton.visitList(),
+        isEmpty: (state) => state.items.isEmpty,
         empty: FlatmatesEmptyState(
           title: locale.emptyVisits,
           subtitle: locale.scheduleSubtitle,
           icon: Icons.calendar_today_rounded,
         ),
-        onRetry: () => ref.invalidate(visitsProvider),
-        data: (items) {
+        onRetry: () =>
+            ref.read(visitsListControllerProvider.notifier).refresh(),
+        data: (state) {
           // Organize into timeline sections. Every status must land in
           // exactly one bucket so no visit silently disappears from the list.
+          final items = state.items;
           final upcoming = items
               .where((v) => v.status == 'scheduled' || v.status == 'confirmed')
               .toList();
@@ -64,7 +79,8 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
               .toList();
 
           return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(visitsProvider),
+            onRefresh: () =>
+                ref.read(visitsListControllerProvider.notifier).refresh(),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.xl,
@@ -131,6 +147,25 @@ class _VisitsPageState extends ConsumerState<VisitsPage> {
                     ),
                   ),
                 ],
+                if (state.hasMore)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    child: Center(
+                      child: state.isLoadingMore
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : TextButton.icon(
+                              onPressed: () => ref
+                                  .read(visitsListControllerProvider.notifier)
+                                  .loadMore(),
+                              icon: const Icon(Icons.expand_more_rounded),
+                              label: Text(locale.loadMoreCta),
+                            ),
+                    ),
+                  ),
               ],
             ),
           );
