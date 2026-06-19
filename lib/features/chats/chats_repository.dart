@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config/endpoints.dart';
 import '../../core/providers.dart';
+import '../../core/utils/paged_envelope.dart';
 import '../../core/utils/safe_json_list.dart';
 import '../bootstrap/bootstrap_controller.dart';
 import 'domain/chat_models.dart';
@@ -19,37 +20,93 @@ class ChatsRepository {
 
   final Ref _ref;
 
-  Future<List<ConversationSummaryModel>> fetchConversations() async {
-    final response = await _ref
-        .read(apiClientProvider)
-        .get(FlatmatesEndpoints.conversations);
-    return safeJsonList(
-      response.data as List?,
+  /// Fetches a single page of conversations using cursor pagination. The
+  /// backend wraps all list endpoints in
+  /// `{ items, next_cursor, has_more, limit }`.
+  Future<
+      ({
+        List<ConversationSummaryModel> items,
+        String? nextCursor,
+        bool hasMore,
+      })> fetchConversationsPage({String? cursor, int limit = 20}) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
+    }
+    final response = await _ref.read(apiClientProvider).get(
+          FlatmatesEndpoints.conversations,
+          queryParameters: queryParameters,
+        );
+    final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
+    return parsePagedEnvelope(
+      data,
       ConversationSummaryModel.fromJson,
       label: 'conversations',
     );
   }
 
-  Future<List<IncomingLikeModel>> fetchIncomingLikes() async {
-    final response = await _ref
-        .read(apiClientProvider)
-        .get(FlatmatesEndpoints.incomingLikes);
-    return safeJsonList(
-      response.data as List?,
+  /// Backwards-compatible helper returning the first page as a list.
+  Future<List<ConversationSummaryModel>> fetchConversations() async {
+    final page = await fetchConversationsPage();
+    return page.items;
+  }
+
+  /// Fetches a single page of incoming likes using cursor pagination.
+  Future<
+      ({
+        List<IncomingLikeModel> items,
+        String? nextCursor,
+        bool hasMore,
+      })> fetchIncomingLikesPage({String? cursor, int limit = 20}) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
+    }
+    final response = await _ref.read(apiClientProvider).get(
+          FlatmatesEndpoints.incomingLikes,
+          queryParameters: queryParameters,
+        );
+    final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
+    return parsePagedEnvelope(
+      data,
       IncomingLikeModel.fromJson,
       label: 'incomingLikes',
     );
   }
 
-  Future<List<IncomingLikeModel>> fetchOutgoingLikes() async {
-    final response = await _ref
-        .read(apiClientProvider)
-        .get(FlatmatesEndpoints.outgoingLikes);
-    return safeJsonList(
-      response.data as List?,
+  /// Backwards-compatible helper returning the first page as a list.
+  Future<List<IncomingLikeModel>> fetchIncomingLikes() async {
+    final page = await fetchIncomingLikesPage();
+    return page.items;
+  }
+
+  /// Fetches a single page of outgoing likes using cursor pagination.
+  Future<
+      ({
+        List<IncomingLikeModel> items,
+        String? nextCursor,
+        bool hasMore,
+      })> fetchOutgoingLikesPage({String? cursor, int limit = 20}) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
+    }
+    final response = await _ref.read(apiClientProvider).get(
+          FlatmatesEndpoints.outgoingLikes,
+          queryParameters: queryParameters,
+        );
+    final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
+    return parsePagedEnvelope(
+      data,
       IncomingLikeModel.fromJson,
       label: 'outgoingLikes',
     );
+  }
+
+  /// Backwards-compatible helper returning the first page as a list.
+  Future<List<IncomingLikeModel>> fetchOutgoingLikes() async {
+    final page = await fetchOutgoingLikesPage();
+    return page.items;
   }
 
   Future<int?> matchIncomingLike({
@@ -83,34 +140,34 @@ class ChatsRepository {
     return ConversationSummaryModel.fromJson(data);
   }
 
-  Future<MessageListResponse> fetchMessages(int conversationId) async {
-    final response = await _ref
-        .read(apiClientProvider)
-        .get(FlatmatesEndpoints.conversationMessages(conversationId));
-    final data = response.data;
-    if (data is Map) {
-      final map = Map<String, dynamic>.from(data);
-      final messages = safeJsonList(
-        map['messages'] as List?,
-        ChatMessage.fromJson,
-        label: 'messages',
-      );
-      return MessageListResponse(
-        messages: messages,
-        total: (map['total'] as num?)?.toInt() ?? messages.length,
-        hasMore: map['has_more'] as bool? ?? false,
-      );
+  /// Fetches a single page of messages from a conversation using cursor
+  /// pagination. Pass the previous response's [MessageListResponse.nextCursor]
+  /// to fetch older messages; the backend wraps every list endpoint in
+  /// `{ items, next_cursor, has_more, limit }`.
+  Future<MessageListResponse> fetchMessages(
+    int conversationId, {
+    String? cursor,
+    int limit = 30,
+  }) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (cursor != null && cursor.isNotEmpty) {
+      queryParameters['cursor'] = cursor;
     }
-    // Fallback: handle legacy responses that return a raw list
-    final messages = safeJsonList(
-      data as List?,
+    final response = await _ref.read(apiClientProvider).get(
+          FlatmatesEndpoints.conversationMessages(conversationId),
+          queryParameters: queryParameters,
+        );
+    final data = Map<String, dynamic>.from(response.data as Map? ?? const {});
+    final page = parsePagedEnvelope(
+      data,
       ChatMessage.fromJson,
       label: 'messages',
     );
     return MessageListResponse(
-      messages: messages,
-      total: messages.length,
-      hasMore: false,
+      messages: page.items,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
+      limit: (data['limit'] as num?)?.toInt() ?? limit,
     );
   }
 

@@ -166,16 +166,29 @@ class ConversationSummaryModel with _$ConversationSummaryModel {
   }
 }
 
+/// Paginated message envelope returned by `GET /flatmates/conversations/{id}/messages`.
+///
+/// The backend wraps all list endpoints in
+/// `{ items, next_cursor, has_more, limit }`. `limit` is the page size the
+/// server echoed back; callers use it to size UI pagination controls.
 class MessageListResponse {
   const MessageListResponse({
     required this.messages,
-    required this.total,
     required this.hasMore,
+    this.nextCursor,
+    this.limit,
   });
 
   final List<ChatMessage> messages;
-  final int total;
+
+  /// Whether more messages exist after [messages].
   final bool hasMore;
+
+  /// Opaque cursor for the next page; `null` when at the end of the thread.
+  final String? nextCursor;
+
+  /// Page size used by the server for this response, when present.
+  final int? limit;
 }
 
 class IncomingLikeModel {
