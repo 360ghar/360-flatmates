@@ -404,6 +404,18 @@ class SwipeRepository {
           },
         );
   }
+
+  /// `POST /swipes/batch-remove` — undoes multiple likes/swipes in one
+  /// request. The backend expects a list of property ids and returns a
+  /// confirmation envelope (`{ message }`). Errors propagate via the
+  /// shared [ApiClient] -> [ErrorPresenter] pipeline.
+  Future<void> batchRemoveSwipes(List<int> propertyIds) async {
+    if (propertyIds.isEmpty) return;
+    await _ref.read(apiClientProvider).post(
+          FlatmatesEndpoints.swipesBatchRemove,
+          data: {'property_ids': propertyIds},
+        );
+  }
 }
 
 final swipeRepositoryProvider = Provider<SwipeRepository>(
