@@ -67,9 +67,13 @@ abstract class CursorListController<T>
       final page = await fetchPage(cursor: _nextCursor);
       _nextCursor = page.nextCursor;
       _hasMore = page.hasMore;
+      // Read the latest state at write time rather than the pre-await
+      // snapshot, so concurrent mutations during the request (e.g. an
+      // optimistic removal via removeOptimistically) are not clobbered.
+      final latest = state.valueOrNull ?? current;
       state = AsyncValue.data(
-        current.copyWith(
-          items: [...current.items, ...page.items],
+        latest.copyWith(
+          items: [...latest.items, ...page.items],
           isLoadingMore: false,
           hasMore: page.hasMore,
         ),
@@ -77,11 +81,11 @@ abstract class CursorListController<T>
     } catch (e, st) {
       // Preserve the existing items so a transient error on a load-more
       // request doesn't blow away the list the user is browsing.
-      state = AsyncValue.data(current.copyWith(isLoadingMore: false, error: e));
+      final latest = state.valueOrNull ?? current;
       // Also surface to listeners that read .error directly.
       state = AsyncValue.error(e, st);
       // Restore the items + error on top so the UI keeps the list.
-      state = AsyncValue.data(current.copyWith(isLoadingMore: false, error: e));
+      state = AsyncValue.data(latest.copyWith(isLoadingMore: false, error: e));
     } finally {
       _loadInFlight = false;
     }
