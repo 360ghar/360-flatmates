@@ -27,6 +27,9 @@ import 'presentation/widgets/owner_profile_sheet.dart';
 import 'presentation/widgets/staggered_card_appear.dart';
 import 'share_listing_card.dart';
 
+final _currentImageIndexProvider = StateProvider<int>((ref) => 0);
+final _contactingProvider = StateProvider<bool>((ref) => false);
+
 class FlatDetailsPage extends ConsumerStatefulWidget {
   const FlatDetailsPage({required this.listingId, super.key});
 
@@ -37,15 +40,13 @@ class FlatDetailsPage extends ConsumerStatefulWidget {
 }
 
 class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
-  int _currentImageIndex = 0;
-  bool _contacting = false;
   int? _conversationId;
 
   @override
   void didUpdateWidget(covariant FlatDetailsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.listingId != widget.listingId) {
-      _currentImageIndex = 0;
+      ref.read(_currentImageIndexProvider.notifier).state = 0;
     }
   }
 
@@ -53,6 +54,7 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
   Widget build(BuildContext context) {
     final listingState = ref.watch(propertyListingProvider(widget.listingId));
     final locale = AppLocalizations.of(context);
+    final currentImageIndex = ref.watch(_currentImageIndexProvider);
     final currentUserId = ref
         .watch(bootstrapControllerProvider)
         .valueOrNull
@@ -100,9 +102,12 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
                         index: 0,
                         child: FlatDetailsHeader(
                           listing: listing,
-                          currentIndex: _currentImageIndex,
+                          currentIndex: currentImageIndex,
                           onPageChanged: (index) =>
-                              setState(() => _currentImageIndex = index),
+                              ref
+                                      .read(_currentImageIndexProvider.notifier)
+                                      .state =
+                                  index,
                           onBack: () => context.pop(),
                           onShare: () => _showShareSheet(listing),
                           onFavorite: () => _handleShortlist(listing),
@@ -180,7 +185,7 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     return FullScreenGallery.open(
       context: context,
       images: images,
-      initialIndex: _currentImageIndex,
+      initialIndex: ref.read(_currentImageIndexProvider),
       heroTagPrefix: 'flat-gallery-${widget.listingId}',
     );
   }
@@ -225,8 +230,8 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
   }
 
   Future<void> _handleContact(PropertyListing listing) async {
-    if (_contacting) return;
-    setState(() => _contacting = true);
+    if (ref.read(_contactingProvider)) return;
+    ref.read(_contactingProvider.notifier).state = true;
 
     try {
       final hasLiked = listing.liked ?? false;
@@ -257,7 +262,7 @@ class _FlatDetailsPageState extends ConsumerState<FlatDetailsPage> {
     }
 
     if (mounted) {
-      setState(() => _contacting = false);
+      ref.read(_contactingProvider.notifier).state = false;
     }
   }
 

@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flatmates_app/features/profile/legal_content_page.dart';
 import 'package:flatmates_app/l10n/gen/app_localizations.dart';
 
-Widget _wrap(Widget child) => MaterialApp(
-  locale: const Locale('en'),
-  supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
-  home: child,
+Widget _wrap(Widget child) => ProviderScope(
+  child: MaterialApp(
+    locale: const Locale('en'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    home: child,
+  ),
 );
 
 void main() {

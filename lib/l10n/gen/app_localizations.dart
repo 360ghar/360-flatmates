@@ -392,6 +392,12 @@ abstract class AppLocalizations {
   /// **'Could not detect your location. Please select manually.'**
   String get locationDetectionFailed;
 
+  /// No description provided for @couldNotDetectLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not detect location'**
+  String get couldNotDetectLocation;
+
   /// No description provided for @homeSearchHint.
   ///
   /// In en, this message translates to:
@@ -4238,11 +4244,41 @@ abstract class AppLocalizations {
   /// **'Very private'**
   String get qnaVeryPrivate;
 
+  /// No description provided for @qnaMostlyPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Mostly private'**
+  String get qnaMostlyPrivate;
+
+  /// No description provided for @qnaBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get qnaBalanced;
+
+  /// No description provided for @qnaMostlySocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Mostly social'**
+  String get qnaMostlySocial;
+
   /// No description provided for @qnaVerySocial.
   ///
   /// In en, this message translates to:
   /// **'Very social'**
   String get qnaVerySocial;
+
+  /// No description provided for @closeSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Close search'**
+  String get closeSearch;
+
+  /// No description provided for @profileSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Setup'**
+  String get profileSetup;
 
   /// No description provided for @aboutThisFlatSection.
   ///

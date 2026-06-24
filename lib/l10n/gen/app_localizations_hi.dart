@@ -180,6 +180,9 @@ class AppLocalizationsHi extends AppLocalizations {
       'आपका स्थान पता नहीं लगा सके। कृपया मैन्युअली चुनें।';
 
   @override
+  String get couldNotDetectLocation => 'स्थान का पता नहीं लगा सके';
+
+  @override
   String get homeSearchHint => 'इलाका, बजट, फ्लैटमेट खोजें...';
 
   @override
@@ -2216,7 +2219,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get qnaVeryPrivate => 'बहुत प्राइवेट';
 
   @override
+  String get qnaMostlyPrivate => 'ज़्यादातर प्राइवेट';
+
+  @override
+  String get qnaBalanced => 'संतुलित';
+
+  @override
+  String get qnaMostlySocial => 'ज़्यादातर सामाजिक';
+
+  @override
   String get qnaVerySocial => 'बहुत सामाजिक';
+
+  @override
+  String get closeSearch => 'खोज बंद करें';
+
+  @override
+  String get profileSetup => 'प्रोफ़ाइल सेटअप';
 
   @override
   String get aboutThisFlatSection => 'इस फ्लैट के बारे में';
@@ -3476,24 +3494,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get discardChanges => 'रद्द करें';
 
   @override
-  String get loadMoreCta => 'Load more';
+  String get loadMoreCta => 'और देखें';
 
   @override
-  String get loadOlderCta => 'Load older';
+  String get loadOlderCta => 'पुराने देखें';
 
   @override
-  String get startOfConversation =>
-      'You\'ve reached the start of this conversation';
+  String get startOfConversation => 'आप इस बातचीत की शुरुआत पर पहुँच गए हैं';
 
   @override
-  String get noMoreListingsLabel => 'You\'ve seen all the matches.';
+  String get noMoreListingsLabel => 'आपने सभी मैच देख लिए हैं।';
 
   @override
-  String get noMoreVisitsLabel => 'No more visits to show.';
+  String get noMoreVisitsLabel => 'दिखाने के लिए और विज़िट नहीं हैं।';
 
   @override
-  String get noMoreNotificationsLabel => 'You\'re all caught up.';
+  String get noMoreNotificationsLabel => 'आप पूरी तरह अपडेट हैं।';
 
   @override
-  String get noMoreBlockedUsersLabel => 'No more blocked users.';
+  String get noMoreBlockedUsersLabel =>
+      'और कोई ब्लॉक किए गए उपयोगकर्ता नहीं हैं।';
 }

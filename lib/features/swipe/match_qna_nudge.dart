@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flatmates_app/core/theme/app_semantic_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/config/endpoints.dart';
-import '../../core/providers.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../shared/presentation/flatmates_card.dart';
 import '../shared/presentation/flatmates_toast.dart';
 import '../shared/presentation/flatmates_ui.dart';
+import 'application/match_qna_controller.dart';
 
 /// Bottom sheet that nudges the user to answer 3 ice-breaker Q&A questions
 /// after a match, before they start chatting.
@@ -25,7 +24,6 @@ class _MatchQnANudgeSheetState extends ConsumerState<MatchQnANudgeSheet> {
   final _q1Controller = TextEditingController();
   final _q3Controller = TextEditingController();
   int _socialScale = 3; // 1–5, default middle
-  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -34,54 +32,40 @@ class _MatchQnANudgeSheetState extends ConsumerState<MatchQnANudgeSheet> {
     super.dispose();
   }
 
-  Future<void> _submitAnswers() async {
-    if (_isSubmitting) return;
-    setState(() => _isSubmitting = true);
-
-    try {
-      await ref
-          .read(apiClientProvider)
-          .post(
-            FlatmatesEndpoints.conversationQnA(widget.conversationId),
-            data: {
-              'answers': {
-                '0': _q1Controller.text.trim(),
-                '1': _socialScaleValue,
-                '2': _q3Controller.text.trim(),
-              },
-            },
-          );
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      debugPrint(
-        'MatchQnANudgeSheet._submitAnswers failed for conversation ${widget.conversationId}: $e',
-      );
-      if (mounted) {
-        final locale = AppLocalizations.of(context);
-        FlatmatesToast.error(context, locale.commonRetry);
-      }
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
-    }
+  String _socialScaleLabel(AppLocalizations locale) {
+    return switch (_socialScale) {
+      1 => locale.qnaVeryPrivate,
+      2 => locale.qnaMostlyPrivate,
+      3 => locale.qnaBalanced,
+      4 => locale.qnaMostlySocial,
+      5 => locale.qnaVerySocial,
+      _ => locale.qnaBalanced,
+    };
   }
 
-  String get _socialScaleValue {
-    const labels = [
-      'Very private',
-      'Mostly private',
-      'Balanced',
-      'Mostly social',
-      'Very social',
-    ];
-    return labels[_socialScale - 1];
+  Future<void> _submitAnswers() async {
+    final locale = AppLocalizations.of(context);
+    final success = await ref
+        .read(matchQnAControllerProvider.notifier)
+        .submitAnswers(
+          conversationId: widget.conversationId,
+          q1: _q1Controller.text.trim(),
+          q2: _socialScaleLabel(locale),
+          q3: _q3Controller.text.trim(),
+        );
+    if (!mounted) return;
+    if (success) {
+      Navigator.of(context).pop();
+    } else {
+      FlatmatesToast.error(context, locale.commonRetry);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final locale = AppLocalizations.of(context);
+    final isSubmitting = ref.watch(matchQnAControllerProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -150,7 +134,7 @@ class _MatchQnANudgeSheetState extends ConsumerState<MatchQnANudgeSheet> {
                       min: 1,
                       max: 5,
                       divisions: 4,
-                      label: _socialScaleValue,
+                      label: _socialScaleLabel(locale),
                       onChanged: (v) =>
                           setState(() => _socialScale = v.round()),
                     ),
@@ -199,7 +183,7 @@ class _MatchQnANudgeSheetState extends ConsumerState<MatchQnANudgeSheet> {
         // Share Answers button
         FlatmatesButton(
           label: locale.qnaShareAnswers,
-          onPressed: _isSubmitting ? null : _submitAnswers,
+          onPressed: isSubmitting ? null : _submitAnswers,
           fullWidth: true,
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -208,7 +192,7 @@ class _MatchQnANudgeSheetState extends ConsumerState<MatchQnANudgeSheet> {
         Center(
           child: FlatmatesButton.tertiary(
             label: locale.qnaSkipForNow,
-            onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+            onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
           ),
         ),
       ],

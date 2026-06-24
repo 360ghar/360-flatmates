@@ -26,19 +26,22 @@ class _MatchQnANudgeState extends ConsumerState<MatchQnANudge> {
   int _q2Value = 2; // 1-5 scale, default middle
   final _q3Controller = TextEditingController();
 
-  static const _q2Labels = [
-    'Very private',
-    'Private',
-    'Mixed',
-    'Social',
-    'Very social',
-  ];
-
   @override
   void dispose() {
     _q1Controller.dispose();
     _q3Controller.dispose();
     super.dispose();
+  }
+
+  String _q2Label(AppLocalizations locale) {
+    return switch (_q2Value) {
+      1 => locale.qnaVeryPrivate,
+      2 => locale.qnaMostlyPrivate,
+      3 => locale.qnaBalanced,
+      4 => locale.qnaMostlySocial,
+      5 => locale.qnaVerySocial,
+      _ => locale.qnaBalanced,
+    };
   }
 
   @override
@@ -89,7 +92,7 @@ class _MatchQnANudgeState extends ConsumerState<MatchQnANudge> {
                   min: 1,
                   max: 5,
                   divisions: 4,
-                  label: _q2Labels[_q2Value - 1],
+                  label: _q2Label(locale),
                   onChanged: (v) => setState(() => _q2Value = v.round()),
                 ),
               ],

@@ -179,6 +179,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not detect your location. Please select manually.';
 
   @override
+  String get couldNotDetectLocation => 'Could not detect location';
+
+  @override
   String get homeSearchHint => 'Search area, budget, flatmate...';
 
   @override
@@ -2213,7 +2216,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qnaVeryPrivate => 'Very private';
 
   @override
+  String get qnaMostlyPrivate => 'Mostly private';
+
+  @override
+  String get qnaBalanced => 'Balanced';
+
+  @override
+  String get qnaMostlySocial => 'Mostly social';
+
+  @override
   String get qnaVerySocial => 'Very social';
+
+  @override
+  String get closeSearch => 'Close search';
+
+  @override
+  String get profileSetup => 'Profile Setup';
 
   @override
   String get aboutThisFlatSection => 'About this Flat';

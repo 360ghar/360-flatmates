@@ -15,6 +15,12 @@ import '../bootstrap/catalog_helpers.dart';
 import '../shared/presentation/components.dart';
 import '../profile/profile_repository.dart';
 
+final _selectedCityProvider = StateProvider<CatalogOption?>((ref) => null);
+final _locatingProvider = StateProvider<bool>((ref) => false);
+final _savingProvider = StateProvider<bool>((ref) => false);
+final _selectingPlaceProvider = StateProvider<bool>((ref) => false);
+final _searchVersionProvider = StateProvider<int>((ref) => 0);
+
 class ChangeLocationPage extends ConsumerStatefulWidget {
   const ChangeLocationPage({super.key});
 
@@ -24,10 +30,6 @@ class ChangeLocationPage extends ConsumerStatefulWidget {
 
 class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
   final _searchController = TextEditingController();
-  CatalogOption? _selectedCity;
-  bool _locating = false;
-  bool _saving = false;
-  bool _selectingPlace = false;
 
   @override
   void initState() {
@@ -36,6 +38,8 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
       ref
           .read(locationSearchProvider.notifier)
           .onSearchChanged(_searchController.text);
+      // Bump version so the visible-cities filter recomputes reactively.
+      ref.read(_searchVersionProvider.notifier).state++;
     });
   }
 
@@ -46,7 +50,7 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
   }
 
   Future<void> _useCurrentLocation() async {
-    setState(() => _locating = true);
+    ref.read(_locatingProvider.notifier).state = true;
     try {
       final bootstrap = ref.read(bootstrapControllerProvider).valueOrNull;
       final catalogCities =
@@ -59,7 +63,7 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
 
       switch (detection.result) {
         case LocationDetectResult.success:
-          setState(() => _selectedCity = detection.city);
+          ref.read(_selectedCityProvider.notifier).state = detection.city;
         case LocationDetectResult.serviceDisabled:
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -122,31 +126,30 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _locating = false);
+      if (mounted) ref.read(_locatingProvider.notifier).state = false;
     }
   }
 
   Future<void> _save() async {
-    if (_selectedCity == null || _saving) return;
-    setState(() => _saving = true);
+    final selectedCity = ref.read(_selectedCityProvider);
+    if (selectedCity == null || ref.read(_savingProvider)) return;
+    ref.read(_savingProvider.notifier).state = true;
 
     final locale = AppLocalizations.of(context);
     try {
       await ref
           .read(profileRepositoryProvider)
-          .updateProfile(payload: {'city': _selectedCity!.label});
+          .updateProfile(payload: {'city': selectedCity.label});
       await ref.read(bootstrapControllerProvider.notifier).refresh();
       if (!mounted) return;
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(locale.locationUpdated),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        if (mounted) context.pop();
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(locale.locationUpdated),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      if (mounted) context.pop();
     } catch (e) {
       debugPrint('ChangeLocationPage._save failed: $e');
       if (mounted) {
@@ -155,12 +158,12 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
         ).showSnackBar(SnackBar(content: Text(locale.actionFailedRetry)));
       }
     } finally {
-      if (mounted) setState(() => _saving = false);
+      if (mounted) ref.read(_savingProvider.notifier).state = false;
     }
   }
 
   Future<void> _selectPlace(PlaceSuggestion suggestion) async {
-    setState(() => _selectingPlace = true);
+    ref.read(_selectingPlaceProvider.notifier).state = true;
     try {
       final details = await ref
           .read(locationSearchProvider.notifier)
@@ -199,10 +202,8 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
       }
 
       if (match != null && minDist <= kMaxMatchDistanceKm) {
-        setState(() {
-          _selectedCity = match;
-          _searchController.text = match!.label;
-        });
+        ref.read(_selectedCityProvider.notifier).state = match;
+        _searchController.text = match.label;
         ref.read(locationSearchProvider.notifier).clear();
       } else {
         final fallbackOption = CatalogOption(
@@ -210,10 +211,8 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
           label: details.name,
           meta: {'latitude': details.latitude, 'longitude': details.longitude},
         );
-        setState(() {
-          _selectedCity = fallbackOption;
-          _searchController.text = details.name;
-        });
+        ref.read(_selectedCityProvider.notifier).state = fallbackOption;
+        _searchController.text = details.name;
         ref.read(locationSearchProvider.notifier).clear();
       }
     } catch (e) {
@@ -226,7 +225,7 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
         );
       }
     } finally {
-      if (mounted) setState(() => _selectingPlace = false);
+      if (mounted) ref.read(_selectingPlaceProvider.notifier).state = false;
     }
   }
 
@@ -238,13 +237,20 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
     final catalogCities =
         bootstrap?.catalogOptions('flatmates_popular_cities') ?? const [];
     final cities = resolveCities(catalogCities);
+    // Watch version so the visible-cities filter recomputes when search text
+    // changes.
+    ref.watch(_searchVersionProvider);
     final query = _searchController.text.trim().toLowerCase();
     final visibleCities = query.isEmpty
         ? cities
         : cities.where((c) => cityMatchesQuery(c, query)).toList();
     final searchState = ref.watch(locationSearchProvider);
     final hasPlacesResults = searchState.suggestions.isNotEmpty;
-    final isPlacesLoading = searchState.isLoading || _selectingPlace;
+    final selectingPlace = ref.watch(_selectingPlaceProvider);
+    final isPlacesLoading = searchState.isLoading || selectingPlace;
+    final locating = ref.watch(_locatingProvider);
+    final saving = ref.watch(_savingProvider);
+    final selectedCity = ref.watch(_selectedCityProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -286,7 +292,9 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
               child: FlatmatesSearchBar(
                 controller: _searchController,
                 hint: locale.searchCityOrAreaHint,
-                onChanged: (_) => setState(() {}),
+                // No-op onChanged; the _searchVersionProvider bump in the
+                // listener triggers rebuild.
+                onChanged: (_) {},
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -296,10 +304,10 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
               ),
               child: LocationActionRow(
                 icon: Icons.my_location_outlined,
-                title: _locating
+                title: locating
                     ? locale.detectingLocation
                     : locale.useCurrentLocation,
-                onTap: _locating ? null : _useCurrentLocation,
+                onTap: locating ? null : _useCurrentLocation,
               ),
             ),
             const Padding(
@@ -340,7 +348,7 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
                   ),
                   child: LocationSuggestionRow(
                     suggestion: suggestion,
-                    onTap: _selectingPlace
+                    onTap: selectingPlace
                         ? null
                         : () => _selectPlace(suggestion),
                   ),
@@ -379,13 +387,19 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
                           const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         final city = visibleCities[index];
-                        final selected = _selectedCity?.id == city.id;
+                        final selected = selectedCity?.id == city.id;
                         return LocationCityRow(
                           city: city,
                           selected: selected,
                           onTap: city.comingSoon
                               ? null
-                              : () => setState(() => _selectedCity = city),
+                              : () =>
+                                    ref
+                                            .read(
+                                              _selectedCityProvider.notifier,
+                                            )
+                                            .state =
+                                        city,
                         );
                       },
                     ),
@@ -400,7 +414,7 @@ class _ChangeLocationPageState extends ConsumerState<ChangeLocationPage> {
               child: FlatmatesButton(
                 label: locale.modeContinue,
                 fullWidth: true,
-                onPressed: _selectedCity == null || _saving ? null : _save,
+                onPressed: selectedCity == null || saving ? null : _save,
               ),
             ),
           ],

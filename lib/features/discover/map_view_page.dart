@@ -275,7 +275,7 @@ class _MapViewPageState extends ConsumerState<MapViewPage> {
     );
   }
 
-  void _likeListing(PropertyListing item) async {
+  Future<void> _likeListing(PropertyListing item) async {
     final locale = AppLocalizations.of(context);
     try {
       final conversationId = await ref

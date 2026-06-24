@@ -60,7 +60,7 @@ class _BrowseListingsPageState extends ConsumerState<BrowseListingsPage> {
         leading: IconButton(
           onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'Back',
+          tooltip: locale.backCta,
         ),
         titleSpacing: 0,
         title: isSearchActive
@@ -91,7 +91,7 @@ class _BrowseListingsPageState extends ConsumerState<BrowseListingsPage> {
           if (isSearchActive)
             IconButton(
               key: const Key('browse_search_close'),
-              tooltip: 'Close search',
+              tooltip: locale.closeSearch,
               onPressed: () {
                 _searchController.clear();
                 ref

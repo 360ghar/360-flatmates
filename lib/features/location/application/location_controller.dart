@@ -7,14 +7,30 @@ import 'package:geolocator/geolocator.dart';
 import '../../../core/location/google_places_service.dart';
 import '../../../core/location/location_data.dart';
 import '../../../core/location/place_suggestion.dart';
+import '../../../l10n/gen/app_localizations.dart';
 import '../../bootstrap/bootstrap_controller.dart';
 import '../../profile/profile_repository.dart';
+
+/// Maps a [LocationError] to a localized user-facing string. The UI layer
+/// calls this when displaying the error from [LocationState].
+extension LocationErrorL10n on LocationError {
+  String toMessage(AppLocalizations locale) {
+    return switch (this) {
+      LocationError.couldNotDetect => locale.couldNotDetectLocation,
+    };
+  }
+}
+
+/// Typed error codes for location detection failures. The UI layer maps
+/// these to localized strings via `AppLocalizations`, keeping the controller
+/// free of hardcoded user-facing text.
+enum LocationError { couldNotDetect }
 
 class LocationState {
   final Position? currentPosition;
   final String? currentAddress;
   final bool isLoading;
-  final String? error;
+  final LocationError? error;
   final LocationData? selectedLocation;
 
   const LocationState({
@@ -29,11 +45,12 @@ class LocationState {
     Position? currentPosition,
     String? currentAddress,
     bool? isLoading,
-    String? error,
+    LocationError? error,
     LocationData? selectedLocation,
     bool clearCurrentPosition = false,
     bool clearCurrentAddress = false,
     bool clearSelectedLocation = false,
+    bool clearError = false,
   }) {
     return LocationState(
       currentPosition: clearCurrentPosition
@@ -43,7 +60,7 @@ class LocationState {
           ? null
           : (currentAddress ?? this.currentAddress),
       isLoading: isLoading ?? this.isLoading,
-      error: error,
+      error: clearError ? null : error,
       selectedLocation: clearSelectedLocation
           ? null
           : (selectedLocation ?? this.selectedLocation),
@@ -126,14 +143,14 @@ class LocationController extends Notifier<LocationState> {
       } else {
         state = state.copyWith(
           isLoading: false,
-          error: 'Could not detect location',
+          error: LocationError.couldNotDetect,
         );
       }
     } catch (e) {
       debugPrint('LocationController: IP location failed: $e');
       state = state.copyWith(
         isLoading: false,
-        error: 'Could not detect location',
+        error: LocationError.couldNotDetect,
       );
     }
   }

@@ -79,7 +79,7 @@ class ChatPeerProfilePage extends ConsumerWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, size: 22),
           onPressed: () => context.pop(),
-          tooltip: 'Back',
+          tooltip: locale.backCta,
         ),
         title: Text(name),
       ),

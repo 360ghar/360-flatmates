@@ -8,12 +8,15 @@ import 'package:flatmates_app/core/theme/app_spacing.dart';
 import '../../../l10n/gen/app_localizations.dart';
 import '../shared/presentation/flatmates_header.dart';
 
-final _legalContentProvider =
-    StateProvider.family<String, String>((ref, assetPath) => '');
-final _legalLoadingProvider =
-    StateProvider.family<bool, String>((ref, assetPath) => true);
-final _legalHasErrorProvider =
-    StateProvider.family<bool, String>((ref, assetPath) => false);
+final _legalContentProvider = StateProvider.family<String, String>(
+  (ref, assetPath) => '',
+);
+final _legalLoadingProvider = StateProvider.family<bool, String>(
+  (ref, assetPath) => true,
+);
+final _legalHasErrorProvider = StateProvider.family<bool, String>(
+  (ref, assetPath) => false,
+);
 
 class LegalContentPage extends ConsumerStatefulWidget {
   const LegalContentPage({

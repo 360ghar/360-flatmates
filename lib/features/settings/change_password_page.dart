@@ -130,7 +130,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                             );
                             notifier.state = !notifier.state;
                           },
-                          tooltip: 'Toggle password visibility',
+                          tooltip: locale.togglePasswordVisibility,
                         ),
                       ),
                       onChanged: (_) =>
@@ -162,7 +162,7 @@ class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
                             );
                             notifier.state = !notifier.state;
                           },
-                          tooltip: 'Toggle password visibility',
+                          tooltip: locale.togglePasswordVisibility,
                         ),
                       ),
                       validator: (value) {

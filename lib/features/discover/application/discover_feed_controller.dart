@@ -168,9 +168,9 @@ class DiscoverFeedController extends Notifier<DiscoverFeedState> {
       final conversationId = await ref
           .read(discoverRepositoryProvider)
           .setLiked(propertyId, newLiked);
-      if (newLiked) {
-        ref.invalidate(conversationsProvider);
-      }
+      // Invalidate on both like and unlike so the conversation list stays
+      // in sync (unliking may remove a pending conversation/like entry).
+      ref.invalidate(conversationsProvider);
       return conversationId;
     } catch (e) {
       debugPrint('DiscoverFeedController.toggleLike failed: $e');
