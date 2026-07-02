@@ -74,6 +74,8 @@ final class AuthRepository {
   final ApiClient _apiClient;
   final AuthTokenStorage _tokenStorage;
   final AppConfig _config;
+  Future<void>? _googleSignInInitializeFuture;
+  String? _googleSignInInitializeKey;
 
   SupabaseClient get _supabase => Supabase.instance.client;
 
@@ -131,6 +133,7 @@ final class AuthRepository {
     'AUTH_REDIRECT_URL',
     defaultValue: 'com.the360ghar.flatmates360://login-callback',
   );
+  static const _googleAuthScopes = <String>['email', 'profile'];
 
   /// Whether native Google sign-in (ID-token flow) is available.
   bool get isNativeGoogleAvailable =>
@@ -162,36 +165,22 @@ final class AuthRepository {
       );
     }
 
-    final signIn = GoogleSignIn.instance;
-    await signIn.initialize(
-      // serverClientId is the Web client id; Supabase validates the audience
-      // against it. clientId is the iOS client id (ignored on Android).
-      serverClientId: webClientId,
-      clientId: (Platform.isIOS && iosClientId.trim().isNotEmpty)
-          ? iosClientId
-          : null,
+    final signIn = await _initializedGoogleSignIn(
+      webClientId: webClientId,
+      iosClientId: iosClientId,
     );
 
     if (!signIn.supportsAuthenticate()) {
       throw StateError('Google sign-in is not supported on this platform.');
     }
 
-    final account = await signIn.authenticate();
+    final account = await signIn.authenticate(scopeHint: _googleAuthScopes);
     final idToken = account.authentication.idToken;
     if (idToken == null) {
       throw StateError('Google did not return an ID token.');
     }
 
-    // Best-effort silent access-token retrieval; not required for the
-    // ID-token flow but improves Supabase provider-token availability.
-    String? accessToken;
-    try {
-      final authorization = await account.authorizationClient
-          .authorizationForScopes(const ['email', 'profile']);
-      accessToken = authorization?.accessToken;
-    } catch (e) {
-      debugPrint('AuthRepository.signInWithGoogle: scope auth skipped: $e');
-    }
+    final accessToken = await _googleAccessTokenFor(account);
 
     final response = await _supabase.auth.signInWithIdToken(
       provider: OAuthProvider.google,
@@ -204,6 +193,70 @@ final class AuthRepository {
     }
     await _tokenStorage.save(session.accessToken);
     await _apiClient.get(FlatmatesEndpoints.me);
+  }
+
+  Future<GoogleSignIn> _initializedGoogleSignIn({
+    required String webClientId,
+    required String iosClientId,
+  }) async {
+    final signIn = GoogleSignIn.instance;
+    final serverClientId = webClientId.trim();
+    final clientId = (Platform.isIOS && iosClientId.trim().isNotEmpty)
+        ? iosClientId.trim()
+        : null;
+    final configKey = '$serverClientId|${clientId ?? ''}';
+    final existingFuture = _googleSignInInitializeFuture;
+
+    if (existingFuture != null) {
+      if (_googleSignInInitializeKey != configKey) {
+        throw StateError(
+          'Google sign-in is already initialized with different client configuration.',
+        );
+      }
+      await existingFuture;
+      return signIn;
+    }
+
+    final initializeFuture = signIn.initialize(
+      // serverClientId is the Web client id; Supabase validates the audience
+      // against it. clientId is the iOS client id (ignored on Android).
+      serverClientId: serverClientId,
+      clientId: clientId,
+    );
+    _googleSignInInitializeFuture = initializeFuture;
+    _googleSignInInitializeKey = configKey;
+
+    try {
+      await initializeFuture;
+    } catch (e) {
+      debugPrint('AuthRepository._initializedGoogleSignIn failed: $e');
+      if (identical(_googleSignInInitializeFuture, initializeFuture)) {
+        _googleSignInInitializeFuture = null;
+        _googleSignInInitializeKey = null;
+      }
+      rethrow;
+    }
+
+    return signIn;
+  }
+
+  Future<String> _googleAccessTokenFor(GoogleSignInAccount account) async {
+    final authorizationClient = account.authorizationClient;
+    GoogleSignInClientAuthorization? authorization;
+    try {
+      authorization = await authorizationClient.authorizationForScopes(
+        _googleAuthScopes,
+      );
+    } catch (e) {
+      debugPrint(
+        'AuthRepository.signInWithGoogle: silent scope auth failed: $e',
+      );
+    }
+
+    authorization ??= await authorizationClient.authorizeScopes(
+      _googleAuthScopes,
+    );
+    return authorization.accessToken;
   }
 
   // ---------------------------------------------------------------------------

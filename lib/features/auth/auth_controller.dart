@@ -171,6 +171,12 @@ class AuthController extends Notifier<AuthState> {
       if (authOp == 'password') {
         return 'failure:invalid_credentials';
       }
+      if (authOp == 'google') {
+        debugPrint(
+          'AuthController._userSafeMessage: $authOp auth failed: $error',
+        );
+        return 'failure:auth';
+      }
       // OTP verify: token invalid / expired / already consumed.
       return 'failure:otp_invalid';
     }
@@ -181,6 +187,12 @@ class AuthController extends Notifier<AuthState> {
         return 'failure:auth_session_missing';
       }
       return 'failure:unknown';
+    }
+    if (authOp == 'google') {
+      debugPrint(
+        'AuthController._userSafeMessage: $authOp auth failed: $error',
+      );
+      return 'failure:auth';
     }
     debugPrint(
       'AuthController._userSafeMessage: unhandled ${error.runtimeType}: $error',
@@ -252,14 +264,14 @@ class AuthController extends Notifier<AuthState> {
       } else {
         state = state.copyWith(
           status: AuthStatus.error,
-          errorMessage: _userSafeMessage(e),
+          errorMessage: _userSafeMessage(e, authOp: 'google'),
         );
       }
       return false;
     } catch (error) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: _userSafeMessage(error),
+        errorMessage: _userSafeMessage(error, authOp: 'google'),
       );
       return false;
     }
